@@ -43,15 +43,84 @@ testPrintln
 
 引入：`import 【包名】`
 
-- AES_Utils
-  - AES_CBC
-  - AES_CFB
+- AES_Utils——AES加密
+  - AES_CBC——CBC模式
+  - AES_CFB——CFB模式
+  - AES_Tools——AES组件共用的函数（十六进制字符串转Byte数组、Byte数组转十六进制字符串）
+- Code_Utils——编码
+  - Base64Bytes——Base64和Bytes
+  - BytesHexString——十六进制字符串和Bytes
 
 ### AES_Utils
 
 >AES模块，CBC模式和CFB模式
 
-(TODO)
+例：
+
+```java
+package AES_Utils;
+
+public class test {
+    public static void main(String[] args) {
+        String todo = "妳好Hello@";
+        String hex;
+        /**
+         * CFB模式 密码123456 填充；符号
+         */
+        System.out.printf("CFB加密前：%s\n", todo);
+        AES_Utils.AES_CFB cfb = new AES_Utils.AES_CFB("123456", ";");
+        hex = cfb.encrypt(todo);
+        System.out.printf("CFB加密：%s\n", hex);
+        System.out.printf("CFB解密：%s\n", cfb.decrypt(hex));
+        /**
+         * 临时更换密码
+         */
+        hex = cfb.encrypt("12345", todo);
+        System.out.printf("CFB临时加密(PWD: 12345)：%s\n", hex);
+        System.out.printf("CFB临时解密(PWD: 12345)：%s\n", cfb.decrypt("12345", hex));
+        System.out.println();
+        /**
+         * CBC模式 密码123456 偏移量：4321 位数 16:128/32:256
+         */
+        AES_Utils.AES_CBC cbc = new AES_Utils.AES_CBC("123456", "4321", 32);
+        System.out.printf("CBC加密前：%s\n", todo);
+        hex = cbc.encrypt(todo);
+        System.out.printf("CBC加密：%s\n", hex);
+        System.out.printf("CBC解密：%s\n", cbc.decrypt(hex));
+        /**
+         * 临时更换密码
+         */
+        hex = cbc.encrypt("12345", "54321", todo);
+        System.out.printf("CBC临时加密(PWD: 12345, IV: 54321)：%s\n", hex);
+        System.out.printf("CBC临时解密(PWD: 12345, IV: 54321)：%s\n", cbc.decrypt("12345", "54321", hex));
+    }
+}
+```
+
+### Code_Utils
+
+>类型转换类
+
+```java
+package Code_Utils;
+
+import java.io.UnsupportedEncodingException;
+
+public class test {
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String test = "字符串";
+        String str = "";
+        System.out.printf("原始的字符串： %s\n", test);
+        str = Base64Bytes.bytes2base64(test.getBytes("UTF-8"));
+        System.out.printf("Base64-E: %s\n", str);
+        System.out.printf("Base64-D: %s\n", new String(Base64Bytes.base642bytes(str), "UTF-8"));
+
+        str = BytesHexString.bytes2hex(test.getBytes("UTF-8"));
+        System.out.printf("HexString-E: %s\n", str);
+        System.out.printf("HexString-D: %s\n", new String(BytesHexString.hex2bytes(str), "UTF-8"));
+    }
+}
+```
 
 ## Python
 
@@ -93,6 +162,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2022.08.08——0.0.2
+  - 添加了Java AES
 - 2022.08.07——0.0.1
   - 初始化仓库
 
