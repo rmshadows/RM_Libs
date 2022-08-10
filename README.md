@@ -128,6 +128,7 @@ public class test {
 
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ProgressBar.py——终端进度条(Linux Only)
+- m_System——系统信息相关
 
 ### m_ColorStdout
 
@@ -190,10 +191,26 @@ if __name__ == '__main__':
 	m_ProgressBar.rateBar(34, 100, 38, " - 5号进程")
 ```
 
+### m_System
+
+例:
+
+```python
+if __name__ == '__main__':
+    print("是否是管理员：{}".format(checkAdministrator()))
+    execCommand("ls", True)
+    print("CPU核心数: {}".format(cpu_count()))
+    print("gitignore文件是否有UTF-8 BOM: {}".format(isBomExist("gitignore")))
+    # 列出py文件
+    for f in getSuffixFile("py"):
+        print(f)
+```
+
 ## 更新日志
 
 - 2022.08.10——0.0.3
   - 添加了Python终端彩色字体输出
+  - 添加了Python系统信息模块
 - 2022.08.08——0.0.2
   - 添加了Java AES
 - 2022.08.07——0.0.1
