@@ -126,7 +126,37 @@ public class test {
 
 引入：`import 【脚本名称】`
 
+- m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ProgressBar.py——终端进度条(Linux Only)
+
+### m_ColorStdout
+
+终端彩色字体输出，支持Windows Powershell、GNOME Terminal
+
+Windows端颜色受限（可以自己修改源代码补充）
+
+例:
+
+```python
+#!/usr/bin/python3
+"""
+	Mode预置：
+	0：暗色蓝
+	1：暗色绿
+	2：暗色红
+	3：亮色蓝
+	4：亮色绿
+	5：亮色红
+	6：蓝底红字
+"""
+if __name__ == '__main__':
+	# 打印Windows端可选颜色
+	for text, color in zip(texts, colors):
+		if IS_WINDOWS:
+			wprint(text, color)
+	for i in range(0, 7):
+		cprint("cprint-测试字体", i)
+```
 
 ### m_ProgressBar
 
@@ -162,6 +192,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2022.08.10——0.0.3
+  - 添加了Python终端彩色字体输出
 - 2022.08.08——0.0.2
   - 添加了Java AES
 - 2022.08.07——0.0.1
