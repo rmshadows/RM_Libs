@@ -8,9 +8,16 @@
 
 引入：`source 【脚本路径】`
 
-- Println.sh——终端字体颜色输出
+注意：返回值均使用变量：RETURN_VAR
 
-### Println.sh
+- Profile.sh——Bash脚本头【所有脚本的基础依赖】
+- System——系统组件相关【依赖Profile.sh】
+
+### Profile.sh
+
+- `prompt`——终端打印彩色文字
+- `comfirmy`——默认选择Y的询问函数
+- `comfirmn`——默认选择N的询问函数
 
 使用：`prompt [参数] "文字"`
 
@@ -26,7 +33,7 @@
 
 ```bash
 #!/bin/bash
-source Println.sh
+source Profile.sh
 testPrintln(){
     prompt -s "成功信息（绿色）"
     prompt -x "执行日志（绿色）"
@@ -38,6 +45,19 @@ testPrintln(){
 }
 testPrintln
 ```
+
+### System
+
+- `checkRootPasswd`——检查root密码是否正确 `checkRootPasswd $1`
+- `doAsRoot `——以root用户身份运行，需要提供root密码 `doAsRoot -p root密码 -c 命令`
+- `checkForRoot`——检查是否有root权限
+- `backupFile`——备份文件的方法，要求`sudo`没有密码才能备份系统文件
+- `addFolder`——新建文件夹 $1 注意权限！系统文件需要sudo无密码
+- `debianBullseyeDetect`——显示是否是Debian11，无返回值！
+- `isMacOS`——检测是否为苹果系统
+- `isGNOME`——是否是GNOME桌面
+
+系统组件相关操作
 
 ## Java
 
@@ -54,6 +74,12 @@ testPrintln
 ### AES_Utils
 
 >AES模块，CBC模式和CFB模式
+
+- AES CBC
+- AES CFB
+- AES Tool
+  - `public static byte[] hex2bytes(String inputHexString)`——十六进制字符串转Byte数组
+  - `public static String bytes2hex(byte[] b)`——Byte数组转十六进制字符串
 
 例：
 
@@ -101,6 +127,13 @@ public class test {
 
 >类型转换类
 
+- Base64Bytes——Base64和Bytes
+  - `public static String bytes2base64(byte[] data)`——传入byte数组执行base64加密
+  - `public static byte[] base642bytes(String data)`——传入String执行base64解密
+- BytesHexString——十六进制字符串和Bytes
+  - `public static byte[] hex2bytes(String inputHexString)`——十六进制字符串转Byte数组
+  - `public static String bytes2hex(byte[] b)`——Byte数组转十六进制字符串
+
 ```java
 package Code_Utils;
 
@@ -127,10 +160,15 @@ public class test {
 引入：`import 【脚本名称】`
 
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
+- m_ConfigFiles——配置文件相关操作
 - m_ProgressBar.py——终端进度条(Linux Only)
 - m_System——系统信息相关
 
 ### m_ColorStdout
+
+- `wprint(content, color=4)`——Windows端打印彩色文字(颜色可选受限，可自行修改源码)
+- `lprint(content, fg=32, bg=40, display=1)`——Linux端打印彩色文字(颜色可选多)
+- `cprint(content, mode=4`——跨平台常用颜色打印(颜色不多)
 
 终端彩色字体输出，支持Windows Powershell、GNOME Terminal
 
@@ -159,11 +197,22 @@ if __name__ == '__main__':
 		cprint("cprint-测试字体", i)
 ```
 
+### m_ConfigFiles
+
+- `write_JSON(json_save_path, json_body)`——保存JSON到文本文档
+- `load_JSON(json_path`——从文本文档加载JSON
+
+加载JSON配置文件和保存JSON对象到文本
+
 ### m_ProgressBar
 
 >参考： 来源：https://blog.csdn.net/Lingdongtianxia/article/details/76359555
 >
 >(Linux Only)
+
+- `timeBar(float_sec, curr, total, color=32)`——返回时间进度条(静态)
+- `rateBar(curr, total, color=32, shows=None)`——显示进度条百分比(静态)
+- `timeWaitfor(sec)`——等待时间的进度条(百分之一为间隔，动态)
 
 ```
 [███████████████████████████████████████████████████████████████] - 还有0.00秒。
@@ -192,6 +241,13 @@ if __name__ == '__main__':
 ```
 
 ### m_System
+
+- `execCommand(cmd, debug=False)`——执行命令
+- `checkAdministrator()`——检查是否有管理员权限
+- `cpu_count()`——返回CPU核心数
+- `isBomExist(text_file_path)`——检查文件（UTF-8文本文档）头部是否包含有UTF-BOM
+- `removeBom(filepath)`——移除UTF-8文件的BOM字节
+- `getSuffixFile(suffix, directory=".")`——返回文件夹下的带后缀的文件
 
 例:
 

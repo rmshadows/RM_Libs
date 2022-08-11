@@ -52,4 +52,85 @@ testPrintln(){
     prompt -k "一个参数（蓝色）" "两个参数（黄色）"
 }
 
+
+civiccccc (){
+  echo -e "\e[1;31m
+_________  .___ ____   ____.___ _________  _________  _________  _________  _________  
+\_   ___ \ |   |\   \ /   /|   |\_   ___ \ \_   ___ \ \_   ___ \ \_   ___ \ \_   ___ \ 
+/    \  \/ |   | \   Y   / |   |/    \  \/ /    \  \/ /    \  \/ /    \  \/ /    \  \/ 
+\     \____|   |  \     /  |   |\     \____\     \____\     \____\     \____\     \____
+ \______  /|___|   \___/   |___| \______  / \______  / \______  / \______  / \______  /
+        \/                              \/         \/         \/         \/         \/ 
+\e[1;32m"
+}
+
+
+## 询问函数 Yes:1 No:2 ???:5
+:<<!询问函数
+函数调用请使用：
+comfirmn "\e[1;33m? [y/N]\e[0m"
+comfirmy "\e[1;33m? [Y/n]\e[0m"
+choice=$?
+if [ $choice == 1 ];then
+  yes
+elif [ $choice == 2 ];then
+  prompt -i "——————————  下一项  ——————————"
+else
+  prompt -e "ERROR:未知返回值!"
+  exit 5
+fi
+!询问函数
+comfirmy () {
+  flag=true
+  ask=$1
+  while $flag
+  do
+    echo -e "$ask"
+    read -r input
+    if [ -z "${input}" ];then
+      # 默认选择Y
+      input='y'
+    fi
+    case $input in [yY][eE][sS]|[yY])
+      return 1
+      flag=false
+    ;;
+    [nN][oO]|[nN])
+      return 2
+      flag=false
+    ;;
+    *)
+      prompt -w "Invalid option..."
+    ;;
+    esac
+  done
+}
+
+comfirmn () {
+  flag=true
+  ask=$1
+  while $flag
+  do
+    echo -e "$ask"
+    read -r input
+    if [ -z "${input}" ];then
+      # 默认选择N
+      input='n'
+    fi
+    case $input in [yY][eE][sS]|[yY])
+      return 1
+      flag=false
+    ;;
+    [nN][oO]|[nN])
+      return 2
+      flag=false
+    ;;
+    *)
+      prompt -w "Invalid option..."
+    ;;
+    esac
+  done
+}
+
+
 # testPrintln
