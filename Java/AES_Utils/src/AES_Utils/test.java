@@ -1,7 +1,11 @@
 package AES_Utils;
 
+import javax.crypto.spec.SecretKeySpec;
+import javax.swing.*;
+import java.io.UnsupportedEncodingException;
+
 public class test {
-    public static void main(String[] args) {
+    public static void test(){
         String todo = "妳好Hello@";
         String hex;
         /**
@@ -33,5 +37,9 @@ public class test {
         hex = cbc.encrypt("12345", "54321", todo);
         System.out.printf("CBC临时加密(PWD: 12345, IV: 54321)：%s\n", hex);
         System.out.printf("CBC临时解密(PWD: 12345, IV: 54321)：%s\n", cbc.decrypt("12345", "54321", hex));
+    }
+
+    public static void main(String[] args){
+        test();
     }
 }

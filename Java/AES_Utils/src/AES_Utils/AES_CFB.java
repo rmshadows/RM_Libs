@@ -15,7 +15,8 @@ public class AES_CFB {
     // 仅用于Debug，不加密
     private static boolean debug_mode = false;
     private static final String CipherMode = "AES/CFB/NoPadding";// 使用CFB加密，需要设置IV
-
+    // 偏移量
+    private static String IV;
     // 填充
     private static String passwd_fill = "0";
 
@@ -31,8 +32,10 @@ public class AES_CFB {
         return passwd_fill;
     }
 
-    public static void setPasswd_fill(String passwd_fill) {
+    public static void setPasswd_fill(String passwd_fill, String iv) {
         AES_CFB.passwd_fill = passwd_fill;
+        AES_CFB.IV = iv;
+        // TODO
     }
 
     // 密码
