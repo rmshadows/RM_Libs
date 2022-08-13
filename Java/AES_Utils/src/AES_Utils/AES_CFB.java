@@ -14,11 +14,24 @@ import javax.crypto.spec.SecretKeySpec;
 public class AES_CFB {
     // 仅用于Debug，不加密
     private static boolean debug_mode = false;
-    private static final String CipherMode = "AES/CFB/NoPadding";// 使用CFB加密，需要设置IV
+    private static final String CipherMode = "AES/CFB/NoPadding";// 与Python兼容
+//    private static final String CipherMode = "AES/CFB/PKCS5Padding";// 使用CFB加密，需要设置IV
     // 偏移量
-    private static String IV;
+    private static byte[] IV;
     // 填充
-    private static String passwd_fill = "0";
+    private static String passwd_padding = "0";
+    // 密钥长度
+    private static int passwd_len = 32;
+    // 密码
+    private static String password = "";
+
+    public static int getPasswd_len() {
+        return passwd_len;
+    }
+
+    public static void setPasswd_len(int passwd_len) {
+        AES_CFB.passwd_len = passwd_len;
+    }
 
     public static String getPassword() {
         return password;
@@ -28,40 +41,64 @@ public class AES_CFB {
         AES_CFB.password = password;
     }
 
-    public static String getPasswd_fill() {
-        return passwd_fill;
+    public static String getPasswd_padding() {
+        return passwd_padding;
     }
 
-    public static void setPasswd_fill(String passwd_fill, String iv) {
-        AES_CFB.passwd_fill = passwd_fill;
-        AES_CFB.IV = iv;
-        // TODO
+    public static void setPasswd_padding(String passwd_padding) {
+        AES_CFB.passwd_padding = passwd_padding;
     }
 
-    // 密码
-    private static String password = "default";
+    public static String getIV() {
+        try {
+            return new String(IV, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    public AES_CFB(String passwd, String pwd_fill) {
-        password = passwd;
+    public static void setIV(String IV) {
+        AES_CFB.IV = createIV(IV);
+    }
+
+    public AES_CFB(String passwd, String pwd_padding, String iv, int pwd_len) {
 //        try {
 //            throw new Exception("给定的值不是控制字符！");
 //        } catch (Exception e) {
 //            throw new RuntimeException(e);
 //        }
-        passwd_fill = pwd_fill;
+        AES_CFB.passwd_padding = pwd_padding;
+        AES_CFB.password = passwd;
+        AES_CFB.IV = createIV(iv);
+        AES_CFB.passwd_len = pwd_len;
+    }
+
+    public AES_CFB(String passwd, String pwd_padding, String iv) {
+        password = passwd;
+        passwd_padding = pwd_padding;
+        AES_CFB.IV = createIV(iv);
+    }
+
+    public AES_CFB(String passwd, String pwd_padding) {
+        password = passwd;
+        passwd_padding = pwd_padding;
+        AES_CFB.IV = createIV("");
     }
 
     public AES_CFB(String passwd){
-        password = passwd;
+        AES_CFB.password = passwd;
+        AES_CFB.passwd_padding = "0";
+        AES_CFB.IV = createIV("");
     }
 
     /**
      * 加密
      * @param password 密码
+     * @param iv 偏移量
      * @param clear_content 明文
      * @return HexString 16进制字符串
      */
-    public String encrypt(String password, String clear_content) {
+    public String encrypt(String password, String iv, String clear_content) {
         if(!debug_mode) {
             byte[] data = null;
             try {
@@ -69,7 +106,7 @@ public class AES_CFB {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            data = bytesEncrypt(data, password);
+            data = bytesEncrypt(data, password, createIV(iv));
             String result = AES_Tools.bytes2hex(data);
             return result;
         }else {
@@ -90,7 +127,7 @@ public class AES_CFB {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            data = bytesEncrypt(data, password);
+            data = bytesEncrypt(data, password, IV);
             String result = AES_Tools.bytes2hex(data);
             return result;
         }else {
@@ -101,10 +138,11 @@ public class AES_CFB {
     /**
      * 解密16进制的字符串为字符串
      * @param password 密码
+     * @param iv 偏移量
      * @param hex_content 密文
      * @return 字符串
      */
-    public String decrypt(String password, String hex_content) {
+    public String decrypt(String password, String iv, String hex_content) {
         if(!debug_mode) {
             byte[] data = null;
             try {
@@ -112,7 +150,7 @@ public class AES_CFB {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            data = bytesDecrypt(data, password);
+            data = bytesDecrypt(data, password, createIV(iv));
             if (data == null)
                 return null;
             String result = null;
@@ -140,7 +178,7 @@ public class AES_CFB {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            data = bytesDecrypt(data, password);
+            data = bytesDecrypt(data, password, IV);
             if (data == null)
                 return null;
             String result = null;
@@ -156,6 +194,32 @@ public class AES_CFB {
     }
 
     /**
+     * 生成偏移量（填充）
+     * @param iv 偏移量
+     * @return byte[]偏移量
+     */
+    private static byte[] createIV(String iv) {
+        byte[] data = null;
+        if (iv == null) {
+            iv = "";
+        }
+        StringBuilder sb = new StringBuilder(16);
+        sb.append(iv);
+        while (sb.length() < 16) {
+            sb.append(passwd_padding);
+        }
+        if (sb.length() > 16) {
+            sb.setLength(16);
+        }
+        try {
+            data = sb.toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    /**
      * 生成加密后的密钥(填充密钥到32位)
      *
      * @param password 密钥
@@ -166,13 +230,13 @@ public class AES_CFB {
         if (password == null) {
             password = "";
         }
-        StringBuilder sb = new StringBuilder(32);
+        StringBuilder sb = new StringBuilder(passwd_len);
         sb.append(password);
-        while (sb.length() < 32) {
-            sb.append(passwd_fill);
+        while (sb.length() < passwd_len) {
+            sb.append(passwd_padding);
         }
-        if (sb.length() > 32) {
-            sb.setLength(32);
+        if (sb.length() > passwd_len) {
+            sb.setLength(passwd_len);
         }
         try {
             data = sb.toString().getBytes("UTF-8");
@@ -188,12 +252,20 @@ public class AES_CFB {
      * @param password 密码
      * @return 密文数组
      */
-    private static byte[] bytesEncrypt(byte[] content, String password) {
+    private static byte[] bytesEncrypt(byte[] content, String password, byte[] iv) {
         try {
             // 生成加密后的密钥
             SecretKeySpec key = createKey(password);
             Cipher cipher = Cipher.getInstance(CipherMode);
-            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(new byte[cipher.getBlockSize()]));
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+            cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
+            try {
+                System.out.println(new String(key.getEncoded(), "UTF-8"));
+                System.out.println(new String(ivParameterSpec.getIV(), "UTF-8"));
+                System.out.println(cipher.getBlockSize());
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
             return cipher.doFinal(content);
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,11 +279,11 @@ public class AES_CFB {
      * @param password 密码
      * @return 明文数组
      */
-    private static byte[] bytesDecrypt(byte[] content, String password) {
+    private static byte[] bytesDecrypt(byte[] content, String password, byte[] iv) {
         try {
             SecretKeySpec key = createKey(password);
             Cipher cipher = Cipher.getInstance(CipherMode);
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(new byte[cipher.getBlockSize()]));
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
 
             return cipher.doFinal(content);
         } catch (Exception e) {
