@@ -14,7 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class AES_CFB {
     // 仅用于Debug，不加密
     private static boolean debug_mode = false;
-    private static final String CipherMode = "AES/CFB/NoPadding";// 与Python兼容
+    private static final String CipherMode = "AES/CFB/NoPadding";// 与Python默认配置兼容
 //    private static final String CipherMode = "AES/CFB/PKCS5Padding";// 使用CFB加密，需要设置IV
     // 偏移量
     private static byte[] IV;
@@ -259,13 +259,6 @@ public class AES_CFB {
             Cipher cipher = Cipher.getInstance(CipherMode);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
-            try {
-                System.out.println(new String(key.getEncoded(), "UTF-8"));
-                System.out.println(new String(ivParameterSpec.getIV(), "UTF-8"));
-                System.out.println(cipher.getBlockSize());
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
             return cipher.doFinal(content);
         } catch (Exception e) {
             e.printStackTrace();
