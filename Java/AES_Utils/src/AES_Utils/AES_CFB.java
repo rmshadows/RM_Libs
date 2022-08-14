@@ -15,7 +15,7 @@ public class AES_CFB {
     // 仅用于Debug，不加密
     private static boolean debug_mode = false;
     private static final String CipherMode = "AES/CFB/NoPadding";// 与Python默认配置兼容
-//    private static final String CipherMode = "AES/CFB/PKCS5Padding";// 使用CFB加密，需要设置IV
+    //    private static final String CipherMode = "AES/CFB/PKCS5Padding";// 使用CFB加密，需要设置IV
     // 偏移量
     private static byte[] IV;
     // 填充
@@ -24,6 +24,7 @@ public class AES_CFB {
     private static int passwd_len = 32;
     // 密码
     private static String password = "";
+    private static final String CHARACTER = "UTF-8";
 
     public static int getPasswd_len() {
         return passwd_len;
@@ -51,7 +52,7 @@ public class AES_CFB {
 
     public static String getIV() {
         try {
-            return new String(IV, "UTF-8");
+            return new String(IV, CHARACTER);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -102,7 +103,7 @@ public class AES_CFB {
         if(!debug_mode) {
             byte[] data = null;
             try {
-                data = clear_content.getBytes("UTF-8");
+                data = clear_content.getBytes(CHARACTER);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -123,7 +124,7 @@ public class AES_CFB {
         if(!debug_mode) {
             byte[] data = null;
             try {
-                data = clear_content.getBytes("UTF-8");
+                data = clear_content.getBytes(CHARACTER);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -155,7 +156,7 @@ public class AES_CFB {
                 return null;
             String result = null;
             try {
-                result = new String(data, "UTF-8");
+                result = new String(data, CHARACTER);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -183,7 +184,7 @@ public class AES_CFB {
                 return null;
             String result = null;
             try {
-                result = new String(data, "UTF-8");
+                result = new String(data, CHARACTER);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -212,7 +213,7 @@ public class AES_CFB {
             sb.setLength(16);
         }
         try {
-            data = sb.toString().getBytes("UTF-8");
+            data = sb.toString().getBytes(CHARACTER);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -239,7 +240,7 @@ public class AES_CFB {
             sb.setLength(passwd_len);
         }
         try {
-            data = sb.toString().getBytes("UTF-8");
+            data = sb.toString().getBytes(CHARACTER);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

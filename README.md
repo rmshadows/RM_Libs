@@ -159,10 +159,21 @@ public class test {
 
 引入：`import 【脚本名称】`
 
+- m_AES——AES模块
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ConfigFiles——配置文件相关操作
 - m_ProgressBar.py——终端进度条(Linux Only)
 - m_System——系统信息相关
+
+### m_AES
+
+>与Java无缝衔接，支持CFB、CBC模式
+
+例:
+
+```python
+
+```
 
 ### m_ColorStdout
 
@@ -264,6 +275,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2022.08.15——0.0.4
+  - 对接了Python和Java的AES模块
 - 2022.08.10——0.0.3
   - 添加了Python终端彩色字体输出
   - 添加了Python系统信息模块

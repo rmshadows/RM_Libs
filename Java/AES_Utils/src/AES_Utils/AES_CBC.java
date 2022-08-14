@@ -58,27 +58,20 @@ public class AES_CBC {
      */
     private static byte[] pwdHandler(String password, boolean isIv) throws UnsupportedEncodingException {
         byte[] data = null;
-        if (!isIv){
-            if (password != null) {
-                byte[] bytes = password.getBytes(CHARACTER); //一个中文3位长度，一数字1位
-                if (password.length() < PWD_SIZE) {
-                    System.arraycopy(bytes, 0, data = new byte[PWD_SIZE], 0, bytes.length);
-                }
-                else {
-                    data = bytes;
-                }
+        int tlength = PWD_SIZE;
+        if (isIv){
+            tlength = 16;
+        }
+        if (password != null) {
+            byte[] pwd_bytes = password.getBytes(CHARACTER); //一个中文3位长度，一数字1位
+            if (password.length() < tlength) {
+                System.arraycopy(pwd_bytes, 0, data = new byte[tlength], 0, pwd_bytes.length);
             }
-        }else {
-            if (password != null) {
-                byte[] bytes = password.getBytes(CHARACTER); //一个中文3位长度，一数字1位
-                if (password.length() < 16) {
-                    System.arraycopy(bytes, 0, data = new byte[16], 0, bytes.length);
-                }
-                else {
-                    data = bytes;
-                }
+            else {
+                data = pwd_bytes;
             }
         }
+//        System.out.println(new String(data, CHARACTER));
         return data;
     }
 
