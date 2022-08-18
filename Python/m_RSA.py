@@ -9,46 +9,9 @@ import rsa
 import os
 
 # 是否是Windows
+import m_System
+
 WINDOWS = (os.sep == "\\")
-
-
-def isBomExist(text_file_path):
-    """
-    检查文件（UTF-8文本文档）头部是否包含有UTF-BOM
-    Args:
-        text_file_path: UTF-8文本文档路径
-
-    Returns:
-        boolean: 是否含有BOM
-        True: 有
-        False: 无
-    """
-    BOM = b'\xef\xbb\xbf'
-    bomExisted = lambda s: True if s == BOM else False
-    with open(text_file_path, 'rb') as r:
-        if bomExisted(r.read(3)):
-            print("{}: 检测到UTF-BOM...".format(text_file_path))
-            return True
-        else:
-            return False
-
-
-def removeBom(filepath):
-    """
-    existBom(f.read(3))
-    移除UTF-8文件的BOM字节
-    Args:
-        filepath: 带有BOM的文本文档路径
-    """
-    with open(filepath, 'rb') as r:
-        # 只有先读取三个字节，接下来的读取才是去掉BOM的内容
-        r.read(3)
-        if isBomExist(filepath):
-            print("正在移除{}的BOM...".format(filepath))
-            fbody = r.read()
-            print(fbody)
-            with open(filepath, 'wb') as f:
-                f.write(fbody)
 
 
 def loadPRK(rsa_private_key_path):
@@ -62,7 +25,7 @@ def loadPRK(rsa_private_key_path):
     """
     # 加载私钥
     if WINDOWS:
-        removeBom(rsa_private_key_path)
+        m_System.removeBom(rsa_private_key_path)
     with open(rsa_private_key_path, mode='rb') as privatefile:
         data = privatefile.read()
     prk = rsa.PrivateKey.load_pkcs1(data)
@@ -80,7 +43,7 @@ def loadPUK(rsa_public_key_path):
         公钥
     """
     if WINDOWS:
-        removeBom(rsa_public_key_path)
+        m_System.removeBom(rsa_public_key_path)
     with open(rsa_public_key_path, mode='rb') as pubfile:
         data = pubfile.read()
     try:
