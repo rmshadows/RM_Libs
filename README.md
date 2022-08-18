@@ -163,9 +163,14 @@ public class test {
 - m_AES——AES模块
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ConfigFiles——配置文件相关操作
+- m_Excel——Excel相关处理
+- m_Image——图像处理相关
+- m_PDF——PDF文件处理
 - m_ProgressBar.py——终端进度条(Linux Only)
+- m_QR——二维码生成、识别
 - m_RSA——RSA模块
 - m_System——系统信息相关
+- m_Web——网络相关
 
 ### m_AES
 
@@ -246,11 +251,29 @@ if __name__ == '__main__':
 
 加载JSON配置文件和保存JSON对象到文本
 
+### m_Excel
+
+- `def permutation(lst, len)`——对给定的列表进行排列组合
+- `def excelIndex2cell(row, col)`——将索引转化为字符串定位，如（0，0）==> ‘A1’
+- `def colname2num(colname)`——Excel 表格单元格转换坐标（A -> 0、AA -> 26）
+- `def lines_writer(worksheet_ob, content_in_lines:list, start_row)`——添加一行或者多行数据
+
+### m_Image
+
+- `def draw_English_text(image, x, y, string, font_size=20, color=(0, 0, 0), word_css="en.ttf", direction=None)`——添加英文文字（字体限制英文, 可自行修改中文字体）
+
 ### m_PDF
 
 >依赖m_System
 
-TODO
+- `def add_content(pdf_in_name:str,pdf_out_name:str,content_dict:dict)`——添加PDF注释（目录）
+- `def mergePdfs(directory, output_pdf_file)`——合并PDF（提供目录）
+- `def image2pdf(directory, output_pdf_name, content:bool=True):`——将所给文件夹的jpg图片转为PDF文档（提供目录）
+
+### m_QR
+
+- `def readQR(qr_path)`——识别二维码
+- `def generateQR(data, save_file="qr.png", view_only=False)`——生成二维码
 
 ### m_ProgressBar
 
@@ -331,6 +354,8 @@ if __name__ == '__main__':
 - `isBomExist(text_file_path)`——检查文件（UTF-8文本文档）头部是否包含有UTF-BOM
 - `removeBom(filepath)`——移除UTF-8文件的BOM字节
 - `getSuffixFile(suffix, directory=".")`——返回文件夹下的带后缀的文件
+- `def averageSplitList(list2split:list, n:int)`——自动平均分配列表
+- `def splitListInto(list2split:list, n:int)`——将列表强制分为n个
 
 例:
 
@@ -345,8 +370,14 @@ if __name__ == '__main__':
         print(f)
 ```
 
+### m_Web
+
+- `def getWebservertime(host)`——返回网络日期、时间['2022-06-23', '03:53:01']
+
 ## 更新日志
 
+- 2022.08.19——0.0.5
+  - Python添加了二维码模块、PDF模块、图像处理模块、Excel模块、网络相关模块
 - 2022.08.18——0.0.4
   - 新增RSA模块
   - 对接了Python和Java的AES模块
