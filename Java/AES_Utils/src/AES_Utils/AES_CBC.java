@@ -20,11 +20,11 @@ public class AES_CBC {
     private static final String ENCRY_ALGORITHM = "AES";//加密方法名称
     private static final String CIPHER_MODE = "AES/CBC/PKCS5Padding";//填充方式
     private static final String CHARACTER = "UTF-8";//编码
-    private static int PWD_SIZE = 16;//采用128位的Key 16byte
+    private static int PWD_SIZE = 16; //默认采用128位的Key 16byte
     // 密钥 keyA
-    private static String password = "default";
+    private static String password = null;
     // vi偏移量 keyB
-    private static String iv_spec = "iv";
+    private static String iv_spec = null;
 
     /**
      * 默认16位
@@ -49,33 +49,6 @@ public class AES_CBC {
     }
 
     /**
-     * 密钥长度补全
-     * 把所给的String密钥转为PWD_SIZE长度 的 Byte数组并填充
-     * @param password String KeyA or KeyB
-     * @param isIv : 是否是偏移量 是的话固定长度16
-     * @return Byte[] 密钥的byte数组
-     * @throws UnsupportedEncodingException 忽略编码错误
-     */
-    private static byte[] pwdHandler(String password, boolean isIv) throws UnsupportedEncodingException {
-        byte[] data = null;
-        int tlength = PWD_SIZE;
-        if (isIv){
-            tlength = 16;
-        }
-        if (password != null) {
-            byte[] pwd_bytes = password.getBytes(CHARACTER); //一个中文3位长度，一数字1位
-            if (password.length() < tlength) {
-                System.arraycopy(pwd_bytes, 0, data = new byte[tlength], 0, pwd_bytes.length);
-            }
-            else {
-                data = pwd_bytes;
-            }
-        }
-//        System.out.println(new String(data, CHARACTER));
-        return data;
-    }
-
-    /**
      * 将明文密码加密成密文密码
      * @param clearText String 明文密码
      * @return String 密文密码
@@ -85,9 +58,9 @@ public class AES_CBC {
         try{
             byte[] a = clearText.getBytes(CHARACTER);//明文密码转字节数组
             // keyA
-            byte[] b = pwdHandler(password, false);
+            byte[] b = AES_Tools.padding(password, PWD_SIZE);
             // keyB
-            byte[] c = pwdHandler(iv_spec, true);
+            byte[] c = AES_Tools.padding(iv_spec, 16);
             byte[] d = null;
             d =bytesEncrypt(a, b, c);
             encoded = AES_Tools.bytes2hex(d);
@@ -107,9 +80,9 @@ public class AES_CBC {
         try{
             byte[] a = AES_Tools.hex2bytes(cipherText);
             //keyA
-            byte[] b = b = pwdHandler(password, false);
+            byte[] b = b = AES_Tools.padding(password, PWD_SIZE);
             //keyB
-            byte[] c = pwdHandler(iv_spec, true);
+            byte[] c = AES_Tools.padding(iv_spec, 16);
             byte[] d = bytesDecrypt(a, b, c);
             decoded = new String(d, CHARACTER);
         }catch (Exception e){
@@ -130,9 +103,9 @@ public class AES_CBC {
         try{
             byte[] a = clearText.getBytes(CHARACTER);//明文密码转字节数组
             // keyA
-            byte[] b = pwdHandler(pwd, false);
+            byte[] b = AES_Tools.padding(pwd, PWD_SIZE);
             // keyB
-            byte[] c = pwdHandler(iv, true);
+            byte[] c = AES_Tools.padding(iv, 16);
             byte[] d = null;
             d =bytesEncrypt(a, b, c);
             encoded = AES_Tools.bytes2hex(d);
@@ -154,9 +127,9 @@ public class AES_CBC {
         try{
             byte[] a = AES_Tools.hex2bytes(cipherText);
             //keyA
-            byte[] b = b = pwdHandler(pwd, false);
+            byte[] b = b = AES_Tools.padding(pwd, PWD_SIZE);
             //keyB
-            byte[] c = pwdHandler(iv, true);
+            byte[] c = AES_Tools.padding(iv, 16);
             byte[] d = bytesDecrypt(a, b, c);
             decoded = new String(d, CHARACTER);
         }catch (Exception e){
@@ -192,8 +165,6 @@ public class AES_CBC {
         } catch (Exception e) {
 			e.printStackTrace();
         }
-        //加密失败
-        System.out.println("加密失败!");
         return null;
     }
 
@@ -223,8 +194,6 @@ public class AES_CBC {
         } catch (Exception e) {
 			e.printStackTrace();
         }
-        // 解密错误 返回null
-//        System.out.println("解密失败!");
         return null;
     }
 }

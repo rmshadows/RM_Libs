@@ -80,6 +80,7 @@ testPrintln
 - AES Tool
   - `public static byte[] hex2bytes(String inputHexString)`——十六进制字符串转Byte数组
   - `public static String bytes2hex(byte[] b)`——Byte数组转十六进制字符串
+  - `public static byte[] padding(String key, int length)`——把所给的String密钥转为一定长度 的 Byte数组并填充
 
 例：
 
@@ -163,16 +164,46 @@ public class test {
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ConfigFiles——配置文件相关操作
 - m_ProgressBar.py——终端进度条(Linux Only)
+- m_RSA——RSA模块
 - m_System——系统信息相关
 
 ### m_AES
 
->与Java无缝衔接，支持CFB、CBC模式
+>与Java无缝衔接，支持CFB（默认32-256位）、CBC模式（默认长度16-128位）
+
+- `class AES_CFB`
+  - `def padding(self, pwd, leng)`——填充到指定位数
+  - `def encrypt(self, content)`——加密
+  - `def decrypt(self, content)`——解密
+  - `def ex_encrypt(self, content, ex_passwd, ex_iv="")`——临时加密
+  - `def ex_decrypt(self, content, ex_passwd, ex_iv="")`——临时解密
+- `class AES_CBC`
+  - `def padding(self, pwd, leng)`——填充到指定位数
+  - `def encrypt(self, content)`——加密
+  - `def decrypt(self, content)`——解密
+  - `def ex_encrypt(self, content, ex_passwd, ex_iv="")`——临时加密
+  - `def ex_decrypt(self, content, ex_passwd, ex_iv="")`——临时解密
 
 例:
 
 ```python
-
+if __name__ == '__main__':
+    s = "妳好Hello@"
+    cipher = AES_CFB("123456", ";")
+    es = cipher.encrypt(s)
+    print("KEY:123456 IV:; KEY_SIZE: 32 加密：" + es)
+    print("KEY:123456 IV:; KEY_SIZE: 32 解密：" + cipher.decrypt(es))
+    es = cipher.ex_encrypt(s, "12345", "54321")
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 加密：" + es)
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 解密：" + cipher.ex_decrypt(es, "12345", "54321"))
+    print("CBC Test: ")
+    cipher = AES_CBC("123456", "4321", 32)
+    es = cipher.encrypt(s)
+    print("KEY:123456 IV:4321 KEY_SIZE: 32 加密：" + es)
+    print("KEY:123456 IV:4321 KEY_SIZE: 32 解密：" + cipher.decrypt(es))
+    es = cipher.ex_encrypt(s, "12345", "54321")
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 加密：" + es)
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 解密：" + cipher.ex_decrypt(es, "12345", "54321"))
 ```
 
 ### m_ColorStdout
@@ -251,6 +282,39 @@ if __name__ == '__main__':
 	m_ProgressBar.rateBar(34, 100, 38, " - 5号进程")
 ```
 
+### m_RSA
+
+- `def loadPRK(rsa_private_key_path)`——加载RSA私钥
+- `def loadPUK(rsa_public_key_path)`——加载RSA公钥
+- `def sign_msg(prk, msg)`——私钥签名 用私钥签名msg信息
+- `def verify_msg(puk, sig_msg, msg)`——公钥验证签名, 返回是否验证
+- `def encrypt_msg(puk, msg)`——加密信息, 使用公钥
+- `def decrypt_msg(prk, crypto_msg)`——解密信息，使用私钥
+- `def generateRSA(key_name, key_path, key_length=2048)`——用于生成RSA密钥
+
+例:
+
+```python
+if __name__ == '__main__':
+    RSA_NAME = "test"
+    # 生成RSA密钥
+    generateRSA(RSA_NAME, key_length=512)
+    prk = loadPRK(RSA_NAME+".pem")
+    puk = loadPUK(RSA_NAME+".pub")
+    print(prk)
+    print(puk)
+    # TEST
+    sign = sign_msg(prk, "妳好")
+    print("私钥签名信息：{}".format(sign.hex().upper()))
+    print("公钥验证信息：{}".format(verify_msg(puk, sign, "妳好")))
+    hex = encrypt_msg(puk, "妳好").hex().upper()
+    print("公钥加密信息：{}".format(hex))
+    print("私钥解密信息：{}".format(decrypt_msg(prk, bytes.fromhex(hex))))
+    # 删除RSA密钥
+    os.remove(RSA_NAME+".pem")
+    os.remove(RSA_NAME+".pub")
+```
+
 ### m_System
 
 - `execCommand(cmd, debug=False)`——执行命令
@@ -275,8 +339,10 @@ if __name__ == '__main__':
 
 ## 更新日志
 
-- 2022.08.15——0.0.4
+- 2022.08.18——0.0.4
+  - 新增RSA模块
   - 对接了Python和Java的AES模块
+  - 优化了AES模块
 - 2022.08.10——0.0.3
   - 添加了Python终端彩色字体输出
   - 添加了Python系统信息模块

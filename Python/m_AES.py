@@ -5,7 +5,6 @@ AES模块
 import os
 
 from Crypto.Util.Padding import pad, unpad
-from Crypto import Random
 from Crypto.Cipher import AES
 
 IS_WINDOWS = os.sep == "\\"
@@ -15,8 +14,6 @@ CHARACTER = "UTF-8"
 class AES_CFB:
     # 密钥
     CFB_KEY = None
-    # 密钥填充
-    CFB_KEY_PADDING = None
     # 密码长度
     CFB_KEY_LEN = 32
     # 偏移量
@@ -33,13 +30,12 @@ class AES_CFB:
             byte[]： 填充后的数据
         """
         # 密钥过长的报错交给AES模块
-        if len(pwd) >= leng:
-            return pwd
-        padding_len = leng - len(pwd)
-        to_padding = ""
-        for i in range(0, padding_len):
-            to_padding += self.CFB_KEY_PADDING
-        return (pwd + to_padding).encode(CHARACTER)
+        b_pwd = bytearray(pwd, CHARACTER)
+        if len(b_pwd) < leng:
+            to_pad = leng - len(b_pwd)
+            to_pad = bytes(to_pad)
+            b_pwd.extend(to_pad)
+        return b_pwd
 
     def encrypt(self, content):
         """
@@ -105,14 +101,11 @@ class AES_CFB:
         result = cipher.decrypt(bytes.fromhex(content.lower())).decode(CHARACTER)
         return result
 
-    def __init__(self, passwd, pwd_fill="0", iv="", key_len=32):
-        if pwd_fill == "" or pwd_fill is None:
-            raise Exception("pwd_fill canot be None!")
+    def __init__(self, passwd, iv="", key_len=32):
         # 以下是有顺序的
-        self.CFB_KEY_PADDING = pwd_fill
+        self.CFB_KEY_LEN = key_len
         self.CFB_KEY = self.padding(passwd, self.CFB_KEY_LEN)
         self.CFB_IV = self.padding(iv, 16)
-        self.CFB_KEY_LEN = key_len
 
 
 class AES_CBC:
@@ -134,12 +127,12 @@ class AES_CBC:
             byte[]： 填充后的数据
         """
         # 密钥过长的报错交给AES模块
-        if len(pwd) >= leng:
-            return pwd
-        a = bytearray(pwd, CHARACTER)
-        a.extend(bytearray(leng - len(pwd)))
-        return a
-
+        b_pwd = bytearray(pwd, CHARACTER)
+        if len(b_pwd) < leng:
+            to_pad = leng - len(b_pwd)
+            to_pad = bytes(to_pad)
+            b_pwd.extend(to_pad)
+        return b_pwd
 
     def encrypt(self, content):
         """
@@ -171,83 +164,62 @@ class AES_CBC:
         result = unpad(result, 16)
         return result.decode(CHARACTER)
 
-    # def ex_encrypt(self, content, ex_passwd, ex_iv=""):
-    #     """
-    #     临时加密
-    #     修改填充、密码长度请另行新建类
-    #     Args:
-    #         content: 内容
-    #         ex_passwd: 密码
-    #         ex_iv: 向量
-    #
-    #     Returns:
-    #         十六进制字符串
-    #     """
-    #     cipher = AES.new(self.padding(ex_passwd, self.CBC_KEY_LEN),
-    #                      AES.MODE_CBC,
-    #                      self.padding(ex_iv, 16))
-    #     result = cipher.encrypt(content.encode(CHARACTER)).hex().upper()
-    #     return result
-    #
-    # def ex_decrypt(self, content, ex_passwd, ex_iv=""):
-    #     """
-    #     临时解密
-    #     Args:
-    #         content: 十六进制字符串
-    #         ex_passwd: str密码
-    #         ex_iv: str向量
-    #
-    #     Returns:
-    #         解密后的字符串
-    #     """
-    #     cipher = AES.new(self.padding(ex_passwd, self.CBC_KEY_LEN),
-    #                      AES.MODE_CBC,
-    #                      self.padding(ex_iv, 16))
-    #     result = cipher.decrypt(bytes.fromhex(content.lower())).decode(CHARACTER)
-    #     return result
+    def ex_encrypt(self, content, ex_passwd, ex_iv=""):
+        """
+        临时加密
+        修改填充、密码长度请另行新建类
+        Args:
+            content: 内容
+            ex_passwd: 密码
+            ex_iv: 向量
+
+        Returns:
+            十六进制字符串
+        """
+        content = content.encode(CHARACTER)
+        # 填充到16的倍数
+        content = pad(content, 16)
+        cipher = AES.new(self.padding(ex_passwd, self.CBC_KEY_LEN), AES.MODE_CBC, self.padding(ex_iv, 16))
+        result = cipher.encrypt(content).hex().upper()
+        return result
+
+    def ex_decrypt(self, content, ex_passwd, ex_iv=""):
+        """
+        临时解密
+        Args:
+            content: 十六进制字符串
+            ex_passwd: str密码
+            ex_iv: str向量
+
+        Returns:
+            解密后的字符串
+        """
+        cipher = AES.new(self.padding(ex_passwd, self.CBC_KEY_LEN), AES.MODE_CBC, self.padding(ex_iv, 16))
+        result = cipher.decrypt(bytes.fromhex(content.lower()))
+        result = unpad(result, 16)
+        return result.decode(CHARACTER)
 
     def __init__(self, passwd, iv="", key_len=16):
         # 以下是有顺序的
+        self.CBC_KEY_LEN = key_len
         self.CBC_KEY = self.padding(passwd, self.CBC_KEY_LEN)
         self.CBC_IV = self.padding(iv, 16)
-        self.CBC_KEY_LEN = key_len
 
 
 if __name__ == '__main__':
     s = "妳好Hello@"
-    # cipher = AES_CFB("123456", ";")
-    # es = cipher.encrypt(s)
-    # print(es)
-    # print(cipher.decrypt(es))
-    # es = cipher.ex_encrypt(s, "12345", "54321")
-    # print(es)
-    # print(cipher.ex_decrypt(es, "12345", "54321"))
+    cipher = AES_CFB("123456", ";")
+    es = cipher.encrypt(s)
+    print("KEY:123456 IV:; KEY_SIZE: 32 加密：" + es)
+    print("KEY:123456 IV:; KEY_SIZE: 32 解密：" + cipher.decrypt(es))
+    es = cipher.ex_encrypt(s, "12345", "54321")
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 加密：" + es)
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 解密：" + cipher.ex_decrypt(es, "12345", "54321"))
     print("CBC Test: ")
-    # cipher = AES_CBC("123456", "4321", 32)
-    # es = cipher.encrypt(s)
-    # print(es)
-    # print(cipher.decrypt(es))
-    """
-    CBC加密前：妳好Hello@
-CBC加密：8494872F6E4EFC08FBD8E3EC57F04A17
-CBC解密：妳好Hello@
-CBC临时加密(PWD: 12345, IV: 54321)：D0A99E4A590B06AE867B412094697E21
-CBC临时解密(PWD: 12345, IV: 54321)：妳好Hello@
-    """
-    # print(cipher.decrypt(es))
-    # es = cipher.ex_encrypt(s, "12345", "54321")
-    # print(es)
-    # print(cipher.ex_decrypt(es, "12345", "54321"))
-
-    
-    ss = bytes("0123456789012348", CHARACTER)
-    # ss = pad(ss, 16)
-    def xx(pwd, leng):
-        a = bytearray(pwd)
-        a.extend(bytearray(leng - len(pwd)))
-        return a
-    # key = bytes("12345678901234567890123456789012", CHARACTER)
-    key = bytes("1234567890123456", CHARACTER)
-    iv = bytes("1234567890123457", CHARACTER)
-    result = AES.new(xx(key, 16), AES.MODE_CBC, xx(iv, 16)).encrypt(ss).hex().upper()
-    print(result)
+    cipher = AES_CBC("123456", "4321", 32)
+    es = cipher.encrypt(s)
+    print("KEY:123456 IV:4321 KEY_SIZE: 32 加密：" + es)
+    print("KEY:123456 IV:4321 KEY_SIZE: 32 解密：" + cipher.decrypt(es))
+    es = cipher.ex_encrypt(s, "12345", "54321")
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 加密：" + es)
+    print("KEY:12345 IV:54321 KEY_SIZE: 32 解密：" + cipher.ex_decrypt(es, "12345", "54321"))

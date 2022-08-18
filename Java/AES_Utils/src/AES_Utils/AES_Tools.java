@@ -1,6 +1,35 @@
 package AES_Utils;
 
+import java.io.UnsupportedEncodingException;
+
 public class AES_Tools {
+    public static final String CHARACTER = "UTF-8";
+    /**
+     * 密钥长度补全
+     * 把所给的String密钥转为PWD_SIZE长度 的 Byte数组并填充
+     * @param key String KeyA or KeyB
+     * @param length: 长度
+     * @return Byte[] 密钥的byte数组
+     */
+    public static byte[] padding(String key, int length){
+        byte[] result = null;
+        if (key != null) {
+            byte[] pwd_bytes = new byte[0]; //一个中文3位长度，一数字1位
+            try {
+                pwd_bytes = key.getBytes(CHARACTER);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            if (key.length() < length) {
+                System.arraycopy(pwd_bytes, 0, result = new byte[length], 0, pwd_bytes.length);
+            }
+            else {
+                result = pwd_bytes;
+            }
+        }
+        return result;
+    }
+
     /**
      * 十六进制字符串转Byte数组
      * @param inputHexString 十六进制字符串
