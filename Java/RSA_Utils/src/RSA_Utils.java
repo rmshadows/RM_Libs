@@ -18,8 +18,8 @@ public class RSA_Utils {
     public static final String KEY_ALGORITHM = "RSA";
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
 
-    private static final String PUBLIC_KEY = "RSAPublicKey";
-    private static final String PRIVATE_KEY = "RSAPrivateKey";
+    private static final String PUBLIC_KEY = "PUK";
+    private static final String PRIVATE_KEY = "PRK";
 
     /**
      * 用私钥对信息生成数字签名
@@ -35,21 +35,16 @@ public class RSA_Utils {
     public static String sign(byte[] data, String privateKey) throws Exception {
         // 解密由base64编码的私钥
         byte[] keyBytes = decryptBASE64(privateKey);
-
         // 构造PKCS8EncodedKeySpec对象
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
-
         // KEY_ALGORITHM 指定的加密算法
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
-
         // 取私钥匙对象
         PrivateKey priKey = keyFactory.generatePrivate(pkcs8KeySpec);
-
         // 用私钥对信息生成数字签名
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(priKey);
         signature.update(data);
-
         return encryptBASE64(signature.sign());
     }
 
@@ -226,7 +221,6 @@ public class RSA_Utils {
     public static String getPublicKey(Map<String, Object> keyMap)
             throws Exception {
         Key key = (Key) keyMap.get(PUBLIC_KEY);
-
         return encryptBASE64(key.getEncoded());
     }
 
@@ -236,21 +230,16 @@ public class RSA_Utils {
      * @return
      * @throws Exception
      */
-    public static Map<String, Object> initKey() throws Exception {
+    public static Map<String, Object> generateRSAKey(int key_size) throws Exception {
         KeyPairGenerator keyPairGen = KeyPairGenerator
                 .getInstance(KEY_ALGORITHM);
-        keyPairGen.initialize(1024);
-
+        keyPairGen.initialize(key_size);
         KeyPair keyPair = keyPairGen.generateKeyPair();
-
         // 公钥
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-
         // 私钥
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-
         Map<String, Object> keyMap = new HashMap<String, Object>(2);
-
         keyMap.put(PUBLIC_KEY, publicKey);
         keyMap.put(PRIVATE_KEY, privateKey);
         return keyMap;

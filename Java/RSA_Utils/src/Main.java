@@ -1,10 +1,14 @@
-import java.io.UnsupportedEncodingException;
+import javax.swing.*;
+import java.security.Key;
+import java.util.Map;
 
 public class Main {
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println("Hello world!");
-        String b = Code_Utils.Base64Bytes.bytes2base64("Hello world!".getBytes("UTF-8"));
-        System.out.println(b);
-        System.out.println(new String(Code_Utils.Base64Bytes.base642bytes(b), "UTF-8"));
+    public static void main(String[] args) throws Exception {
+        Map rsa = RSA_Utils.generateRSAKey(512);
+//        System.out.println("rsa = " + rsa);
+//        System.out.println(rsa.get("PUK"));
+        String s = RSA_Utils.getPrivateKey(rsa);
+        System.out.println("s = " + s);
+        IOUtils.writeFile(pubEncBase64, new File("pub.txt"));
     }
 }
