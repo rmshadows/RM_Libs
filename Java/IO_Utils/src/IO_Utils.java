@@ -1,4 +1,7 @@
+import javax.imageio.metadata.IIOMetadata;
+import javax.swing.*;
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -13,8 +16,13 @@ import java.util.stream.Stream;
 public class IO_Utils {
     public static final String CHARSET = "UTF-8";
 
-    public static LinkedList<String> readUsingBufferedReader(String filepath){
-        Path path = Paths.get(filepath);
+    /**
+     * 读取文件，以行位单位返回列表
+     * @param f 文件类
+     * @return 每一行的列表
+     */
+    public static LinkedList<String> readUsingBufferedReader(File f){
+        Path path = Paths.get(f.getAbsolutePath());
         LinkedList<String> lines = new LinkedList<>();
         try (// https://www.cnblogs.com/jpfss/p/9789390.html
              InputStreamReader isr = new InputStreamReader(new FileInputStream(path.toFile()), CHARSET);
@@ -29,54 +37,79 @@ public class IO_Utils {
         }
     }
 
-
-    public static void writeFile(String data, File file) throws IOException {
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(file);
-            out.write(data.getBytes());
-            out.flush();
-        } finally {
-            close(out);
-        }
-    }
-
-    public static String readFile(File file){
-        try (InputStream in = new FileInputStream(file);
-             ByteArrayOutputStream out = new ByteArrayOutputStream();){
-            byte[] buf = new byte[1024];
-            int len = -1;
-            while ((len = in.read(buf)) != -1) {
-                out.write(buf, 0, len);
+    /**
+     * 给定行的列表写入文件
+     * @param f 文件类
+     * @param lines 行内容列表
+     * @return 返回输出文件
+     */
+    public static File writeUsingBufferedWriter(File f, LinkedList<String> lines){
+        Path path = Paths.get(f.getAbsolutePath());
+        try (// https://www.cnblogs.com/jpfss/p/9789390.html
+             OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(path.toFile()), CHARSET);
+                BufferedWriter bw = new BufferedWriter(osw);) {
+            for (String line: lines) {
+                bw.write(String.format("%s\n", line));
             }
-            out.flush();
-            byte[] data = out.toByteArray();
-            return new String(data);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            bw.flush();
+            return path.toFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void close(Closeable c) {
-        if (c != null) {
-            try {
-                c.close();
-            } catch (IOException e) {
-                // nothing
+
+    public static byte[] readBytesUsingBufferedInputStream(File f){
+        Path path = Paths.get(f.getAbsolutePath());
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(path.toFile()));
+             ByteArrayOutputStream baos = new ByteArrayOutputStream();){
+            byte[] read = new byte[4];
+            int r_len = -1;
+            while ((r_len = bis.read(read)) != -1){
+                baos.write(read, 0, r_len);
             }
+            baos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+
+    public static void writeBytesUsingBufferedOutputStream(File f, byte[] data){
+        Path path = Paths.get(f.getAbsolutePath());
+        try (BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(data));
+             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path.toFile()));){
+            int read = -1;
+            byte[] buf = new byte[1024];
+            while ((read = bis.read(buf)) != -1){
+                bos.write(buf, 0, read);
+            }
+            bos.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public static byte[] readBytesUsingFileInputStream(File f){
+        try{
+            return new FileInputStream(f).readAllBytes();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
      * 使用Scanner读取较大的文件
-     * //更多请阅读：https://www.yiibai.com/java/java-read-text-file.html
-     * @param fileName
+     * 更多请阅读：https://www.yiibai.com/java/java-read-text-file.html
+     * 超大文件TODO https://blog.51cto.com/u_9597987/3485702
+     * @param f 文件类
      * @return LinkedList<String>
      */
-    public static LinkedList<String> readUsingScanner(String fileName) {
-        Path path = Paths.get(fileName);
+    public static LinkedList<String> readUsingScanner(File f) {
+        Path path = Paths.get(f.getAbsolutePath());
         LinkedList<String> lines = new LinkedList<>();
         try (Scanner scanner = new Scanner(path, CHARSET);){
             //逐行读取
@@ -92,6 +125,5 @@ public class IO_Utils {
             return null;
         }
     }
-
 
 }

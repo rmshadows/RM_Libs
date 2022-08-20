@@ -5,8 +5,10 @@ public class Main {
         File f = new File("1.txt");
         // 测试Scanner
         // testScanner();
-        testBufferedReader();
-
+        // 测试Reader
+        // testBufferedReader();
+        // 测试Buffered input Stream
+        testBufferedInputStream();
 
 
 
@@ -15,14 +17,20 @@ public class Main {
 
     }
 
+    private static void testBufferedInputStream() throws UnsupportedEncodingException {
+//        IO_Utils.readUsingBufferedStream("1.txt");
+        byte[] bytes = IO_Utils.readBytesUsingBufferedInputStream(new File("1.txt"));
+        System.out.println(bytes.length);
+    }
+
     private static void testBufferedReader() {
-        for (String s: IO_Utils.readUsingBufferedReader("1.txt")) {
+        for (String s: IO_Utils.readUsingBufferedReader(new File("1.txt"))) {
             System.out.println("s = " + s);
         }
     }
 
     private static void testScanner(){
-        for (String s: IO_Utils.readUsingScanner("1.txt")) {
+        for (String s: IO_Utils.readUsingScanner(new File("1.txt"))) {
             System.out.println("s = " + s);
         }
     }
