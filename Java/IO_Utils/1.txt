@@ -1,2 +1,0 @@
-CSDN首页
-白衣徐凤年: $ git commit -m"122" [master 6d6d029] 122 3 files changed, 2 insertions(+), 1 deletion(-) delete mode 100644 123.txt create mode 160000 test create mode 100644 "\346\226\260\345\273\272\346\226\207\344\273\266\345\244\271/123.txt" 大佬 他报这个错怎么解决

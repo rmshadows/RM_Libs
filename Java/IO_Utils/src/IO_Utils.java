@@ -1,5 +1,3 @@
-import javax.imageio.metadata.IIOMetadata;
-import javax.swing.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -8,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 /**
  * IO 工具类, 读写文件
@@ -86,6 +83,37 @@ public class IO_Utils {
         }
     }
 
+    /**
+     * 读取大文本文件
+     * https://zhuanlan.zhihu.com/p/142029812
+     * @param f
+     */
+    public static LinkedList<String> readUsingFileFileChannel(File f) {
+        LinkedList<String> lls = new LinkedList<>();
+        try (FileInputStream fileInputStream = new FileInputStream(f);) {
+            FileChannel fileChannel = fileInputStream.getChannel();
+            int capacity = 1024 * 1024;//1M (1 * 1024 * 1024)
+            ByteBuffer byteBuffer = ByteBuffer.allocate(capacity);
+            StringBuilder buffer = new StringBuilder();
+            while(fileChannel.read(byteBuffer) != -1) {
+                //读取后，将位置置为0，将limit置为容量, 以备下次读入到字节缓冲中，从0开始存储
+                byteBuffer.clear();
+                byte[] bytes = byteBuffer.array();
+                String str = new String(bytes, CHARSET);
+                str = str.replace(new String(new byte[1]), "");
+                lls.add(str);
+                //System.out.println(str);
+                // 处理字符串,并不会将字符串保存真正保存到内存中
+                // 这里简单模拟下处理操作.
+//                buffer.append(str.substring(0,1));
+            }
+            return lls;
+//            System.out.println("buffer.length:"+buffer.length());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * 读取小的文本文件
@@ -158,28 +186,6 @@ public class IO_Utils {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public static void readUsingFileFileChannel(File f) {
-        try (FileInputStream fileInputStream = new FileInputStream(f);) {
-            FileChannel fileChannel = fileInputStream.getChannel();
-            int capacity = 1024 * 1024;//1M (1 * 1024 * 1024)
-            ByteBuffer byteBuffer = ByteBuffer.allocate(capacity);
-            StringBuilder buffer = new StringBuilder();
-            while( fileChannel.read(byteBuffer) != -1) {
-                //读取后，将位置置为0，将limit置为容量, 以备下次读入到字节缓冲中，从0开始存储
-                byteBuffer.clear();
-                byte[] bytes = byteBuffer.array();
-                String str = new String(bytes);
-                //System.out.println(str);
-                //处理字符串,并不会将字符串保存真正保存到内存中
-                // 这里简单模拟下处理操作.
-                buffer.append(str.substring(0,1));
-            }
-            System.out.println("buffer.length:"+buffer.length());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 }

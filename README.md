@@ -70,6 +70,10 @@ testPrintln
 - Code_Utils——编码
   - Base64Bytes——Base64和Bytes
   - BytesHexString——十六进制字符串和Bytes
+- IO_Utils——输入输出，文件读写
+  - IO_Utils——文件读写
+- RSA_Utils——RSA组件
+  - RSA_Utils——RSA组件
 
 ### AES_Utils
 
@@ -155,6 +159,23 @@ public class test {
     }
 }
 ```
+
+### IO_Utils
+
+- IO_Utils
+  - `public static LinkedList<String> readUsingBufferedReader(File f)`——读取文件，以行位单位返回列表，仅适用于单行少的，返回每一行的列表。
+  - `public static File writeUsingBufferedWriter(File f, LinkedList<String> lines)`——给定行的列表写入文件
+  - `public static LinkedList<String> readUsingScanner(File f) `——使用Scanner读取较大的文件，但是花时也长
+  - `public static LinkedList<String> readUsingFileFileChannel(File f)`——读取大文本文件
+  - `public static LinkedList<String> readUsingFiles(File f)`——读取小的文本文件，本质上使用BufferedReader
+  - `public static byte[] readBytesUsingBufferedInputStream(File f)`——读取二进制文件
+  - `public static void writeBytesUsingBufferedOutputStream(File f, byte[] data)`——写入二进制文件
+  - `public static byte[] readBytesUsingFileInputStream(File f)`——读取小的二进制文件
+
+### RSA_Utils
+
+- RSA_Utils
+  - ``
 
 ## Python
 
