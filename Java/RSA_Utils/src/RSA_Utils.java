@@ -1,11 +1,15 @@
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.crypto.Cipher;
 
@@ -15,6 +19,10 @@ public class RSA_Utils {
 
     private static final String PUBLIC_KEY = "PUK";
     private static final String PRIVATE_KEY = "PRK";
+    public static final String PRK_HEADER = "-----BEGIN RSA PRIVATE KEY-----";
+    public static final String PRK_TAILER = "-----END RSA PRIVATE KEY-----";
+    public static final String PUK_HEADER = "-----BEGIN RSA PUBLIC KEY-----";
+    public static final String PUK_TAILER = "-----END RSA PUBLIC KEY-----";
     public static final String CHARSET = "UTF-8";
 
     /**
@@ -229,11 +237,20 @@ public class RSA_Utils {
         return encryptBASE64(key.getEncoded());
     }
 
-    public static PrivateKey loadPRK(String key){
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(key.getBytes()));
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-        return privateKey;
+    public static PrivateKey loadPRK(byte[] keyBytes){
+        try {
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+//            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+//            RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec();
+//            RSAPrivateCrtKeySpec keySpec = new RSAPrivateCrtKeySpec();
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+            System.out.println(privateKey.toString());
+            return privateKey;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -243,10 +260,11 @@ public class RSA_Utils {
      * @return
      */
     public static PublicKey loadPUK(String key){
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(key.getBytes()));
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(keySpec);
-        return publicKey;
+//        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(key.getBytes()));
+//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+//        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+//        return publicKey;
+        return null;
     }
 
 
@@ -254,7 +272,7 @@ public class RSA_Utils {
      * 初始化密钥
      * @return
      */
-    public static Map<String, Object> generateRSAKey(int key_size) {
+    public static Map<String, Object> generateRSAKey(int key_size){
         KeyPairGenerator keyPairGen = null;
         try {
             keyPairGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
@@ -271,5 +289,25 @@ public class RSA_Utils {
         keyMap.put(PUBLIC_KEY, publicKey);
         keyMap.put(PRIVATE_KEY, privateKey);
         return keyMap;
+    }
+
+    /**
+     * 生成RSA密钥对 (直接保存Encoder密钥Python不兼容)
+     * @param key_size 密钥长度
+     * @param alg 算法 默认RSA 可为null
+     * @return
+     */
+    public static KeyPair generateRSAKeyPair(int key_size, String alg) {
+        if (Objects.equals(alg, "") || alg == null){
+            alg = KEY_ALGORITHM;
+        }
+        KeyPairGenerator keyPairGen = null;
+        try {
+            keyPairGen = KeyPairGenerator.getInstance(alg);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        keyPairGen.initialize(key_size);
+        return keyPairGen.generateKeyPair();
     }
 }
