@@ -4,6 +4,16 @@ import java.nio.file.Paths;
 import java.util.Base64;
 
 public class RSA_Tools {
+    public static final String PKCS1_PRK_HEADER = "-----BEGIN RSA PRIVATE KEY-----";
+    public static final String PKCS1_PRK_TAILER = "-----END RSA PRIVATE KEY-----";
+    public static final String PKCS1_PUK_HEADER = "-----BEGIN RSA PUBLIC KEY-----";
+    public static final String PKCS1_PUK_TAILER = "-----END RSA PUBLIC KEY-----";
+    public static final String PKCS8_PRK_HEADER = "-----BEGIN PRIVATE KEY-----";
+    public static final String PKCS8_PRK_TAILER = "-----END PRIVATE KEY-----";
+    public static final String PKCS8_PUK_HEADER = "-----BEGIN PUBLIC KEY-----";
+    public static final String PKCS8_PUK_TAILER = "-----END PUBLIC KEY-----";
+    public static final String CHARSET = "UTF-8";
+
     /**
      * 读取二进制文件
      * @param f
@@ -76,5 +86,10 @@ public class RSA_Tools {
         Base64.Decoder decoder = Base64.getDecoder();
         byte[] buffer = decoder.decode(data);
         return buffer;
+    }
+
+
+    public static void PKCS8_2_PKCS1(){
+
     }
 }
