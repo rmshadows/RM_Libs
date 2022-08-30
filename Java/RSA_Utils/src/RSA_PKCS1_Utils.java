@@ -176,15 +176,16 @@ public class RSA_PKCS1_Utils {
         try {
             byte[] read_b = RSA_Tools.readBytesUsingBufferedInputStream(f);
             String read_str = new String(read_b, RSA_Tools.CHARSET);
+
             // 去头尾和换行符
-            read_str = read_str.replace(RSA_Tools.PKCS1_PRK_HEADER, "");
-            read_str = read_str.replace(RSA_Tools.PKCS1_PRK_TAILER, "");
-            read_str = read_str.replaceAll(System.lineSeparator(), "");
+//            read_str = read_str.replace(RSA_Tools.PKCS1_PRK_HEADER, "");
+//            read_str = read_str.replace(RSA_Tools.PKCS1_PRK_TAILER, "");
+//            read_str = read_str.replaceAll(System.lineSeparator(), "");
             // 注意这一步要将读取的Base64密钥转bytes
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(RSA_Tools.base642bytes(read_str));
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-//            System.out.println(privateKey.toString());
+            System.out.println(privateKey.toString());
             return privateKey;
         }catch (Exception e){
             e.printStackTrace();
@@ -198,7 +199,7 @@ public class RSA_PKCS1_Utils {
      * @param f 公钥文件
      * @return
      */
-    public static PublicKey loadPKCS8_PUK(File f){
+    public static PublicKey loadPKCS1_PUK(File f){
         byte[] read_b = RSA_Tools.readBytesUsingBufferedInputStream(f);
         String read_str = null;
         try {
@@ -239,20 +240,16 @@ public class RSA_PKCS1_Utils {
 
     /**
      * 初始化PKCS1密钥
-     * @return Map
+     * @return RSA_PEM
      */
-    public static Map<String, Object> generatePKCS1_RSAKey(int key_size){
-        // TODO: 2022/8/30
-        Map<String, Object> keyMap = new HashMap<String, Object>(2);
+    public static RSA_PEM generatePKCS1_RSAKey(int key_size){
         try {
+            // 先生成PKCS8的密钥
             RSA_Util rsa = new RSA_Util(key_size);
-            PrivateKey prk = rsa.privateKey;
-            PublicKey puk = rsa.publicKey;
-            keyMap.put(PRIVATE_KEY, prk);
-            keyMap.put(PUBLIC_KEY, puk);
+            // 再转PEM类
+            return rsa.ToPEM(false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return keyMap;
     }
 }

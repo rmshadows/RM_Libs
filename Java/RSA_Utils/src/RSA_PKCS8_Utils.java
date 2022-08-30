@@ -17,8 +17,8 @@ public class RSA_PKCS8_Utils {
 //    public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
     public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
-    private static final String PUBLIC_KEY = "PUK";
-    private static final String PRIVATE_KEY = "PRK";
+    public static final String PUBLIC_KEY = "PUK";
+    public static final String PRIVATE_KEY = "PRK";
 
     /**
      * 用私钥对信息生成数字签名
@@ -151,7 +151,7 @@ public class RSA_PKCS8_Utils {
      * @param keyMap
      * @return Base64后的密钥
      */
-    public static String getPrivateKey(Map<String, Object> keyMap) {
+    public static String getBase64PrivateKey(Map<String, Object> keyMap) {
         Key key = (Key) keyMap.get(PRIVATE_KEY);
         return RSA_Tools.bytes2base64(key.getEncoded());
     }
@@ -162,9 +162,28 @@ public class RSA_PKCS8_Utils {
      * @param keyMap
      * @return
      */
-    public static String getPublicKey(Map<String, Object> keyMap){
+    public static String getBase64PublicKey(Map<String, Object> keyMap){
         Key key = (Key) keyMap.get(PUBLIC_KEY);
         return RSA_Tools.bytes2base64(key.getEncoded());
+    }
+
+    /**
+     * 取得私钥
+     *
+     * @param keyMap
+     * @return Base64后的密钥
+     */
+    public static PrivateKey getPrivateKey(Map<String, Object> keyMap) {
+        return (PrivateKey) keyMap.get(PRIVATE_KEY);
+    }
+
+    /**
+     * 取得公钥
+     * @param keyMap
+     * @return PublicKey
+     */
+    public static PublicKey getPublicKey(Map<String, Object> keyMap){
+        return (PublicKey)keyMap.get(PUBLIC_KEY);
     }
 
     /**

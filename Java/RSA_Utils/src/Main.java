@@ -1,3 +1,5 @@
+import com.github.xiangyuecn.rsajava.RSA_PEM;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
@@ -11,8 +13,8 @@ public class Main {
 //        loadPKCS8_key();
 //        PKCS8_Test();
         // PKCS1测试
-        savePKCS1_RSA();
-//        loadPKCS1_key();
+//        savePKCS1_RSA();
+        loadPKCS1_key();
 
 
     }
@@ -41,11 +43,9 @@ public class Main {
     }
 
     static void savePKCS1_RSA(){
-        Map<String, Object> rsa = RSA_PKCS1_Utils.generatePKCS1_RSAKey(512);
-        String prk = RSA_PKCS1_Utils.getPrivateKey(rsa);
-        String puk = RSA_PKCS1_Utils.getPublicKey(rsa);
-        RSA_PKCS8_Utils.savePKCS8_RSA_Key(prk, new File("test.pem"), true);
-        RSA_PKCS8_Utils.savePKCS8_RSA_Key(puk, new File("test.pub"), false);
+        RSA_PEM rp = RSA_PKCS1_Utils.generatePKCS1_RSAKey(512);
+        RSA_PKCS1_Utils.savePKCS1_RSA_Key(rp, new File("test.pem"), true);
+        RSA_PKCS1_Utils.savePKCS1_RSA_Key(rp, new File("test.pub"), false);
     }
     static void PKCS8_Test() throws UnsupportedEncodingException {
         PrivateKey r = RSA_PKCS8_Utils.loadPKCS8_PRK(new File("test.pem"));
@@ -74,8 +74,15 @@ public class Main {
 
     static void savePKCS8_RSA(){
         Map<String, Object> rsa = RSA_PKCS8_Utils.generatePKCS8_RSAKey(512);
-        String prk = RSA_PKCS8_Utils.getPrivateKey(rsa);
-        String puk = RSA_PKCS8_Utils.getPublicKey(rsa);
+        String prk = RSA_PKCS8_Utils.getBase64PrivateKey(rsa);
+        String puk = RSA_PKCS8_Utils.getBase64PublicKey(rsa);
+        RSA_PKCS8_Utils.savePKCS8_RSA_Key(prk, new File("test.pem"), true);
+        RSA_PKCS8_Utils.savePKCS8_RSA_Key(puk, new File("test.pub"), false);
+    }
+
+    static void savePKCS8_RSA_as_PKCS1(){
+        Map<String, Object> rsa = RSA_PKCS8_Utils.generatePKCS8_RSAKey(512);
+        RSA_Tools.PKCS8_2_PKCS1(RSA_PKCS8_Utils.getBase64PrivateKey(rsa), RSA_PKCS8_Utils.getBase64PublicKey(rsa));
         RSA_PKCS8_Utils.savePKCS8_RSA_Key(prk, new File("test.pem"), true);
         RSA_PKCS8_Utils.savePKCS8_RSA_Key(puk, new File("test.pub"), false);
     }

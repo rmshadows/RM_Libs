@@ -1,7 +1,15 @@
+import com.github.xiangyuecn.rsajava.RSA_PEM;
+
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RSA_Tools {
     public static final String PKCS1_PRK_HEADER = "-----BEGIN RSA PRIVATE KEY-----";
@@ -88,8 +96,20 @@ public class RSA_Tools {
         return buffer;
     }
 
+    public static Map<String, Object> PKCS1_2_PKCS8(RSA_PEM pem){
+        Map<String, Object> keys = new HashMap<>(2);
+        try {
+            keys.put(RSA_PKCS8_Utils.PRIVATE_KEY, pem.getRSAPrivateKey());
+            keys.put(RSA_PKCS8_Utils.PUBLIC_KEY, pem.getRSAPublicKey());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return keys;
+    }
 
-    public static void PKCS8_2_PKCS1(){
-
+    public static RSA_PEM PKCS8_2_PKCS1(PrivateKey prk, PublicKey puk){
+        RSAPrivateKey rprk = (RSAPrivateKey) prk;
+        RSAPublicKey rpuk = (RSAPublicKey) puk;
+        return new RSA_PEM(rpuk, rprk);
     }
 }

@@ -192,17 +192,7 @@ public class RSA_PEM {
 			}
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	/**
 	 * 用PEM格式密钥对创建RSA，支持PKCS#1、PKCS#8格式的PEM
@@ -355,24 +345,7 @@ public class RSA_PEM {
 			idxO[0]=idx;
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	/***
 	 * 将RSA中的密钥对转换成PEM PKCS#8格式
@@ -563,26 +536,7 @@ public class RSA_PEM {
 		}
 		return str.toString();
 	}
-	
-	
-	
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	/***
 	 * 将XML格式密钥转成PEM，支持公钥xml、私钥xml
