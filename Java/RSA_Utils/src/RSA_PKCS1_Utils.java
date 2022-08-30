@@ -22,7 +22,7 @@ public class RSA_PKCS1_Utils {
     }
 
     /**
-     * 加载公钥
+     * 加载PKCS1公钥
      * @param f 公钥文件
      * @return
      */

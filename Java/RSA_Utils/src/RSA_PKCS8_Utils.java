@@ -146,8 +146,7 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 取得私钥
-     *
+     * 取得Base64后的私钥
      * @param keyMap
      * @return Base64后的密钥
      */
@@ -157,8 +156,7 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 取得公钥
-     *
+     * 取得Base64后的公钥
      * @param keyMap
      * @return
      */
@@ -169,7 +167,6 @@ public class RSA_PKCS8_Utils {
 
     /**
      * 取得私钥
-     *
      * @param keyMap
      * @return Base64后的密钥
      */
@@ -187,7 +184,7 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 加载私钥
+     * 加载PKCS8私钥
      * @param f 私钥文件
      * @return 私钥
      */
@@ -212,7 +209,7 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 加载公钥
+     * 加载PKCS8公钥
      * https://github.com/wustrive2008/aes-rsa-java/blob/master/src/main/java/com/wustrive/aesrsa/util/RSA.java
      * @param f 公钥文件
      * @return
@@ -238,7 +235,7 @@ public class RSA_PKCS8_Utils {
 
 
     /**
-     * 保存RSA密钥
+     * 保存PKCS8 RSA密钥
      * @param Base64_RSA_Key Base64编码后的密钥
      * @param save_path 保存路径
      * @param isPRK 是否是私钥

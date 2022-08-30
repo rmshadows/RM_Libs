@@ -6,11 +6,11 @@
 
 ## Android
 
-- RSA_Utils
+- RSA_Utils(停工)
 
 ### RSA_Utils
 
-(TODO)
+(TODO)(停工)
 
 ## Bash
 
@@ -81,7 +81,10 @@ testPrintln
 - IO_Utils——输入输出，文件读写
   - IO_Utils——文件读写
 - RSA_Utils——RSA组件
-  - RSA_Utils——RSA组件
+  - com.github.xiangyuecn.rsajava——PKCS1的依赖
+  - RSA_PKCS1_Utils——处理PKCS1的RSA组件
+  - RSA_PKCS8_Utils——处理PKCS8的RSA组件
+  - RSA_Tools——RSA公用函数
 
 ### AES_Utils
 
@@ -182,8 +185,37 @@ public class test {
 
 ### RSA_Utils
 
-- RSA_Utils
-  - ``
+- `com.github.xiangyuecn.rsajava`
+  - 处理PKCS1的依赖，感谢[RSA-java](https://github.com/xiangyuecn/RSA-java)项目
+- RSA_PKCS1_Utils
+  - `public static PrivateKey loadPKCS1_PRK(File f)`——加载PKCS1私钥
+  - `public static PublicKey loadPKCS1_PUK(File f)`——加载PKCS1公钥
+  - `public static void savePKCS1_RSA_Key(RSA_PEM pem, File save_path, boolean isPRK)`——保存PKCS1 RSA密钥
+  - `public static RSA_PEM generatePKCS1_RSAKey(int key_size)`——初始化PKCS1密钥
+- RSA_PKCS8_Utils
+  - `public static String sign(byte[] data, PrivateKey privateKey)`——用私钥对信息生成数字签名
+  - `public static boolean verify(byte[] data, PublicKey publicKey, String sign) `——校验数字签名
+  - `public static byte[] decryptByPrivateKey(byte[] data, PrivateKey privateKey)`——用私钥解密
+  - `public static byte[] decryptByPublicKey(byte[] data, PublicKey publicKey)`——用公钥解密
+  - `public static byte[] encryptByPublicKey(byte[] data, PublicKey publicKey)`——用公钥加密
+  - `public static byte[] encryptByPrivateKey(byte[] data, PrivateKey privateKey)`——用私钥加密
+  - `public static String getBase64PrivateKey(Map<String, Object> keyMap)`——取得Base64后的私钥
+  - `public static String getBase64PublicKey(Map<String, Object> keyMap)`——取得Base64后的公钥
+  - `public static PrivateKey getPrivateKey(Map<String, Object> keyMap)`——取得私钥
+  - `public static PublicKey getPublicKey(Map<String, Object> keyMap)`——取得公钥
+  - `public static PrivateKey loadPKCS8_PRK(File f)`——加载PKCS8私钥
+  - `public static PublicKey loadPKCS8_PUK(File f)`——加载PKCS8公钥
+  - `public static void savePKCS8_RSA_Key(String Base64_RSA_Key, File save_path, boolean isPRK)`——保存PKCS8 RSA密钥
+  - `public static Map<String, Object> generatePKCS8_RSAKey(int key_size)`——初始化PKCS8密钥
+  - `public static KeyPair generatePKCS8_RSAKeyPair(int key_size, String alg)`——生成PKCS8 RSA密钥对 (直接保存Encoder密钥Python不兼容)
+  - `public static Map<String, Object> loadPKCS1_RSA_Key_as_PKCS8(File prk, File puk)`——直接读取PKCS1密钥并转为PKCS8密钥使用
+- RSA_Tools
+  - `public static byte[] readBytesUsingBufferedInputStream(File f)`——读取二进制文件
+  - `public static void writeBytesUsingBufferedOutputStream(File f, byte[] data)`——写入二进制文件
+  - `public static String bytes2base64(byte[] data)`——base64加密
+  - `public static byte[] base642bytes(String data)`——base64解密
+  - `public static Map<String, Object> PKCS1_2_PKCS8(RSA_PEM pem)`——PKCS1转PKCS8
+  - `public static RSA_PEM PKCS8_2_PKCS1(PrivateKey prk, PublicKey puk)`——PKCS8 转 PKCS1
 
 ## Python
 
@@ -405,6 +437,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2022.8.31——0.0.6
+  - 更新了Java的RSA模块，支持PKCS1(已集成第三方依赖到项目中)和PKCS8
 - 2022.08.19——0.0.5
   - Python添加了二维码模块、PDF模块、图像处理模块、Excel模块、网络相关模块
 - 2022.08.18——0.0.4
