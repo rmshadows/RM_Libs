@@ -96,6 +96,11 @@ public class RSA_Tools {
         return buffer;
     }
 
+    /**
+     * PKCS1转PKCS8
+     * @param pem
+     * @return
+     */
     public static Map<String, Object> PKCS1_2_PKCS8(RSA_PEM pem){
         Map<String, Object> keys = new HashMap<>(2);
         try {
@@ -107,6 +112,12 @@ public class RSA_Tools {
         return keys;
     }
 
+    /**
+     * PKCS8 转 PKCS1
+     * @param prk
+     * @param puk
+     * @return
+     */
     public static RSA_PEM PKCS8_2_PKCS1(PrivateKey prk, PublicKey puk){
         RSAPrivateKey rprk = (RSAPrivateKey) prk;
         RSAPublicKey rpuk = (RSAPublicKey) puk;

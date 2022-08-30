@@ -300,4 +300,17 @@ public class RSA_PKCS8_Utils {
         keyPairGen.initialize(key_size, new SecureRandom());
         return keyPairGen.generateKeyPair();
     }
+
+    /**
+     * 直接读取PKCS1密钥并转为PKCS8密钥使用
+     * @param prk 私钥文件
+     * @param puk 公钥文件
+     * @return Map
+     */
+    public static Map<String, Object> loadPKCS1_RSA_Key_as_PKCS8(File prk, File puk){
+        Map<String,Object> keyMap = new HashMap<String, Object>(2);
+        keyMap.put(PRIVATE_KEY, RSA_PKCS1_Utils.loadPKCS1_PRK(prk));
+        keyMap.put(PUBLIC_KEY, RSA_PKCS1_Utils.loadPKCS1_PUK(puk));
+        return keyMap;
+    }
 }
