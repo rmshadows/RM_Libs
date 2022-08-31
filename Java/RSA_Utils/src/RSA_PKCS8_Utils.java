@@ -26,15 +26,22 @@ public class RSA_PKCS8_Utils {
      *            加密数据
      * @param privateKey
      *            私钥
+     * @param HexString_or_Base64 输出Hex或者Base64
      * @return
      */
-    public static String sign(byte[] data, PrivateKey privateKey){
+    public static String sign(byte[] data, PrivateKey privateKey, boolean HexString_or_Base64){
         try {
             // 用私钥对信息生成数字签名
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
             signature.initSign(privateKey);
             signature.update(data);
-            return RSA_Tools.bytes2base64(signature.sign());
+            if (HexString_or_Base64){
+                // Hex
+                return RSA_Tools.bytes2hex(signature.sign());
+            }else {
+                // Base64
+                return RSA_Tools.bytes2base64(signature.sign());
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -43,21 +50,25 @@ public class RSA_PKCS8_Utils {
 
     /**
      * 校验数字签名
-     * @param data
-     *            加密数据
-     * @param publicKey
-     *            公钥
-     * @param sign
-     *            数字签名(注意，是sign返回的Base64签名)
+     * @param data 加密数据
+     * @param publicKey 公钥
+     * @param sign 数字签名(注意，是sign返回的Base64签名)
+     * @param HexString_or_Base64 输入Hex或者Base64
      * @return 校验成功返回true 失败返回false
      */
-    public static boolean verify(byte[] data, PublicKey publicKey, String sign) {
+    public static boolean verify(byte[] data, PublicKey publicKey, String sign, boolean HexString_or_Base64) {
         try {
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
             signature.initVerify(publicKey);
             signature.update(data);
             // 验证签名是否正常
-            return signature.verify(RSA_Tools.base642bytes(sign));
+            if (HexString_or_Base64){
+                // Hex
+                return signature.verify(RSA_Tools.hex2bytes(sign));
+            }else {
+                // Base64
+                return signature.verify(RSA_Tools.base642bytes(sign));
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -65,7 +76,7 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 解密<br>
+     * 解密
      * 用私钥解密
      * @param data
      * @param privateKey
@@ -85,7 +96,8 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 解密<br>
+     * 解密
+     * @deprecated
      * 用公钥解密
      * @param data
      * @param publicKey
@@ -125,9 +137,9 @@ public class RSA_PKCS8_Utils {
     }
 
     /**
-     * 加密<br>
+     * 加密
+     * @deprecated
      * 用私钥加密
-     *
      * @param data
      * @param privateKey
      * @return
@@ -283,6 +295,7 @@ public class RSA_PKCS8_Utils {
      * @param key_size 密钥长度
      * @param alg 算法 默认RSA 可为null
      * @return KeyPair
+     * @deprecated 弃用的
      */
     public static KeyPair generatePKCS8_RSAKeyPair(int key_size, String alg) {
         if (Objects.equals(alg, "") || alg == null){

@@ -1,5 +1,6 @@
 import com.github.xiangyuecn.rsajava.RSA_PEM;
 
+import javax.tools.Tool;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
@@ -9,17 +10,8 @@ import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        Map<String, Object> keys = RSA_PKCS8_Utils.loadPKCS1_RSA_Key_as_PKCS8(new File("test.pem"), new File("test.pub"));
-        PrivateKey prk = RSA_PKCS8_Utils.getPrivateKey(keys);
-        PublicKey puk = RSA_PKCS8_Utils.getPublicKey(keys);
-        String str = "妳好";
-        byte[] strb = str.getBytes(RSA_Tools.CHARSET);
-        String signed = RSA_PKCS8_Utils.sign(strb, prk);
-        System.out.println("signed = " + signed);
-
-
         // 仅测试Java
-//        RSA_Utils_Test();
+        RSA_Utils_Test();
         // PKCS8测试
 //        savePKCS8_RSA();
 //        loadPKCS8_key();
@@ -85,9 +77,9 @@ public class Main {
         String e;
         byte[] f;
         // 签名测试
-        e = RSA_PKCS8_Utils.sign(todo, r);
+        e = RSA_PKCS8_Utils.sign(todo, r, false);
         System.out.println(e);
-        boolean re = RSA_PKCS8_Utils.verify("待加密".getBytes(RSA_Tools.CHARSET), u, e);
+        boolean re = RSA_PKCS8_Utils.verify("待加密".getBytes(RSA_Tools.CHARSET), u, e, false);
         System.out.println(re);
         // 加解密
         f = RSA_PKCS8_Utils.encryptByPrivateKey(todo, r);
@@ -115,9 +107,9 @@ public class Main {
         String e;
         byte[] f;
         // 签名测试
-        e = RSA_PKCS8_Utils.sign(todo, r);
+        e = RSA_PKCS8_Utils.sign(todo, r, false);
         System.out.println(e);
-        boolean re = RSA_PKCS8_Utils.verify("待加密".getBytes(RSA_Tools.CHARSET), u, e);
+        boolean re = RSA_PKCS8_Utils.verify("待加密".getBytes(RSA_Tools.CHARSET), u, e, false);
         System.out.println(re);
         // 加解密
         f = RSA_PKCS8_Utils.encryptByPrivateKey(todo, r);

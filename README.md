@@ -193,8 +193,8 @@ public class test {
   - `public static void savePKCS1_RSA_Key(RSA_PEM pem, File save_path, boolean isPRK)`——保存PKCS1 RSA密钥
   - `public static RSA_PEM generatePKCS1_RSAKey(int key_size)`——初始化PKCS1密钥
 - RSA_PKCS8_Utils
-  - `public static String sign(byte[] data, PrivateKey privateKey)`——用私钥对信息生成数字签名
-  - `public static boolean verify(byte[] data, PublicKey publicKey, String sign) `——校验数字签名
+  - `public static String sign(byte[] data, PrivateKey privateKey, boolean HexString_or_Base64)`——用私钥对信息生成数字签名
+  - `public static boolean verify(byte[] data, PublicKey publicKey, String sign, boolean HexString_or_Base64) `——校验数字签名
   - `public static byte[] decryptByPrivateKey(byte[] data, PrivateKey privateKey)`——用私钥解密
   - `public static byte[] decryptByPublicKey(byte[] data, PublicKey publicKey)`——用公钥解密
   - `public static byte[] encryptByPublicKey(byte[] data, PublicKey publicKey)`——用公钥加密
@@ -214,6 +214,8 @@ public class test {
   - `public static void writeBytesUsingBufferedOutputStream(File f, byte[] data)`——写入二进制文件
   - `public static String bytes2base64(byte[] data)`——base64加密
   - `public static byte[] base642bytes(String data)`——base64解密
+  - `public static byte[] hex2bytes(String inputHexString)`——十六进制字符串转Byte数组
+  - `public static String bytes2hex(byte[] b)`——Byte数组转十六进制字符串
   - `public static Map<String, Object> PKCS1_2_PKCS8(RSA_PEM pem)`——PKCS1转PKCS8
   - `public static RSA_PEM PKCS8_2_PKCS1(PrivateKey prk, PublicKey puk)`——PKCS8 转 PKCS1
 

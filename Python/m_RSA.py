@@ -12,7 +12,7 @@ import os
 import m_System
 
 WINDOWS = (os.sep == "\\")
-
+CHARSET="UTF-8"
 
 def loadPRK(rsa_private_key_path):
     """
@@ -57,7 +57,7 @@ def loadPUK(rsa_public_key_path):
         print("公钥加载完毕")
 
 
-def sign_msg(prk, msg, alg='SHA-256'):
+def sign_msg(prk, msg:str, alg='SHA-256'):
     """
     私钥签名 用私钥签名msg信息
     Args:
@@ -68,7 +68,7 @@ def sign_msg(prk, msg, alg='SHA-256'):
     Returns:
         bytes: 签名后的数据
     """
-    message = msg.encode('utf8')
+    message = msg.encode(CHARSET)
     # 下面等效
     # hash = rsa.compute_hash(message, 'SHA-1')
     # print(hash)
@@ -76,7 +76,7 @@ def sign_msg(prk, msg, alg='SHA-256'):
     return rsa.sign(message, prk, alg)
 
 
-def verify_msg(puk, sig_msg, msg):
+def verify_msg(puk, sig_msg:bytes, msg:str):
     """
     公钥验证签名, 返回是否验证
     Args:
@@ -87,7 +87,7 @@ def verify_msg(puk, sig_msg, msg):
     Returns:
         boolean
     """
-    message = msg.encode('utf8')
+    message = msg.encode(CHARSET)
     try:
         rsa.verify(message, sig_msg, puk)
         print("Verification success.")
@@ -97,21 +97,20 @@ def verify_msg(puk, sig_msg, msg):
         return False
 
 
-def encrypt_msg(puk, msg):
+def encrypt_msg(puk, msg:bytes):
     """
     加密信息, 使用公钥
     Args:
         puk: 公钥
-        msg: 明文string
+        msg: 明文
 
     Returns:
         加密后的数据byte
     """
-    message = msg.encode('utf8')
-    return rsa.encrypt(message, puk)
+    return rsa.encrypt(msg, puk)
 
 
-def decrypt_msg(prk, crypto_msg):
+def decrypt_msg(prk, crypto_msg:bytes):
     """
     解密信息，使用私钥
     Args:
@@ -122,7 +121,7 @@ def decrypt_msg(prk, crypto_msg):
 
     """
     message = rsa.decrypt(crypto_msg, prk)
-    return message.decode('utf-8')
+    return message
 
 
 def generateRSA(key_name, key_path=".", key_length=2048):
@@ -152,7 +151,7 @@ def __testRSA():
     sign = sign_msg(prk, "妳好")
     print("私钥签名信息：{}".format(sign.hex().upper()))
     print("公钥验证信息：{}".format(verify_msg(puk, sign, "妳好")))
-    hex = encrypt_msg(puk, "妳好").hex().upper()
+    hex = encrypt_msg(puk, bytes("妳好", CHARSET)).hex().upper()
     print("公钥加密信息：{}".format(hex))
     print("私钥解密信息：{}".format(decrypt_msg(prk, bytes.fromhex(hex))))
     # 删除RSA密钥
@@ -161,20 +160,7 @@ def __testRSA():
 
 
 if __name__ == '__main__':
-    RSA_NAME = "test"
-    prk = loadPRK(RSA_NAME + ".pem")
-    puk = loadPUK(RSA_NAME + ".pub")
-    print(prk)
-    print(puk)
-    sign = sign_msg(prk, "妳好")
-    print("私钥签名信息：{}".format(sign.hex().upper()))
-    print("公钥验证信息：{}".format(verify_msg(puk, sign, "妳好")))
-    # hex = encrypt_msg(puk, "妳好").hex().upper()
-    # print("公钥加密信息：{}".format(hex))
-    # print("私钥解密信息：{}".format(decrypt_msg(prk, bytes.fromhex(hex))))
-    # os.remove(RSA_NAME + ".pem")
-    # os.remove(RSA_NAME + ".pub")
-    
+    __testRSA()
 
 
 
