@@ -140,12 +140,12 @@ def generateRSA(key_name, key_path=".", key_length=2048):
         f.write(privkey.save_pkcs1())
 
 
-if __name__ == '__main__':
+def __testRSA():
     RSA_NAME = "test"
     # 生成RSA密钥
     generateRSA(RSA_NAME, key_length=512)
-    prk = loadPRK(RSA_NAME+".pem")
-    puk = loadPUK(RSA_NAME+".pub")
+    prk = loadPRK(RSA_NAME + ".pem")
+    puk = loadPUK(RSA_NAME + ".pub")
     print(prk)
     print(puk)
     # TEST
@@ -156,8 +156,24 @@ if __name__ == '__main__':
     print("公钥加密信息：{}".format(hex))
     print("私钥解密信息：{}".format(decrypt_msg(prk, bytes.fromhex(hex))))
     # 删除RSA密钥
-    os.remove(RSA_NAME+".pem")
-    os.remove(RSA_NAME+".pub")
+    os.remove(RSA_NAME + ".pem")
+    os.remove(RSA_NAME + ".pub")
+
+
+if __name__ == '__main__':
+    RSA_NAME = "test"
+    prk = loadPRK(RSA_NAME + ".pem")
+    puk = loadPUK(RSA_NAME + ".pub")
+    print(prk)
+    print(puk)
+    sign = sign_msg(prk, "妳好")
+    print("私钥签名信息：{}".format(sign.hex().upper()))
+    print("公钥验证信息：{}".format(verify_msg(puk, sign, "妳好")))
+    # hex = encrypt_msg(puk, "妳好").hex().upper()
+    # print("公钥加密信息：{}".format(hex))
+    # print("私钥解密信息：{}".format(decrypt_msg(prk, bytes.fromhex(hex))))
+    # os.remove(RSA_NAME + ".pem")
+    # os.remove(RSA_NAME + ".pub")
     
 
 

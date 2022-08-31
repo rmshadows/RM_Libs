@@ -9,6 +9,31 @@ import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        Map<String, Object> keys = RSA_PKCS8_Utils.loadPKCS1_RSA_Key_as_PKCS8(new File("test.pem"), new File("test.pub"));
+        PrivateKey prk = RSA_PKCS8_Utils.getPrivateKey(keys);
+        PublicKey puk = RSA_PKCS8_Utils.getPublicKey(keys);
+        String str = "妳好";
+        byte[] strb = str.getBytes(RSA_Tools.CHARSET);
+        String signed = RSA_PKCS8_Utils.sign(strb, prk);
+        System.out.println("signed = " + signed);
+
+
+        // 仅测试Java
+//        RSA_Utils_Test();
+        // PKCS8测试
+//        savePKCS8_RSA();
+//        loadPKCS8_key();
+//        PKCS8_Test();
+
+        // PKCS1测试
+//        savePKCS1_RSA();
+//        loadPKCS1_key();
+
+        // PKCS8转PKCS8测试
+//        savePKCS8_RSA_as_PKCS1();
+    }
+
+    static void RSA_Utils_Test() throws UnsupportedEncodingException { // 自我测试
         // RSA_Utils总测试
         // 先生成密钥分别保存
         RSA_PEM rsa_pem = RSA_PKCS1_Utils.generatePKCS1_RSAKey(2048);
@@ -51,19 +76,6 @@ public class Main {
         new File("pkcs1.pub").delete();
         new File("pkcs8.pem").delete();
         new File("pkcs8.pub").delete();
-
-
-        // PKCS8测试
-//        savePKCS8_RSA();
-//        loadPKCS8_key();
-//        PKCS8_Test();
-
-        // PKCS1测试
-//        savePKCS1_RSA();
-//        loadPKCS1_key();
-
-        // PKCS8转PKCS8测试
-//        savePKCS8_RSA_as_PKCS1();
     }
 
     static void PKCS1_Test() throws UnsupportedEncodingException {
