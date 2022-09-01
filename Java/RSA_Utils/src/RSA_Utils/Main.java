@@ -60,6 +60,9 @@ public class Main {
         result = Objects.equals(RSA_Tools.bytes2base64(pkcs8_puk_f.getEncoded()), RSA_Tools.bytes2base64(pkcs1_puk.getEncoded()));
         System.out.println(String.format("PKCS8转PKCS1 与 PKCS1加载的是否相同：%b", result));
 
+        String wrong = "MAy85qZrzJ5N9gWtpQWqnN28HwcoH7g+BdHRHbqI2D9GbacVa3cXlS91ieO83xiioGJxsIwSAgtMgHt5f+C6cXYwk/He33vUiy/8QZw6pjycAyS/mlKNopfEyQzHAjqI4yGFOJdY9mHhwTFNrSXeV0/UuB2ldWi4WFs1KG3tSTjy9ofWurB3po+yRxPnOlwruABtiPxWp3//hOP1nUfZpJDGSrgDVOAtWFtR2kSUvIOUDvAfoQSoZ9FVeKz4Adq/N0OwloPVlUP6mLAi2JqM5Cqxbn/bzVLVN/lWqvEY8SYCoa4CYmUrcbDweg3z9898IgoKsy8iedXYisKV3cVe4Q==";
+        RSA_PKCS8_Utils.decryptByPrivateKey(RSA_Tools.base642bytes(wrong), pkcs8_prk);
+
         // 加密测试 任意私钥加密可用任意公钥解密
         String encrypt = RSA_Tools.bytes2base64(RSA_PKCS8_Utils.encryptByPrivateKey("妳好2022".getBytes(RSA_Tools.CHARSET), pkcs1_prk));
         System.out.println("encrypt = " + encrypt);
