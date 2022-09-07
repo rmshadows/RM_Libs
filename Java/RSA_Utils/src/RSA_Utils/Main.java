@@ -4,15 +4,19 @@ import com.github.xiangyuecn.rsajava.RSA_PEM;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.interfaces.RSAKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Map;
 import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         // 仅测试Java
-        RSA_Utils_Test();
+//        RSA_Utils_Test();
         // PKCS8测试
 //        savePKCS8_RSA();
 //        loadPKCS8_key();
@@ -25,6 +29,7 @@ public class Main {
         // PKCS8转PKCS8测试
 //        savePKCS8_RSA_as_PKCS1();
     }
+
 
     static void RSA_Utils_Test() throws UnsupportedEncodingException { // 自我测试
         // RSA_Utils总测试

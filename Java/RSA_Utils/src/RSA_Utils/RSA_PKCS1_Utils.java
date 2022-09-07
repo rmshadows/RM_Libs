@@ -58,6 +58,34 @@ public class RSA_PKCS1_Utils {
         }
     }
 
+    /**
+     * 返回密钥文本
+     * @param pem PEM类
+     * @param isPRK 是否是私钥
+     * @param pkcs1 是否是pkcs1格式，否则返回PKCS8格式
+     * @return 字符串文本
+     */
+    public static String pem2String(RSA_PEM pem, boolean isPRK, boolean pkcs1){
+        try {
+            if (isPRK){
+                if (pkcs1){
+                    return pem.ToPEM_PKCS1(false);
+                }else {
+                    return pem.ToPEM_PKCS8(false);
+                }
+            }else {
+                if (pkcs1){
+                    return pem.ToPEM_PKCS1(true);
+                }else {
+                    return pem.ToPEM_PKCS8(true);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     /**
      * 初始化PKCS1密钥

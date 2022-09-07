@@ -1,5 +1,7 @@
 package RSA_Utils;
 
+import com.github.xiangyuecn.rsajava.RSA_PEM;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
@@ -7,6 +9,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;

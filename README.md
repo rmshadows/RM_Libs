@@ -191,6 +191,7 @@ public class test {
   - `public static PrivateKey loadPKCS1_PRK(File f)`——加载PKCS1私钥
   - `public static PublicKey loadPKCS1_PUK(File f)`——加载PKCS1公钥
   - `public static void savePKCS1_RSA_Key(RSA_PEM pem, File save_path, boolean isPRK)`——保存PKCS1 RSA密钥
+  - `public static String pem2String(RSA_PEM pem, boolean isPRK, boolean pkcs1)`——返回密钥文本
   - `public static RSA_PEM generatePKCS1_RSAKey(int key_size)`——初始化PKCS1密钥
 - RSA_PKCS8_Utils
   - `public static String sign(byte[] data, PrivateKey privateKey, boolean HexString_or_Base64)`——用私钥对信息生成数字签名
