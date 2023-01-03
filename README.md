@@ -417,6 +417,11 @@ if __name__ == '__main__':
 - `cpu_count()`——返回CPU核心数
 - `isBomExist(text_file_path)`——检查文件（UTF-8文本文档）头部是否包含有UTF-BOM
 - `removeBom(filepath)`——移除UTF-8文件的BOM字节
+- `fdExisted(file_or_dir, expect=0)`——判断文件、目录是否以期待的方式存在(0:不做约束 1:文件 2:文件夹)
+- `fileOrDirectory(file_or_dir)`——判断文件还是目录（-1:other (可能不存在) 1:file 2:dir）
+- `rmFD(file_or_dir, expect=0)`——删除文件
+- `copyFD(src, dst)`——复制文件或者文件夹
+- `moveFD(src, dst)`——移动文件或者文件夹
 - `getSuffixFile(suffix, directory=".")`——返回文件夹下的带后缀的文件
 - `def averageSplitList(list2split:list, n:int)`——自动平均分配列表
 - `def splitListInto(list2split:list, n:int)`——将列表强制分为n个
@@ -440,7 +445,9 @@ if __name__ == '__main__':
 
 ## 更新日志
 
-- 2022.8.31——0.0.6
+- 2023.01.03——0.0.7
+  - Python更新了System模块
+- 2022.08.31——0.0.6
   - 更新了Java的RSA模块，支持PKCS1(已集成第三方依赖到项目中)和PKCS8
 - 2022.08.19——0.0.5
   - Python添加了二维码模块、PDF模块、图像处理模块、Excel模块、网络相关模块
