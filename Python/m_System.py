@@ -5,22 +5,29 @@
 import multiprocessing
 import os
 import shutil
+from subprocess import Popen, PIPE
+import re
+
 
 IS_WINDOWS = os.sep == "\\"
 
 
-def execCommand(cmd, debug=False):
+def execCommand(cmd, mode=0, debug=False):
     """
     执行命令
     Args:
         cmd: str：命令
+        mode: 模式 0默认返回命令行输出:os.popen(cmd).read() 1仅返回执行结果状态:os.system()
         debug: 是否显示运行详情
     Returns:
         执行结果
     """
     r = None
     try:
-        r = os.popen(cmd).read()
+        if mode == 0:
+            r = os.popen(cmd).read()
+        elif mode == 1:
+            r = os.system(cmd)
         if debug:
             print(r)
     except Exception as e:
@@ -279,11 +286,161 @@ def splitListInto(list2split:list, n:int):
         # 算上末尾的j+k
         ls_return.append(list2split[(n - 1) * j:])
         return ls_return
+    
+
+def displaySystemInfo():
+    """
+    打印系统信息
+    Returns:
+        None
+    """
+    import wmi
+    import socket
+    if IS_WINDOWS:
+        w = wmi.WMI()
+        # 获取电脑使用者信息
+        for CS in w.Win32_ComputerSystem():
+            # print(CS)
+            try:
+                print("电脑名称: %s" % CS.Caption)
+                print("使用者: %s" % CS.UserName)
+                print("制造商: %s" % CS.Manufacturer)
+                print("系统信息: %s" % CS.SystemFamily)
+                print("工作组: %s" % CS.Workgroup)
+                print("机器型号: %s" % CS.model)
+            except Exception as e:
+                print(e)
+            print("")
+        # 获取操作系统信息
+        for OS in w.Win32_OperatingSystem():
+            # print(OS)
+            print("操作系统: %s" % OS.Caption)
+            print("语言版本: %s" % OS.MUILanguages)
+            print("系统位数: %s" % OS.OSArchitecture)
+            print("注册人: %s" % OS.RegisteredUser)
+            print("系统驱动: %s" % OS.SystemDevice)
+            print("系统目录: %s" % OS.SystemDirectory)
+            print("")
+        # 获取电脑IP和MAC信息
+        for address in w.Win32_NetworkAdapterConfiguration(ServiceName="e1dexpress"):
+            # print(address)
+            print("IP地址: %s" % address.IPAddress)
+            print("MAC地址: %s" % address.MACAddress)
+            print("网络描述: %s" % address.Description)
+            print("")
+        # 获取电脑CPU信息
+        for processor in w.Win32_Processor():
+            # print(processor)
+            print("CPU型号: %s" % processor.Name.strip())
+            print("CPU核数: %s" % processor.NumberOfCores)
+            print("")
+        # 获取BIOS信息
+        for BIOS in w.Win32_BIOS():
+            # print(BIOS)
+            print("使用日期: %s" % BIOS.Description)
+            print("主板型号: %s" % BIOS.SerialNumber)
+            print("当前语言: %s" % BIOS.CurrentLanguage)
+            print("")
+        # 获取内存信息
+        for memModule in w.Win32_PhysicalMemory():
+            totalMemSize = int(memModule.Capacity)
+            print("内存厂商: %s" % memModule.Manufacturer)
+            print("内存型号: %s" % memModule.PartNumber)
+            print("内存大小: %.2fGB" % (totalMemSize / 1024 ** 3))
+            print("")
+        # 获取磁盘信息
+        for disk in w.Win32_DiskDrive():
+            diskSize = int(disk.size)
+            print("磁盘名称: %s" % disk.Caption)
+            print("硬盘型号: %s" % disk.Model)
+            print("磁盘大小: %.2fGB" % (diskSize / 1024 ** 3))
+        # 获取显卡信息
+        for xk in w.Win32_VideoController():
+            print("显卡名称: %s" % xk.name)
+            print("")
+        # 获取计算机名称和IP
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        print("计算机名称: %s" % hostname)
+        print("IP地址: %s" % ip)
+    else:
+        # 获取主机名,也可以使用 uname -n 命令获取
+        hostname = Popen(["hostname"], stdout=PIPE)
+        hostname = hostname.stdout.read().decode().strip()
+        print("%s: %s" % ("主机名", hostname))
+        # 获取操作系统版本
+        RELEASE_FILE = execCommand("ls /etc/*-release").replace("\n", "")
+        with open(RELEASE_FILE) as f:
+            osversion = f.read().strip()
+        print("%s:\n%s\n" % ("系统版本", osversion))
+        # 获取操作系统内核版本
+        oscoreversion = Popen(["uname", "-r"], stdout=PIPE)
+        oscoreversion = oscoreversion.stdout.read().decode().strip()
+        print("%s: %s" % ("系统内核版本", oscoreversion))
+        # 获取CPU相关信息,如果存在多种不同CPU，那么CPU型号统计的为最后一种型号,这种情况少见
+        corenumber = []
+        with open("/proc/cpuinfo") as cpuinfo:
+            for i in cpuinfo:
+                if i.startswith("processor"):
+                    corenumber.append(i.strip())
+                if i.startswith("model name"):
+                    cpumode = i.split(":")[1].strip()
+        print("%s: %s" % ("CPU生厂商", cpumode)),
+        print("%s: %s" % ("CPU总核心数", len(corenumber)))
+        # 获取内存相关信息
+        with open("/proc/meminfo") as meminfo:
+            for i in meminfo:
+                if i.startswith("MemTotal"):
+                    totalmem = i.split(":")[1].strip()
+        print("%s: %s" % ("总内存", totalmem))
+        # 获取服务器硬件相关信息
+        biosinfo = Popen(["dmidecode", "-t", "system"], stdout=PIPE)
+        biosinfo = biosinfo.stdout.readlines()
+        manufacturer = ""
+        serialnumber = ""
+        for i in biosinfo:
+            i = i.decode()
+            if "Manufacturer" in i:
+                manufacturer = i.split(":")[1].strip()
+            if "Serial Number" in i:
+                serialnumber = i.split(":")[1].strip()
+        print("%s: %s" % ("服务器生厂商", manufacturer))
+        print("%s: %s" % ("服务器序列号", serialnumber))
+
+        # 获取网卡信息,包括网卡名，IP地址，MAC地址
+        # 定义存储格式，以网卡名为key，mac地址和ip地址为一个列表，这个列表又为这网卡名的value
+        def add(dic, key, value):
+            dic.setdefault(key, []).append(value)
+
+        ipinfo = Popen(["ip", "addr"], stdout=PIPE)
+        ipinfo = ipinfo.stdout.readlines()
+        dict1 = {}
+        for i in ipinfo:
+            i = i.decode()
+            if re.search(r"^\d", i):
+                devname = i.split(": ")[1]
+                continue
+            if re.findall("ether", i):
+                devmac = i.split()[1]
+                add(dict1, devname, devmac)
+                continue
+            if re.findall("global", i):
+                devip = i.split()[1]
+                add(dict1, devname, devip)
+                continue
+        for i in dict1.keys():
+            if len(dict1[i]) == 1:
+                imac = dict1[i][0]
+                iip = "该网卡未获取IP(请检查网卡是否启用或联网)"
+            else:
+                imac = dict1[i][0]
+                iip = dict1[i][1]
+            print("网卡名: {}    MAC:{}    IP: {}".format(i, imac, iip))
 
 
 if __name__ == '__main__':
     print("是否是管理员：{}".format(checkAdministrator()))
-    execCommand("ls", True)
+    execCommand("ls", 0, True)
     print("CPU核心数: {}".format(cpu_count()))
     print("gitignore文件是否有UTF-8 BOM: {}".format(isBomExist("gitignore")))
     # 列出py文件

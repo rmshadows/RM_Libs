@@ -423,8 +423,9 @@ if __name__ == '__main__':
 - `copyFD(src, dst)`——复制文件或者文件夹
 - `moveFD(src, dst)`——移动文件或者文件夹
 - `getSuffixFile(suffix, directory=".")`——返回文件夹下的带后缀的文件
-- `def averageSplitList(list2split:list, n:int)`——自动平均分配列表
-- `def splitListInto(list2split:list, n:int)`——将列表强制分为n个
+- `averageSplitList(list2split:list, n:int)`——自动平均分配列表
+- `splitListInto(list2split:list, n:int)`——将列表强制分为n个
+- `displaySystemInfo()`——打印系统信息，仅Windows和Linux
 
 例:
 
@@ -443,8 +444,17 @@ if __name__ == '__main__':
 
 - `def getWebservertime(host)`——返回网络日期、时间['2022-06-23', '03:53:01']
 
+### m_Winreg
+
+>此模块Windows Only
+
+- TODO
+
 ## 更新日志
 
+- 2023.01.14——0.0.8
+  - Python更新了System模块
+  - Python正在新增Windows注册表模块
 - 2023.01.03——0.0.7
   - Python更新了System模块
 - 2022.08.31——0.0.6
