@@ -5,15 +5,36 @@
 import winreg
 
 
+def checkKey():
+    # w = winreg.EnumKey(r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
+    reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
+    print(reg)
+    subKey(reg)
+    
+
+def openReg(KEY, Path):
+    """
+    打开注册表
+    Args:
+        KEY: 前缀 winreg.HKEY_LOCAL_MACHINE
+        Path: 路径 r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+    Returns:
+        注册表类
+    """
+    return winreg.OpenKey(KEY, Path)
+
+
 def subKey(reg):
     """
     给定注册表，返回子键名称列表
-    :param reg:
-    :return:
+    Args:
+        reg: 注册表类
+    Returns:
+        子类
     """
     subKey = []
     # 获取该键的所有键值，遍历枚举
-    print("====>>subKey()<<====")
+    # print("====>>subKey()<<====")
     try:
         i = 0
         while True:
@@ -23,7 +44,7 @@ def subKey(reg):
             subKey.append(key)
             i += 1
     except Exception as e:
-        print("==={}===".format(e))
+        print("\tsubKey(): {}".format(e))
     return subKey
 
 
@@ -39,7 +60,7 @@ def hideSoftware(name, is64Bit=True, accurate=True):
     if is64Bit:
         reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
     else:
-        reg=winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall")
+        reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall")
     sk = subKey(reg)
     # 遍历
     for i in sk:
@@ -78,7 +99,8 @@ def hideSoftware(name, is64Bit=True, accurate=True):
 
 
 if __name__ == '__main__':
-    subKey("")
+    # subKey("")
+    checkKey()
 
 
 
