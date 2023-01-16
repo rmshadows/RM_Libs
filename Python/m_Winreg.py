@@ -3,6 +3,7 @@
 此模块用于Windows注册表修改
 """
 import winreg
+import os.path as op
 
 
 def checkKey():
@@ -10,14 +11,24 @@ def checkKey():
     # reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
     reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"")
     # print(reg)
-    PATH = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\1"
-    sp = splitRootPath(PATH)
-    # print(getValueEx(PATH, "SystemComponent"))
-    print(getValueEx(PATH, "SystemComponent"))
-    deleteValueEx(PATH, "SystemComponent")
-    reg = getKeyEx(PATH)
-    winreg.DeleteValue(reg, "SystemComponent")
-    print("asd")
+    PATH = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\WIC"
+    saveKeyEx(PATH, r"C:\Users\testing\Desktop\reg.txt")
+    print("====END====")
+
+
+def saveKey(key, filepath):
+    try:
+        winreg.SaveKey(key, filepath)
+    except Exception as e:
+        print("saveKey(key, filepath): {}".format(e))
+
+
+def saveKeyEx(fullpath, filepath):
+    try:
+        key = getKeyEx(fullpath)
+        winreg.SaveKey(key, filepath)
+    except Exception as e:
+        print("saveKeyEx(fullpath, filepath): {}".format(e))
 
 
 def createValue(key, subname, type, value):
@@ -192,7 +203,7 @@ def createKey(fullpath):
         print("Key Existed!")
     else:
         s = splitRootPath(fullpath)
-        winreg.CreateKey(winreg.OpenKey(s[0], r""), s[1])
+        winreg.CreateKey(winreg.OpenKey(s[0], r"", 0, winreg.KEY_ALL_ACCESS), s[1])
 
 
 def existedSubkey(key, subname):
@@ -232,7 +243,7 @@ def deleteKey(fullpath):
     """
     if existedKey(fullpath):
         s = splitRootPath(fullpath)
-        winreg.DeleteKey(winreg.OpenKey(s[0], r""), s[1])
+        winreg.DeleteKey(winreg.OpenKey(s[0], r"", 0, winreg.KEY_ALL_ACCESS), s[1])
     else:
         print("Key not existed!")
 
@@ -247,14 +258,15 @@ def existedKey(fullpath):
     """
     s = splitRootPath(fullpath)
     try:
-        winreg.OpenKey(s[0], s[1])
+        k = winreg.OpenKey(s[0], s[1])
+        k.Close()
         return True
     except Exception as e:
         print("existedKey(fullpath):{}".format(e))
         return False
 
 
-def getKey(root, Path):
+def getKey(root, Path, permission=winreg.KEY_ALL_ACCESS):
     """
     打开注册表
     Args:
@@ -263,10 +275,10 @@ def getKey(root, Path):
     Returns:
         注册表类
     """
-    return winreg.OpenKey(root, Path)
+    return winreg.OpenKey(root, Path, 0, permission)
 
 
-def getKeyEx(fullpath):
+def getKeyEx(fullpath, permission=winreg.KEY_ALL_ACCESS):
     """
     打开注册表
     Args:
@@ -275,7 +287,7 @@ def getKeyEx(fullpath):
         注册表类
     """
     s = splitRootPath(fullpath)
-    return winreg.OpenKey(s[0], s[1])
+    return winreg.OpenKey(s[0], s[1], 0, permission)
 
 
 def getSubkey(key, mode=0):
