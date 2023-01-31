@@ -6,10 +6,10 @@ import calendar
 import datetime
 import time
 
-
+#### Get day
 def getFirstAndLastDay(year, month):
     """
-    获取第一天和最后一天
+    获取某月的第一天和最后一天
     https://www.fyovo.com/6606.html
     Args:
         year: 年份
@@ -44,13 +44,15 @@ def getFirstDayofLastMonth(year, month):
         year -= 1
     else:
         month -= 1
-    res = datetime.datetime(year, month, 1) + datetime.timedelta(days=21)
+    #  + datetime.timedelta(days=21)
+    res = datetime.datetime(year, month, 1)
     return res
 
 
 def getFirstDayofNextMonth(year, month):
     """
     获取下个月的第一天
+    https://www.shuzhiduo.com/A/ke5jE41oJr/
     Args:
         year: 年
         month: 月
@@ -63,22 +65,12 @@ def getFirstDayofNextMonth(year, month):
         year += 1
     else:
         month += 1
-    res = datetime.datetime(year, month, 1) + datetime.timedelta(days=21)
+    # + datetime.timedelta(days=21)
+    res = datetime.datetime(year, month, 1)
     return res
 
 
-def timeS2Stamp(args):
-    """
-    将datetime日期格式，先timetuple()转化为struct_time格式
-    然后time.mktime转化为时间戳
-    :param args:    datetime时间格式数据
-    :return:    时间戳格式数据
-    """
-    res = time.mktime(args.timetuple())
-    return res
-
-
-#### Now
+#### Get Now
 def getDateToday():
     """
     获取今天日期 2023-01-17
@@ -88,17 +80,22 @@ def getDateToday():
     return datetime.date.today()
 
 
-def getNow(utc=False):
+def getNow(utc=False, timestamp=False):
     """
     返回当前时间
     2023-01-18 05:08:11.937176
     2023-01-17 21:09:05.977123
     Returns:
     """
+    dt = None
     if utc:
-        return datetime.datetime.utcnow()
+        dt = datetime.datetime.utcnow()
     else:
-        return datetime.datetime.now()
+        dt = datetime.datetime.now()
+    if timestamp:
+        return dt.timestamp()
+    else:
+        return dt
 
 
 def getStrTimeNow():
@@ -112,7 +109,7 @@ def getStrTimeNow():
 #### Date Calc
 def daysDalta(dateTime, Days):
     """
-    计算日期
+    计算日期，加减天数
     Args:
         dateTime:
         Days:
@@ -124,18 +121,68 @@ def daysDalta(dateTime, Days):
 
 
 #### format
+def datetime2Timestamp(args):
+    """
+    将datetime日期格式，先timetuple()转化为struct_time格式
+    然后time.mktime转化为时间戳
+    https://www.shuzhiduo.com/A/ke5jE41oJr/
+    Args:
+        args: datetime时间格式数据
+
+    Returns:
+        时间戳格式数据
+    """
+    res = time.mktime(args.timetuple())
+    return res
+
+
+def timestamp2Datetime(ts):
+    """
+    时间戳转日期时间，仅能精确到秒
+    Args:
+        ts: 时间戳
+
+    Returns:
+
+    """
+    dt = time.localtime(ts)
+    return str2Datetime(time.strftime("%Y-%m-%d %H:%M:%S", dt), 1)
+
+
 def str2Datetime(strinput, format=0, datesplit="-", timesplit=":", datetimesplit=" "):
     """
     字符串转日期时间
+%y 两位数的年份表示（00-99）
+%Y 四位数的年份表示（000-9999）
+%m 月份（01-12）
+%d 月内中的一天（0-31）
+%H 24小时制小时数（0-23）
+%I 12小时制小时数（01-12）
+%M 分钟数（00-59）
+%S 秒（00-59）
+%a 本地简化星期名称
+%A 本地完整星期名称
+%b 本地简化的月份名称
+%B 本地完整的月份名称
+%c 本地相应的日期表示和时间表示
+%j 年内的一天（001-366）
+%p 本地A.M.或P.M.的等价符
+%U 一年中的星期数（00-53）星期天为星期的开始
+%w 星期（0-6），星期天为 0，星期一为 1，以此类推。
+%W 一年中的星期数（00-53）星期一为星期的开始
+%x 本地相应的日期表示
+%X 本地相应的时间表示
+%Z 当前时区的名称
+%% %号本身
     Args:
         strinput: 字符串时间
         format: 格式0: 仅日期 2022-01-01
         1:日期+时间 2022-01-13 10:12:33
-        2: 完整的datetime:
-        其他：自定义格式
-        datesplit:
-        timesplit:
-        datetimesplit:
+        2: 完整的datetime: 2023-01-18 05:56:05.288924
+        3. 其他：自定义格式
+        datesplit: 日期分隔
+        timesplit: 时间分隔
+        datetimesplit: 日期时间分隔
 
     Returns:
 
@@ -150,8 +197,8 @@ def str2Datetime(strinput, format=0, datesplit="-", timesplit=":", datetimesplit
                                                                                        timesplit,
                                                                                        datetimesplit))
     elif format == 2:
-        # 完整datetime 2023-01-18 05:56:05.288924 TODO
-        dt = datetime.datetime.strptime(strinput, "%Y{0}%m{0}%d{2}%H{1}%M{1}%S.%p".format(datesplit,
+        # 完整datetime 2023-01-18 05:56:05.288924
+        dt = datetime.datetime.strptime(strinput, "%Y{0}%m{0}%d{2}%H{1}%M{1}%S.%f".format(datesplit,
                                                                                        timesplit,
                                                                                        datetimesplit))
     else:
@@ -203,13 +250,45 @@ def formatOutput(dateTime, format=None ,datesplit="-", timesplit=":", datetimesp
         return dateTime.strftime(format)
 
 
+#### Timer
+def delayMsecond(t):
+    """
+    精确到1ms的延迟ms定时器 1s = 1000毫秒
+    原文链接：https: // blog.csdn.net / m0_38076397 / article / details / 124751667
+    https://blog.csdn.net/qq_52689354/article/details/124886569
+    Args:
+        t: 时间
+
+    Returns:
+
+    """
+    start, end = 0, 0
+    start = time.perf_counter() * pow(10, 7)
+    while (end - start < t * pow(10, 3)):
+        end = time.perf_counter() * pow(10, 7)
+
+
 if __name__ == '__main__':
     today = getNow()
     print(today)
     a = str2Datetime("2023-01-18 05:56:05.288924", 2)
-    # a = formatOutput(a, ".", "/", "+")
+    a = formatOutput(a, None, ".", "/", "+")
     print(a)
-
+    # 测试计时器
+    for index in range(0, 50):
+        start = time.perf_counter()
+        delayMsecond(10000)
+        end = time.perf_counter()
+        dif = (end - start) * pow(10, 3)
+        print(dif)
+    # 测试时间计算
+    today = getNow()
+    lastmf = getFirstDayofLastMonth(2023, 1)
+    # print(today)
+    # print(lastmf)
+    a = today-lastmf
+    print(a)
+    print(today<lastmf)
 
 
 

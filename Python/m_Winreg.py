@@ -6,7 +6,7 @@ import winreg
 import os.path as op
 
 
-def checkKey():
+def __debug():
     # w = winreg.EnumKey(r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
     # reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
     reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"")
@@ -17,6 +17,15 @@ def checkKey():
 
 
 def saveKey(key, filepath):
+    """
+    Not available yet
+    Args:
+        key:
+        filepath:
+
+    Returns:
+
+    """
     try:
         winreg.SaveKey(key, filepath)
     except Exception as e:
@@ -24,6 +33,15 @@ def saveKey(key, filepath):
 
 
 def saveKeyEx(fullpath, filepath):
+    """
+    Not available yet
+    Args:
+        fullpath:
+        filepath:
+
+    Returns:
+
+    """
     try:
         key = getKeyEx(fullpath)
         winreg.SaveKey(key, filepath)
@@ -321,7 +339,6 @@ def getSubkey(key, mode=0):
     return subKey
 
 
-
 def hideSoftware(name, is64Bit=True, accurate=True):
     """
     to hide a software from regedit, 添加Dword SystemComponent 1
@@ -371,10 +388,9 @@ def hideSoftware(name, is64Bit=True, accurate=True):
     return False
 
 
-
 if __name__ == '__main__':
     # subKey("")
-    checkKey()
+    __debug()
 
 
 

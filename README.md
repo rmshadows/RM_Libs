@@ -227,6 +227,7 @@ public class test {
 - m_AES——AES模块
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ConfigFiles——配置文件相关操作
+- m_Datetime——时间模块
 - m_Excel——Excel相关处理
 - m_Image——图像处理相关
 - m_PDF——PDF文件处理
@@ -314,6 +315,23 @@ if __name__ == '__main__':
 - `load_JSON(json_path`——从文本文档加载JSON
 
 加载JSON配置文件和保存JSON对象到文本
+
+### m_Datetime
+
+- `getFirstAndLastDay(year, month)`——获取某月的第一天和最后一天
+- `getFirstDayofLastMonth(year, month)`——获取上个月第一天的日期，然后加21天就是22号的日期
+- `getFirstDayofNextMonth(year, month)`——获取下个月的第一天
+- `getDateToday()`——获取今天日期 2023-01-17
+- `getNow(utc=False, timestamp=False)`——返回当前时间 2023-01-18 05:08:11.937176
+- `getStrTimeNow()`——仅仅返回字符串时间 05:14:17
+- `daysDalta(dateTime, Days)`——计算日期，加减天数
+- `datetime2Timestamp(args)`——将datetime日期格式，先timetuple()转化为struct_time格式，然后time.mktime转化为时间戳
+- `timestamp2Datetime(ts)`——时间戳转日期时间，仅能精确到秒
+- `str2Datetime(strinput, format=0, datesplit="-", timesplit=":", datetimesplit=" ")`——字符串转日期时间
+- `getDate(dateTime)`——返回日期
+- `getTime(dateTime)`——返回时间
+- `formatOutput(dateTime, format=None ,datesplit="-", timesplit=":", datetimesplit=" ")`——格式化输出
+- `delayMsecond(t)`——精确到1ms的延迟ms定时器 1s = 1000毫秒
 
 ### m_Excel
 
@@ -448,10 +466,28 @@ if __name__ == '__main__':
 
 >此模块Windows Only
 
-- TODO
+- `createValue(key, subname, type, value)`——创建值
+- `deleteValue(key, value)`——删除值
+- `deleteValueEx(fullpath, value)`——删除值
+- `splitRootPath(fullpath)`——分解全路径为root和子路径
+- `getKeyInfo(reg, query)`——查询Key信息
+- `getValue(reg, valuename)`——返回值、类型
+- `getValueEx(fullpath, valuename)`——返回值、类型
+- `createSubkey(reg, subname)`——创建注册表子键
+- `createKey(fullpath)`——创建注册表键
+- `existedSubkey(key, subname)`——是否有注册表子键
+- `deleteSubkey(reg, subname)`——删除注册表子键
+- `deleteKey(fullpath)`——删除注册表键
+- `existedKey(fullpath)`——全路径是否存在
+- `getKey(root, Path, permission=winreg.KEY_ALL_ACCESS)`——打开注册表
+- `getKeyEx(fullpath, permission=winreg.KEY_ALL_ACCESS)`——打开注册表
+- `getSubkey(key, mode=0)`——给定注册表，返回子键名称列表
+- `hideSoftware(name, is64Bit=True, accurate=True)`——`to hide a software from regedit`, 添加`Dword SystemComponent 1`
 
 ## 更新日志
 
+- 2023.02.01——0.0.9
+  - Python新增时间模块
 - 2023.01.14——0.0.8
   - Python更新了System模块
   - Python正在新增Windows注册表模块
