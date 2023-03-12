@@ -2,9 +2,9 @@ package Datetime_Utils;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.concurrent.atomic.DoubleAdder;
+import java.util.Set;
 
 /**
  * 时间日期工具类
@@ -19,8 +19,8 @@ public class Datetime_Utils {
 	
 	// 时间
 	/**
-	 * 获取当前时间戳 ，此方法不受时区影响
-	 * @return 1675374966417
+	 * 获取当前时间毫秒时间戳 ，此方法不受时区影响
+	 * @return 1675374966 417
 	 */
 	public static long getTimeStampNow() {
 //		System.out.println(utcClock.millis());
@@ -72,6 +72,41 @@ public class Datetime_Utils {
 		return ll;
 	}
 
+	/**
+	 * 获取某个月的第一天和最后一天
+	 * @param localDate 某一天(本方法只在乎月份)
+	 * @return 第一天和最后一天
+	 */
+	public static LinkedList<LocalDate> getFirstAndLastDayofMonth(LocalDate localDate){
+		LinkedList<LocalDate> ll = new LinkedList<>();
+		if (localDate == null){
+			localDate = getDateNow(null);
+		}
+//		LocalDate firstDay = localDate.withDayOfMonth(1);
+		LocalDate firstDay = localDate.with(TemporalAdjusters.firstDayOfMonth());
+		LocalDate lastDay = localDate.with(TemporalAdjusters.lastDayOfMonth());
+		ll.add(firstDay);
+		ll.add(lastDay);
+		return ll;
+	}
+
+	/**
+	 * 获取某个月的第一个周几和最后一个周几
+	 * @param localDate 某一天(本方法只在乎月份)
+	 * @return 某个月的第一个周几和最后一个周几
+	 */
+	public static LinkedList<LocalDate> getFirstInAndLastInMonth(LocalDate localDate, int dayofWeek){
+		LinkedList<LocalDate> ll = new LinkedList<>();
+		if (localDate == null){
+			localDate = getDateNow(null);
+		}
+		LocalDate firstin = localDate.with(TemporalAdjusters.firstInMonth(DayOfWeek.of(dayofWeek)));
+		LocalDate lastin = localDate.with(TemporalAdjusters.lastInMonth(DayOfWeek.of(dayofWeek)));
+		ll.add(firstin);
+		ll.add(lastin);
+		return ll;
+	}
+
 	// 日期时间
 	/**
 	 * 返回当前日期时间
@@ -102,27 +137,12 @@ public class Datetime_Utils {
 	}
 
 	/**
-	 * 获取某个月的第一天和最后一天
-	 * @param localDate 某一天(本方法只在乎月份)
-	 * @return 第一天和最后一天
-	 */
-	public static LinkedList<LocalDate> getFirstAndLastDayofmonth(LocalDate localDate){
-		LinkedList<LocalDate> ll = new LinkedList<>();
-		if (localDate == null){
-			localDate = getDateNow(null);
-		}
-
-
-		return ll;
-	}
-
-	/**
 	 * 返回d1， d2时间差数据
 	 * @param d1
 	 * @param d2
 	 * @return 列表：1.long数组 天、时、分、秒、毫秒、微秒 2.字符串时间差
 	 */
-	public static LinkedList<Object> durationLocalDate(LocalDateTime d1, LocalDateTime d2){
+	public static LinkedList<Object> durationLocalDateTime(LocalDateTime d1, LocalDateTime d2){
 		LinkedList<Object> ll = new LinkedList<>();
 		Duration d = Duration.between(d1, d2);
 		// 天、时、分、秒、毫秒、微秒
@@ -139,7 +159,33 @@ public class Datetime_Utils {
 		return ll;
 	}
 
-	// 格式
+	// 时区日期 ZoneDateTime
+	/**
+	 * 获取时区时间 ZoneDateTime 2023-03-13T04:23:39.688183+08:00[Asia/Shanghai]
+	 * @param szoneId String 时区
+	 * @return 2023-03-13T04:23:39.688183+08:00[Asia/Shanghai]
+	 */
+	public static ZonedDateTime getZoneDateTimeNow(String szoneId){
+		if (szoneId == null || szoneId.equals("")){
+			return ZonedDateTime.now();
+		}else {
+			return ZonedDateTime.now(ZoneId.of(szoneId));
+		}
+	}
+
+	/**
+	 * 不同时区的时间转换
+	 * WARN:注意这两次转换后的纽约时间有1小时的夏令时时差。涉及到时区时，千万不要自己计算时差，否则难以正确处理夏令时。
+	 * @param zonedDateTime 时区时间
+	 * @param szoneId 要转换成的某个时区
+	 * @return
+	 */
+	public static ZonedDateTime zonedDateTimeConversion(ZonedDateTime zonedDateTime, String szoneId){
+		return zonedDateTime.withZoneSameInstant(ZoneId.of(szoneId));
+	}
+
+
+	// 格式 与 转换
 	// ISO 8601规定的日期和时间分隔符是T。标准格式如下：
 	// yyyy	4位数的年份
 	//yy	显示2位数的年份，比如2022年，则显示为22年
@@ -158,13 +204,61 @@ public class Datetime_Utils {
 
 	/**
 	 * 获取格式
+	 * 使用：LocalDate.parse(Text, formatter);
 	 * @param format 如"yyyy-MM-dd"
 	 * @return DateTimeFormatter
 	 */
 	public static DateTimeFormatter getFormatter(String format){
-		return DateTimeFormatter.ofPattern(format);
+		if (format == null){
+			return DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		}else {
+			return DateTimeFormatter.ofPattern(format);
+		}
 	}
 
+	/**
+	 * localDate转localDateTime
+	 * @param localDate
+	 * @return
+	 */
+	public static LocalDateTime localDate2LocalDateTime(LocalDate localDate){
+		return LocalDateTime.of(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), 0, 0, 0);
+	}
+
+	/**
+	 * localDateTime转为ZonedDateTime
+	 * https://blog.csdn.net/arjun_yu/article/details/118091874
+	 * @param localDateTime
+	 * @param szoneId 时区名称
+	 * @return
+	 */
+	public static ZonedDateTime LocalDateTime2zonedDateTime(LocalDateTime localDateTime, String szoneId){
+		return localDateTime.atZone(ZoneId.of(szoneId));
+	}
+
+	/**
+	 * 瞬时时间Instant转为上海LocalDateTime
+	 * @param instant
+	 * @return
+	 */
+	public static LocalDateTime instant2ShanghaiLocalDateTime(Instant instant){
+		return LocalDateTime.ofInstant(instant, ZoneId.of("Asia/Shanghai"));
+	}
+
+	/**
+	 * 时间戳转为LocalDateTime
+	 * @param timestamp 时间戳 毫秒或者秒
+	 * @param szoneId 时区
+	 * @param isEpochMilli 是否是毫秒级时间戳（否则当作秒级处理）
+	 * @return
+	 */
+	public static LocalDateTime timestamp2LocalDateTime(long timestamp, String szoneId, boolean isEpochMilli){
+		if (isEpochMilli){
+			return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of(szoneId));
+		}else{
+			return LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.of(szoneId));
+		}
+	}
 
 	// 时区
 	/**
