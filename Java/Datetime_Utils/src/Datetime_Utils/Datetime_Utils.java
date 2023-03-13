@@ -4,7 +4,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * 时间日期工具类
@@ -20,12 +19,17 @@ public class Datetime_Utils {
 	// 时间
 	/**
 	 * 获取当前时间毫秒时间戳 ，此方法不受时区影响
+	 * @param isMillis 是否是毫秒级别
 	 * @return 1675374966 417
 	 */
-	public static long getTimeStampNow() {
+	public static long getTimeStampNow(boolean isMillis) {
 //		System.out.println(utcClock.millis());
 //		System.out.println(System.currentTimeMillis());
-		return utcClock.millis();
+		if (isMillis){
+			return utcClock.millis();
+		}else {
+			return utcClock.instant().getEpochSecond();
+		}
 	}
 
 	/**
@@ -257,6 +261,35 @@ public class Datetime_Utils {
 			return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of(szoneId));
 		}else{
 			return LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.of(szoneId));
+		}
+	}
+
+	/**
+	 * localDateTime转时间戳
+	 * @param localDateTime
+	 * @param zoneOffset null默认UTC
+	 * @param isEpochMilli 是否是毫秒级别，否则返回秒
+	 * @return
+	 */
+		public static long localDateTime2Timestamp(LocalDateTime localDateTime, ZoneOffset zoneOffset, boolean isEpochMilli){
+		if (isEpochMilli){
+			return localDateTime2Instant(localDateTime, zoneOffset).toEpochMilli();
+		}else{
+			return localDateTime2Instant(localDateTime, zoneOffset).getEpochSecond();
+		}
+	}
+
+	/**
+	 * LocalDateTime转Instant
+	 * @param localDateTime
+	 * @param zoneOffset null默认UTC
+	 * @return
+	 */
+	public static Instant localDateTime2Instant(LocalDateTime localDateTime, ZoneOffset zoneOffset){
+		if (zoneOffset == null){
+			return localDateTime.toInstant(ZoneOffset.UTC);
+		}else {
+			return localDateTime.toInstant(zoneOffset);
 		}
 	}
 
