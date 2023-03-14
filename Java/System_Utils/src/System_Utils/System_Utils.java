@@ -42,7 +42,7 @@ public class System_Utils {
         return result;
     }
 
-    public static LinkedList<String> execCommand(String cmd, boolean setGBK, boolean verbose){
+    public static LinkedList<String> execCommandByRuntime(String cmd, boolean setGBK, boolean verbose){
         LinkedList<String> result = new LinkedList<>();
         // 如果是Windows
         if ((int)checkSystemType().get(0) == 0){

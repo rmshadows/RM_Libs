@@ -6,6 +6,8 @@ import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
-        LinkedList<String> r = System_Utils.execCommand("cat as", false, true);
+        LinkedList<String> r = System_Utils.execCommandByRuntime("cat as", false, true);
     }
+
+
 }
