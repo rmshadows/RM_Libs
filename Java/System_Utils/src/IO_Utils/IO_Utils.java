@@ -18,6 +18,17 @@ public class IO_Utils {
     public static final String CHARSET = "UTF-8";
 
     /**
+     * 普通字符串转LinkedList字符串
+     * @param string
+     * @return
+     */
+    public static LinkedList<String> returnLinkedListString(String string){
+        LinkedList<String> linkedList = new LinkedList<>();
+        linkedList.add(string);
+        return linkedList;
+    }
+
+    /**
      * 读取文件，以行位单位返回列表
      * 仅适用于单行少的
      * @param f 文件类

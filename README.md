@@ -199,12 +199,12 @@ public class test {
 
 - IO_Utils
   - `public static LinkedList<String> readUsingBufferedReader(File f)`——读取文件，以行位单位返回列表，仅适用于单行少的，返回每一行的列表。
-  - `public static File writeUsingBufferedWriter(File f, LinkedList<String> lines)`——给定行的列表写入文件
+  - `public static File writeUsingBufferedWriter(File f, LinkedList<String> lines, boolean appendMode)`——给定行的列表写入文件
   - `public static LinkedList<String> readUsingScanner(File f) `——使用Scanner读取较大的文件，但是花时也长
   - `public static LinkedList<String> readUsingFileFileChannel(File f)`——读取大文本文件
   - `public static LinkedList<String> readUsingFiles(File f)`——读取小的文本文件，本质上使用BufferedReader
   - `public static byte[] readBytesUsingBufferedInputStream(File f)`——读取二进制文件
-  - `public static void writeBytesUsingBufferedOutputStream(File f, byte[] data)`——写入二进制文件
+  - `public static void writeBytesUsingBufferedOutputStream(File f, byte[] data, boolean appendMode)`——写入二进制文件
   - `public static byte[] readBytesUsingFileInputStream(File f)`——读取小的二进制文件
 
 ### RSA_Utils
@@ -510,6 +510,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.03.16——0.1.1
+  - Java优化了IO模块，支持追加写入
 - 2023.03.13——0.1.0
   - Java新增Datetime_Utils时间模块
 - 2023.02.01——0.0.9
