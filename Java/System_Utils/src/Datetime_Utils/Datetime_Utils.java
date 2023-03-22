@@ -209,7 +209,7 @@ public class Datetime_Utils {
 	/**
 	 * 获取格式
 	 * 使用：LocalDate.parse(Text, formatter);
-	 * @param format 如"yyyy-MM-dd"
+	 * @param format 如"yyyy-MM-dd" "yyyy年MM月dd日HH时mm分ss.SSSSSSSSS秒" S最多9位
 	 * @return DateTimeFormatter
 	 */
 	public static DateTimeFormatter getFormatter(String format){

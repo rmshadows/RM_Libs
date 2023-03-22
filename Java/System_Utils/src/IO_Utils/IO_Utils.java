@@ -18,17 +18,6 @@ public class IO_Utils {
     public static final String CHARSET = "UTF-8";
 
     /**
-     * 普通字符串转LinkedList字符串
-     * @param string
-     * @return
-     */
-    public static LinkedList<String> returnLinkedListString(String string){
-        LinkedList<String> linkedList = new LinkedList<>();
-        linkedList.add(string);
-        return linkedList;
-    }
-
-    /**
      * 读取文件，以行位单位返回列表
      * 仅适用于单行少的
      * @param f 文件类
@@ -55,9 +44,10 @@ public class IO_Utils {
      * @param f 文件类
      * @param lines 行内容列表
      * @param appendMode 是否追加
+     * @param newLine 是否自动换行 是的话请自备换行符
      * @return 返回输出文件
      */
-    public static File writeUsingBufferedWriter(File f, LinkedList<String> lines, boolean appendMode){
+    public static File writeUsingBufferedWriter(File f, LinkedList<String> lines, boolean appendMode, boolean newLine){
         Path path = Paths.get(f.getAbsolutePath());
         // https://www.cnblogs.com/jpfss/p/9789390.html
         if (appendMode){
@@ -65,7 +55,9 @@ public class IO_Utils {
                  BufferedWriter bw = new BufferedWriter(osw);) {
                 for (String line: lines) {
                     bw.write(String.format("%s", line));
-                    bw.newLine();
+                    if (newLine){
+                        bw.newLine();
+                    }
                 }
                 bw.flush();
                 return path.toFile();
@@ -87,6 +79,16 @@ public class IO_Utils {
         }
     }
 
+    /**
+     * 将字符串转LinkedList
+     * @param s 字符串
+     * @return
+     */
+    public static LinkedList<String> returnLinkedListString(String s){
+        LinkedList<String> linkedList = new LinkedList<>();
+        linkedList.add(s);
+        return linkedList;
+    }
 
     /**
      * 使用Scanner读取较大的文件，但是花时也长
