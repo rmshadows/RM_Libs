@@ -3,39 +3,38 @@ package System_Utils;
 import Datetime_Utils.Datetime_Utils;
 import IO_Utils.IO_Utils;
 
-import javax.swing.*;
 import java.io.*;
-import java.nio.channels.FileLockInterruptionException;
-import java.sql.Time;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Java 系统类
  */
 public class System_Utils {
-
+    // Opration System
     /**
      * 判断系统是Windows(0)、Linux(1)或者MacOS(2)或者其他（-1）
      * Linux
      * 6.0.0-0.deb11.6-amd64
      * amd64
      * http://lopica.sourceforge.net/os.html
-     * @return 系统编号(int)+系统(String)+版本(String)+架构(String)
+     * @return 系统编号(String)+系统(String)+版本(String)+架构(String)
      */
-    public static LinkedList<Object> checkSystemType(){
-        LinkedList<Object> result = new LinkedList<>();
+    public static LinkedList<String> checkSystemType(){
+        LinkedList<String> result = new LinkedList<>();
         String st = System.getProperty("os.name").toUpperCase();
         if (st.contains("LINUX")){
-            result.add(1);
+            result.add("1");
         } else if (st.contains("WINDOWS")) {
-            result.add(0);
+            result.add("0");
         } else if (st.contains("MAC")) {
-            result.add(2);
+            result.add("2");
         }else {
-            result.add(-1);
+            result.add("-1");
         }
         result.add(System.getProperty("os.name"));
         result.add(System.getProperty("os.version"));
@@ -47,6 +46,19 @@ public class System_Utils {
         return result;
     }
 
+    /**
+     * 是否是Windows系统
+     * @return
+     */
+    public static boolean isWindows(){
+        if(Integer.valueOf(checkSystemType().get(0)) == 0){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    // Execute Command
     /**
      * 使用Runtime运行命令
      * 注意：无法运行 ls && cat xxxx 这一类连续的命令
@@ -98,17 +110,17 @@ public class System_Utils {
         }
 
         // 如果是Windows
-        if ((int)checkSystemType().get(0) == 0){
+        if (Integer.valueOf(checkSystemType().get(0)) == 0){
             cmd = "cmd.exe /c " + cmd;
         }
         // 如果是Linux 且使用GNOME弹窗运行
-        else if ((int)checkSystemType().get(0) == 1 && optionIfLinuxSetGnomeTerminalVisible) {
+        else if (Integer.valueOf(checkSystemType().get(0)) == 1 && optionIfLinuxSetGnomeTerminalVisible) {
             cmd = "gnome-terminal -- " + cmd;
         }
         String charset = "UTF-8";
         // 部分系统需要使用gbk编码解决输出乱码问题
         // 如果是Windows系统，启用GBK
-        if ((int)checkSystemType().get(0) == 0 && optionIfWindowsSetCharsetToGBK){
+        if (Integer.valueOf(checkSystemType().get(0)) == 0 && optionIfWindowsSetCharsetToGBK){
             charset = "gbk";
         }
         try {
@@ -230,14 +242,14 @@ public class System_Utils {
      * 注意：无法运行 ls && cat xxxx 这一类连续的命令
      * @param cmd 字符串命令
      */
-    public static LinkedList<LinkedList<String>> execCommandByRuntimeEz(String cmd){
+    public static LinkedList<LinkedList<String>> execCommandByRuntime(String cmd){
         // 标准输出 标准错误 执行结果
         LinkedList<LinkedList<String>> result = new LinkedList<>();
         LinkedList<String> stdout = new LinkedList<>();
         LinkedList<String> stderr = new LinkedList<>();
         LinkedList<String> exit_code = new LinkedList<>();
         // 如果是Windows
-        if ((int)checkSystemType().get(0) == 0){
+        if (Integer.parseInt(checkSystemType().get(0)) == 0){
             cmd = "cmd.exe /c " + cmd;
         }
         String charset = "UTF-8";
@@ -270,66 +282,284 @@ public class System_Utils {
         return result;
     }
 
-
-    public static void execCommandByProcessBuilderEz(String cmd){
-        try (BufferedReader br = null;){
-            File tmpFile = new File("tempf.tmp"); //新建一个用来存储结果的缓存文件
-            if(!tmpFile.exists()) {
-                if(! tmpFile.createNewFile()){
-                    throw new FileNotFoundException("临时文件创建失败");
-                }
+    /**
+     * 仅运行命令（不能带空格）
+     * @param cmd
+     */
+    public static String execCommandByProcessBuilder(String cmd){
+        String r = "";
+        try {
+            ProcessBuilder pb = null;
+            // 如果是Windows
+            if (isWindows()){
+                pb = new ProcessBuilder().command("cmd.exe", "/c", cmd);
+            }else {
+                // .inheritIO()将直接输出，line为空
+//                pb = new ProcessBuilder().command(cmd).inheritIO();
+                pb = new ProcessBuilder().command(cmd);
             }
-            ProcessBuilder pb = new ProcessBuilder().command("cmd.exe", "/c", cmd).inheritIO();
-            pb.redirectErrorStream(true);//这里是把控制台中的红字变成了黑字，用通常的方法其实获取不到，控制台的结果是pb.start()方法内部输出的。
-            pb.redirectOutput(tmpFile);//把执行结果输出。
-            pb.start().waitFor();//等待语句执行完成，否则可能会读不到结果。
-            InputStream in = new FileInputStream(tmpFile);
-            br= new BufferedReader(new InputStreamReader(in));
+            pb.redirectErrorStream(true);
+            BufferedReader br = null;
+            Process process = pb.start();
+            InputStream in = process.getInputStream();
+            br = new BufferedReader(new InputStreamReader(in));
             String line = null;
             while((line = br.readLine()) != null) {
                 System.out.println(line);
+                r += (line + "\n");
             }
+            process.waitFor();
             br.close();
-            br = null;
-            if (! tmpFile.delete()){
-                throw new Exception("临时文件删除失败");
-            };//卸磨杀驴。
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return r;
     }
 
-    public static void execCommandByProcessBuilder(String cmd, File logfile){
-        try (BufferedReader br = null;){
-            File tmpFile = new File("tempf.tmp"); //新建一个用来存储结果的缓存文件
-            if(!tmpFile.exists()) {
-                if(! tmpFile.createNewFile()){
-                    throw new FileNotFoundException("临时文件创建失败");
-                }
+    /**
+     * 仅运行命令（允许空格）
+     * @param cmd
+     * @return
+     */
+    public static String execCommandByProcessBuilder(String[] cmd){
+        String r = "";
+        try {
+            ProcessBuilder pb = null;
+            // 如果是Windows
+            if (isWindows()){
+                String[] c = new String[]{"cmd.exe", "/c"};
+                cmd = (String[])mergeArrays(c, cmd);
             }
-            ProcessBuilder pb = new ProcessBuilder().command("cmd.exe", "/c", cmd).inheritIO();
-            pb.redirectErrorStream(true);//这里是把控制台中的红字变成了黑字，用通常的方法其实获取不到，控制台的结果是pb.start()方法内部输出的。
-            pb.redirectOutput(tmpFile);//把执行结果输出。
-            pb.start().waitFor();//等待语句执行完成，否则可能会读不到结果。
-            InputStream in = new FileInputStream(tmpFile);
+            pb = new ProcessBuilder().command(cmd);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.waitFor();
+            BufferedReader br = null;
+            InputStream in = process.getInputStream();
             br= new BufferedReader(new InputStreamReader(in));
             String line = null;
             while((line = br.readLine()) != null) {
                 System.out.println(line);
+                r += (line + "\n");
             }
             br.close();
-            br = null;
-            if (! tmpFile.delete()){
-                throw new Exception("临时文件删除失败");
-            };//卸磨杀驴。
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return r;
+    }
+
+
+    /**
+     * 使用ProcessBuilder运行命令
+     * @param cmd 命令（不允许空格）
+     * @param logfile null为无日志文件。每次运行日志都会被覆盖！如果重定向错误日志，请提供一个日志文件。如果没有重定向，请提供两个
+     * @param redirectErrorStream 是否重定向错误（一般为是）
+     * @param timeout 超时 小于等于0时无效
+     * @param timeUnit 单位
+     * @return 标准输出 标准错误 退出码
+     */
+    public static LinkedList<LinkedList<String>> execCommandByProcessBuilder(String cmd,
+                                                                             File[] logfile,
+                                                                             boolean redirectErrorStream,
+                                                                             long timeout,
+                                                                             TimeUnit timeUnit){
+        boolean delLog = false;
+        LinkedList<LinkedList<String>> r = new LinkedList<>();
+        LinkedList<String> stdo = new LinkedList<>();
+        LinkedList<String> stde = new LinkedList<>();
+        LinkedList<String> exitcode = new LinkedList<>();
+        try {
+            BufferedReader br = null;
+            if (logfile == null){
+                delLog = true;
+                if(redirectErrorStream){
+                    logfile = new File[1];
+                    logfile[0] = new File("tmpExec.log");
+                }else {
+                    logfile = new File[2];
+                    logfile[0] = new File("tmpExecStdout.log");
+                    logfile[1] = new File("tmpExecError.log");
+                }
+            }
+            //新建一个用来存储结果的缓存文件
+            for (File f: logfile) {
+                if(!f.exists()) {
+                    if(! f.createNewFile()){
+                        throw new FileNotFoundException("临时日志文件创建失败");
+                    }
+                }
+            }
+            ProcessBuilder pb = new ProcessBuilder().command(cmd);
+            if (redirectErrorStream){
+                //这里是把控制台中的红字变成了黑字，用通常的方法其实获取不到，控制台的结果是pb.start()方法内部输出的。
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(logfile[0]);//把执行结果输出。
+            }else{
+                pb.redirectOutput(logfile[0]);
+                pb.redirectError(logfile[1]);
+            }
+            Process process = pb.start();
+            //等待语句执行完成，否则可能会读不到结果。
+            if (timeout <= 0){
+                process.waitFor();
+            }else {
+                process.waitFor(timeout, timeUnit);
+            }
+            InputStream in = new FileInputStream(logfile[0]);
+            br= new BufferedReader(new InputStreamReader(in));
+            String line = null;
+            while((line = br.readLine()) != null) {
+                stdo.add(line);
+                System.out.println("stdout:" + line);
+            }
+            if(!redirectErrorStream){
+                in = new FileInputStream(logfile[1]);
+                br= new BufferedReader(new InputStreamReader(in));
+                while((line = br.readLine()) != null) {
+                    stde.add(line);
+                    System.out.println("stderr:" + line);
+                }
+            }
+            br.close();
+            //卸磨杀驴。
+            if (delLog){
+                for (File f: logfile) {
+                    if (! f.delete()){
+                        throw new Exception("临时日志文件删除失败");
+                    };
+                }
+            };
+            exitcode.add(String.valueOf(process.exitValue()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        r.add(stdo);
+        r.add(stde);
+        r.add(exitcode);
+        return r;
+    }
+
+    /**
+     * 使用ProcessBuilder运行命令
+     * @param cmd 命令（允许空格）
+     * @param logfile null为无日志文件。每次运行日志都会被覆盖！如果重定向错误日志，请提供一个日志文件。如果没有重定向，请提供两个
+     * @param redirectErrorStream 是否重定向错误（一般为是）
+     * @param timeout 超时 小于等于0时无效
+     * @param timeUnit 单位
+     * @return 标准输出 标准错误 退出码
+     */
+    public static LinkedList<LinkedList<String>> execCommandByProcessBuilder(String[] cmd,
+                                                                             File[] logfile,
+                                                                             boolean redirectErrorStream,
+                                                                             long timeout,
+                                                                             TimeUnit timeUnit){
+        boolean delLog = false;
+        LinkedList<LinkedList<String>> r = new LinkedList<>();
+        LinkedList<String> stdo = new LinkedList<>();
+        LinkedList<String> stde = new LinkedList<>();
+        LinkedList<String> exitcode = new LinkedList<>();
+        try {
+            BufferedReader br = null;
+            if (logfile == null){
+                delLog = true;
+                if(redirectErrorStream){
+                    logfile = new File[1];
+                    logfile[0] = new File("tmpExec.log");
+                }else {
+                    logfile = new File[2];
+                    logfile[0] = new File("tmpExecStdout.log");
+                    logfile[1] = new File("tmpExecError.log");
+                }
+            }
+            //新建一个用来存储结果的缓存文件
+            for (File f: logfile) {
+                if(!f.exists()) {
+                    if(! f.createNewFile()){
+                        throw new FileNotFoundException("临时日志文件创建失败");
+                    }
+                }
+            }
+            ProcessBuilder pb = new ProcessBuilder().command(cmd);
+            if (redirectErrorStream){
+                //这里是把控制台中的红字变成了黑字，用通常的方法其实获取不到，控制台的结果是pb.start()方法内部输出的。
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(logfile[0]);//把执行结果输出。
+            }else{
+                pb.redirectOutput(logfile[0]);
+                pb.redirectError(logfile[1]);
+            }
+            Process process = pb.start();
+            //等待语句执行完成，否则可能会读不到结果。
+            if (timeout <= 0){
+                process.waitFor();
+            }else {
+                process.waitFor(timeout, timeUnit);
+            }
+            InputStream in = new FileInputStream(logfile[0]);
+            br= new BufferedReader(new InputStreamReader(in));
+            String line = null;
+            while((line = br.readLine()) != null) {
+                stdo.add(line);
+                System.out.println("stdout:" + line);
+            }
+            if(!redirectErrorStream){
+                in = new FileInputStream(logfile[1]);
+                br= new BufferedReader(new InputStreamReader(in));
+                while((line = br.readLine()) != null) {
+                    stde.add(line);
+                    System.out.println("stderr:" + line);
+                }
+            }
+            br.close();
+            //卸磨杀驴。
+            if (delLog){
+                for (File f: logfile) {
+                    if (! f.delete()){
+                        throw new Exception("临时日志文件删除失败");
+                    };
+                }
+            };
+            exitcode.add(String.valueOf(process.exitValue()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        r.add(stdo);
+        r.add(stde);
+        r.add(exitcode);
+        return r;
     }
 
     // 文件、文件夹操作
     public static void mkdir(){
 
+    }
+
+    public static void touch(Path path){
+//        Files.createTempFile(path);
+    }
+
+    // 其他
+    /**
+     * 合并两个数组
+     * @param a 数组1
+     * @param b 数组2
+     * @return 合并的数组
+     */
+    public static Object[] mergeArrays(Object[] a, Object[] b){
+        Object[] c;
+        int al = a.length;
+        int bl = b.length;
+        // 首先把a数组复制给c，且增加长度
+        c = Arrays.copyOf(a,al+bl);
+        // 将b数组从0开始复制给c数组，c数组从索引sl开始，复制b到bl
+        // @1:要被复制的数组b，内容来源  src
+        // @2:从b的0索引开始复制  src
+        // @3:复制到c数组  dst
+        // @4:从c数组的al索引开始添加  dst
+        // @5:添加bl位（不得超过来源数组长度） src
+        System.arraycopy(b, 0, c, al, bl);
+        return c;
     }
 
 }
