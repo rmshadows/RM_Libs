@@ -4,12 +4,16 @@ import Datetime_Utils.Datetime_Utils;
 import IO_Utils.IO_Utils;
 
 import java.io.*;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Java 系统类
@@ -531,13 +535,123 @@ public class System_Utils {
     }
 
     // 文件、文件夹操作
-    public static void mkdir(){
-
+    /**
+     *  创建文件夹
+     * @param path
+     * @param isMkdirs 是否连续创建（mkdir -p） false时，如果文件夹存在，会报错
+     */
+    public static Path mkdir(Path path, boolean isMkdirs){
+        try {
+            if (isMkdirs){
+                return Files.createDirectories(path);
+            }else {
+                return Files.createDirectory(path);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static void touch(Path path){
-//        Files.createTempFile(path);
+    /**
+     * mkdir -p
+     * @param path
+     * @return
+     */
+    public static Path mkdirs(Path path){
+        try {
+            return Files.createDirectories(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+    /**
+     * mkdir
+     * @param path
+     * @return
+     */
+    public static Path mkdir(Path path){
+        try {
+            return Files.createDirectory(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 创建文件
+     * @param path
+     * @param overwrite 是否覆盖 不覆盖时，如果文件存在，会报错
+     */
+    public static Path touch(Path path, boolean overwrite){
+        try {
+            if (overwrite){
+                Files.deleteIfExists(path);
+                return Files.createFile(path);
+            }else {
+                return Files.createFile(path);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * touch 直接覆盖
+     * @param path
+     * @return
+     */
+    public static Path touch(Path path){
+        try {
+            Files.deleteIfExists(path);
+            return Files.createFile(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     *
+     * @param src
+     * @param dst
+     * @return
+     */
+    public static Path copy(Path src, Path dst){
+        try {
+            if (Files.isDirectory(src)){
+                // 如果是目录
+                Stream<Path> stream = Files.walk(src);
+                stream.forEach(source -> copy(source, dst.resolve(source.relativize(source))));
+                stream.close();
+            }else if(Files.isRegularFile(src)){
+                // 如果是文件
+//                Files.deleteIfExists(dst);
+                Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+            }else{
+                throw new Exception("请检查文件是否存在（非目录亦非常规文件）");
+            }
+            return dst;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void la(Path path){
+        try {
+            Stream<Path> stream = Files.list(path);
+            stream.forEach(p -> System.out.println(p));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void ls(Path path){
+        try {
+            Stream<Path> stream = Files.list(path);
+            stream.forEach(p -> System.out.println(p));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     // 其他
     /**

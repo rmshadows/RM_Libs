@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -22,10 +23,22 @@ public class Main {
 
     public static void testFilesystem() throws IOException, InterruptedException {
 //        System_Utils.mkdir();
-        Path path = Paths.get("1.txt");
-//        Files.createFile(path);
-        Path path1 = Files.createTempFile(Paths.get("."),"1","1");
-        System.out.println(path1.toAbsolutePath());
+        Path path0 = Paths.get(".");
+        Path path1 = Paths.get("1.txt");
+        Path path3 = Paths.get("2.txt");
+        Path path2 = Paths.get("dir0/dir1/dir2");
+        Path path4 = Paths.get("666");
+        Path path5 = Paths.get("777");
+//        System_Utils.touch(path1, true);
+//        System_Utils.mkdir(path2, true);
+//        System_Utils.copy(path1, path3);
+        System_Utils.copy(path4, path5);
+
+//        System_Utils.ls(path0);
+//        Stream<Path> stream = Files.walk(path0);
+//        Stream<Path> stream = Files.list(path0);
+//        stream.forEach(path -> System.out.println(path));
+
     }
 
     public static void testProcessBuilder()  {
