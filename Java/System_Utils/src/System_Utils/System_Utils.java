@@ -4,15 +4,14 @@ import Datetime_Utils.Datetime_Utils;
 import IO_Utils.IO_Utils;
 
 import java.io.*;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.AclEntryFlag;
 import java.nio.file.attribute.FileAttribute;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -565,7 +564,7 @@ public class System_Utils {
         }
     }
     /**
-     * mkdir
+     * mkdir 存在报错
      * @param path
      * @return
      */
@@ -609,49 +608,182 @@ public class System_Utils {
     }
 
     /**
-     *
+     * 复制文件或文件夹（覆盖）
      * @param src
      * @param dst
-     * @return
+     * @return 返回tree dst文件夹内容
      */
-    public static Path copy(Path src, Path dst){
+    //TODO: 解决Copy和move，复制链接的问题
+    public static LinkedList<Path> copy(Path src, Path dst){
         try {
             if (Files.isDirectory(src)){
-                // 如果是目录
-                Stream<Path> stream = Files.walk(src);
-                stream.forEach(source -> copy(source, dst.resolve(source.relativize(source))));
-                stream.close();
+                // 如果是目录，新建目标文件夹后遍历
+                if(!Files.exists(dst)){mkdirs(dst);}
+                la(src).stream().forEach(x -> copy(x, dst.resolve(x.getFileName())));
             }else if(Files.isRegularFile(src)){
                 // 如果是文件
-//                Files.deleteIfExists(dst);
+//                Files.deleteIfExists(dst);// 可以忽略，因为下面StandardCopyOption.REPLACE_EXISTING
+//                Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
                 Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+//                System.out.printf("%s -> %s \n", src.toAbsolutePath(), dst.toAbsolutePath());
             }else{
                 throw new Exception("请检查文件是否存在（非目录亦非常规文件）");
             }
-            return dst;
+            return tree(dst);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void la(Path path){
+    /**
+     * 移动文件或文件夹（覆盖）
+     * @param src
+     * @param dst
+     * @return 返回tree dst文件夹内容
+     */
+    public static LinkedList<Path> move(Path src, Path dst){
         try {
-            Stream<Path> stream = Files.list(path);
-            stream.forEach(p -> System.out.println(p));
+            if (Files.isDirectory(src)){
+                // 如果是目录，新建目标文件夹后遍历
+                if(!Files.exists(dst)){mkdirs(dst);}
+                la(src).stream().forEach(x -> move(x, dst.resolve(x.getFileName())));
+            }else if(Files.isRegularFile(src)){
+                // 如果是文件
+                Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
+//                System.out.printf("%s -> %s \n", src.toAbsolutePath(), dst.toAbsolutePath());
+            }else{
+                throw new Exception("请检查文件是否存在（非目录亦非常规文件）");
+            }
+            return tree(dst);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * tree
+     * @param path 路径
+     * @param level 遍历深度 （小于等于0无效）
+     * @param includeHidden 是否包含隐藏文件
+     * @param followLinks 是否跟随链接
+     * @return 文件Path
+     */
+    public static LinkedList<Path> tree(Path path, int level, boolean includeHidden, boolean followLinks){
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            if(followLinks){
+                if(level > 0){
+                    paths = arrayList2LinkedList(Files.walk(path, level, FileVisitOption.FOLLOW_LINKS).collect(Collectors.toList()));
+                }else {
+                    paths = arrayList2LinkedList(Files.walk(path, FileVisitOption.FOLLOW_LINKS).collect(Collectors.toList()));
+                }
+            }else {
+                if(level > 0){
+                    paths = arrayList2LinkedList(Files.walk(path, level).collect(Collectors.toList()));
+                }else {
+                    paths = arrayList2LinkedList(Files.walk(path).collect(Collectors.toList()));
+                }
+            }
+            if(! includeHidden){
+//                paths.stream().filter(x->{if (! isDotfiles(x)) {return true;}return false;});
+                paths = arrayList2LinkedList(paths.stream().filter(x->{
+                    // 点文件和在点目录的会被剔除
+                    if (isDotfiles(x) || isInDotDirectory(x)) {return false;}
+                    return true;}).collect(Collectors.toList()));
+            }
+            paths.stream().forEach(System.out::println);
+            return paths;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void ls(Path path){
+    /**
+     * tree 列出所有（不跟随Link）
+     * @param path
+     * @return
+     */
+    public static LinkedList<Path> tree(Path path){
         try {
-            Stream<Path> stream = Files.list(path);
-            stream.forEach(p -> System.out.println(p));
+            return arrayList2LinkedList(Files.walk(path).collect(Collectors.toList()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * ls -a 列出包括隐藏文件在内的文件
+     * @param path
+     * @return
+     */
+    public static LinkedList<Path> la(Path path){
+        try {
+            LinkedList<Path> paths = arrayList2LinkedList(Files.list(path).collect(Collectors.toList()));
+//            paths.stream().forEach(System.out::println);
+            return paths;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * ls列出文件（隐藏文件除外）
+     * @param path
+     * @return
+     */
+    public static LinkedList<Path> ls(Path path){
+        try {
+            // ./System_Utils.iml
+            //./.idea
+            //./out
+            //./src
+            LinkedList<Path> paths = arrayList2LinkedList(Files.list(path).filter(p->{
+                // 去除.开头的隐藏文件
+                if (isDotfiles(p)){return false;}
+                return true;
+            }).collect(Collectors.toList()));
+//            paths.stream().forEach(System.out::println);
+            return paths;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 是否是点开头文件（隐藏文件）
+     * @param path
+     * @return
+     */
+    public static boolean isDotfiles(Path path){
+        if(path.getFileName().toString().substring(0, 1).equals(".")){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否在点目录中（隐藏目录），是的话返回true，注意：并不会因为是隐藏文件而true，只专注目录
+     * @param path
+     * @return
+     */
+    public static boolean isInDotDirectory(Path path){
+        if(! Files.isDirectory(path)){
+            // 如果不是目录 排除
+            path = path.getParent();
+        }
+        List<Boolean> f = new ArrayList<Boolean>();
+        f.add(false);
+        path.spliterator().forEachRemaining(x->{
+            // 要排除掉 "."
+            if(isDotfiles(x) && ! x.toString().equals(".")){
+                f.set(0, true);
+            }
+        });
+        if(f.get(0)){
+            return true;
+        }
+        return false;
+    }
 
     // 其他
     /**
@@ -674,6 +806,17 @@ public class System_Utils {
         // @5:添加bl位（不得超过来源数组长度） src
         System.arraycopy(b, 0, c, al, bl);
         return c;
+    }
+
+    /**
+     * List转LinkedList
+     * @param e
+     * @return
+     */
+    public static LinkedList arrayList2LinkedList(List e){
+        LinkedList linkedList = new LinkedList(){};
+        e.stream().forEach(x->linkedList.add(x));
+        return linkedList;
     }
 
 }
