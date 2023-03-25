@@ -4,6 +4,7 @@ import System_Utils.*;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -20,8 +21,12 @@ public class Main {
         Path p1 = Paths.get(".");
         Path p2 = Paths.get("111");
         Path p3 = Paths.get("222");
-        System_Utils.copy(p2, p3).stream().forEach(System.out::println);
-
+        Path p4 = Paths.get("111/到 bak 的链接");
+        Path p5 = Paths.get("222/到 bak 的链接");
+        System.out.println(Files.isSymbolicLink(p5));
+        Files.deleteIfExists(p5);
+//        System_Utils.copy(p2, p3).stream().forEach(System.out::println);
+//        System_Utils.copyFollowLinks(p2, p3).stream().forEach(System.out::println);
 
     }
 

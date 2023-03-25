@@ -613,17 +613,50 @@ public class System_Utils {
      * @param dst
      * @return 返回tree dst文件夹内容
      */
-    //TODO: 解决Copy和move，复制链接的问题
     public static LinkedList<Path> copy(Path src, Path dst){
         try {
+            // 符号链接也会被识别为文件夹
             if (Files.isDirectory(src)){
-                // 如果是目录，新建目标文件夹后遍历
-                if(!Files.exists(dst)){mkdirs(dst);}
-                la(src).stream().forEach(x -> copy(x, dst.resolve(x.getFileName())));
+                if(Files.isSymbolicLink(src)){
+                    // 如果是链接，直接复制
+                    System.out.println("dst = s " + dst);
+                    // 如果不是符号链接，删除 // TODO: 写一个递归删除的方法
+                    if(!Files.isSymbolicLink(dst)){Files.deleteIfExists(dst);}
+                    Files.copy(src, dst, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
+                }else {
+                    if(!Files.exists(dst)){mkdirs(dst);}
+                    la(src).stream().forEach(x -> copy(x, dst.resolve(x.getFileName())));
+                }
             }else if(Files.isRegularFile(src)){
                 // 如果是文件
 //                Files.deleteIfExists(dst);// 可以忽略，因为下面StandardCopyOption.REPLACE_EXISTING
 //                Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(src, dst, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
+//                System.out.printf("%s -> %s \n", src.toAbsolutePath(), dst.toAbsolutePath());
+            }else{
+                throw new Exception("请检查文件是否存在（非目录亦非常规文件）");
+            }
+            return tree(dst);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /**
+     * 复制文件或文件夹（覆盖）
+     * @param src
+     * @param dst
+     * @return 返回tree dst文件夹内容
+     */
+    public static LinkedList<Path> copyFollowLinks(Path src, Path dst){
+        try {
+            if (Files.isDirectory(src)){
+                // 新建目标文件夹后遍历
+                // 第一句用于覆盖符号链接
+                if(Files.isSymbolicLink(dst)){Files.deleteIfExists(dst);}
+                if(!Files.exists(dst)){mkdirs(dst);}
+                la(src).stream().forEach(x -> copyFollowLinks(x, dst.resolve(x.getFileName())));
+            }else if(Files.isRegularFile(src)){
+                // 如果是文件
                 Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 //                System.out.printf("%s -> %s \n", src.toAbsolutePath(), dst.toAbsolutePath());
             }else{
@@ -644,9 +677,40 @@ public class System_Utils {
     public static LinkedList<Path> move(Path src, Path dst){
         try {
             if (Files.isDirectory(src)){
+                if(Files.isSymbolicLink(src)){
+                    Files.move(src, dst, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
+                }else{
+                    // 如果是目录，新建目标文件夹后遍历
+                    if(!Files.exists(dst)){mkdirs(dst);}
+                    la(src).stream().forEach(x -> move(x, dst.resolve(x.getFileName())));
+                }
+            }else if(Files.isRegularFile(src)){
+                // 如果是文件
+                Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS);
+//                System.out.printf("%s -> %s \n", src.toAbsolutePath(), dst.toAbsolutePath());
+            }else{
+                throw new Exception("请检查文件是否存在（非目录亦非常规文件）");
+            }
+            return tree(dst);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 移动文件或文件夹（覆盖）
+     * @param src
+     * @param dst
+     * @return 返回tree dst文件夹内容
+     */
+    public static LinkedList<Path> moveFollowLinks(Path src, Path dst){
+        try {
+            if (Files.isDirectory(src)){
+                // TODO: 安全移动、选项：隐藏文件
+                if(Files.isSymbolicLink(dst)){Files.deleteIfExists(dst);}
                 // 如果是目录，新建目标文件夹后遍历
                 if(!Files.exists(dst)){mkdirs(dst);}
-                la(src).stream().forEach(x -> move(x, dst.resolve(x.getFileName())));
+                la(src).stream().forEach(x -> moveFollowLinks(x, dst.resolve(x.getFileName())));
             }else if(Files.isRegularFile(src)){
                 // 如果是文件
                 Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
