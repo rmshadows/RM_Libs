@@ -724,6 +724,85 @@ public class System_Utils {
         }
     }
 
+
+    /**
+     * rm 删除文件（不能删除文件夹和隐藏文件），如果是目录，仅会删除目录中的文件（没有递归）
+     * @param path
+     * @return
+     */
+    public static LinkedList<Path> rm(Path path){
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            // 是目录，且不是符号链接
+            if(Files.isDirectory(path) && ! Files.isSymbolicLink(path)){
+                la(path).stream().forEach(x -> {
+                    try {
+                        Files.deleteIfExists(x);
+                        paths.add(x);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }else {
+                Files.deleteIfExists(path);
+                paths.add(path);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return paths;
+    }
+
+
+    public static LinkedList<Path> rm(Path path, boolean action, boolean dotFiles){//TODO
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            // 是目录，且不是符号链接
+            if(Files.isDirectory(path) && ! Files.isSymbolicLink(path)){
+                la(path).stream().forEach(x -> {
+                    try {
+                        Files.deleteIfExists(x);
+                        paths.add(x);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }else {
+                Files.deleteIfExists(path);
+                paths.add(path);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return paths;
+    }
+
+    /**
+     * rm -r递归删除删除文件(包括隐藏文件)、文件夹
+     * @param path
+     * @return 成功删除的
+     */
+    public static LinkedList<Path> rmAll(Path path){
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            // 是目录，且不是符号链接
+            if(Files.isDirectory(path) && ! Files.isSymbolicLink(path)){
+                // 下面三句一致
+//                la(path).stream().forEach(x->rmAll(x).stream().forEach(y->paths.add(y)));
+//                la(path).stream().forEach(x->rmAll(x).stream().forEach(paths::add));
+                la(path).stream().forEach(x-> paths.addAll(rmAll(x)));
+                Files.deleteIfExists(path);
+            }else {
+                Files.deleteIfExists(path);
+            }
+            paths.add(path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return paths;
+    }
+
+
     /**
      * tree
      * @param path 路径

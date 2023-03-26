@@ -23,8 +23,11 @@ public class Main {
         Path p3 = Paths.get("222");
         Path p4 = Paths.get("111/到 bak 的链接");
         Path p5 = Paths.get("222/到 bak 的链接");
-        System.out.println(Files.isSymbolicLink(p5));
-        Files.deleteIfExists(p5);
+        Path p6 = Paths.get("222（复件）");
+
+//        System_Utils.rm(p6);
+//        System.out.println("p6 = " + p6);
+
 //        System_Utils.copy(p2, p3).stream().forEach(System.out::println);
 //        System_Utils.copyFollowLinks(p2, p3).stream().forEach(System.out::println);
 
