@@ -5,14 +5,10 @@ import IO_Utils.IO_Utils;
 
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.AclEntryFlag;
-import java.nio.file.attribute.FileAttribute;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Java 系统类
@@ -24,7 +20,7 @@ public class System_Utils {
      * Linux
      * 6.0.0-0.deb11.6-amd64
      * amd64
-     * http://lopica.sourceforge.net/os.html
+     * <a href="http://lopica.sourceforge.net/os.html">...</a>
      * @return 系统编号(String)+系统(String)+版本(String)+架构(String)
      */
     public static LinkedList<String> checkSystemType(){
@@ -619,9 +615,8 @@ public class System_Utils {
             if (Files.isDirectory(src)){
                 if(Files.isSymbolicLink(src)){
                     // 如果是链接，直接复制
-                    System.out.println("dst = s " + dst);
-                    // 如果不是符号链接，删除 // TODO: 写一个递归删除的方法
-                    if(!Files.isSymbolicLink(dst)){Files.deleteIfExists(dst);}
+                    // 如果不是符号链接，删除
+                    if(!Files.isSymbolicLink(dst)){rmAll(dst);}
                     Files.copy(src, dst, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
                 }else {
                     if(!Files.exists(dst)){mkdirs(dst);}
@@ -669,6 +664,27 @@ public class System_Utils {
     }
 
     /**
+     * 复制当前目录中除了点文件以外的文件(仅允许目录)，且不跟随符号链接
+     * @param src
+     * @param dst
+     * @return
+     */
+    public static LinkedList<Path> copyExcludeDotfiles(Path src, Path dst){
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            // 不是目录或者是符号链接的无效
+            if(! Files.isDirectory(src) || Files.isSymbolicLink(src)){
+                throw new Exception("文件类型错误，仅允许文件夹");
+            }
+            // 列出当前目录
+            ls(src).stream().forEach(x->paths.addAll(copy(x, dst.resolve(x.getFileName()))));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return paths;
+    }
+
+    /**
      * 移动文件或文件夹（覆盖）
      * @param src
      * @param dst
@@ -684,6 +700,7 @@ public class System_Utils {
                     if(!Files.exists(dst)){mkdirs(dst);}
                     la(src).stream().forEach(x -> move(x, dst.resolve(x.getFileName())));
                 }
+                Files.deleteIfExists(src);
             }else if(Files.isRegularFile(src)){
                 // 如果是文件
                 Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS);
@@ -699,6 +716,7 @@ public class System_Utils {
 
     /**
      * 移动文件或文件夹（覆盖）
+     * 注意：符号链接仅复制下属内容，不会删除原来的文件夹（所以有些报错无法避免）
      * @param src
      * @param dst
      * @return 返回tree dst文件夹内容
@@ -706,11 +724,21 @@ public class System_Utils {
     public static LinkedList<Path> moveFollowLinks(Path src, Path dst){
         try {
             if (Files.isDirectory(src)){
-                // TODO: 安全移动、选项：隐藏文件
                 if(Files.isSymbolicLink(dst)){Files.deleteIfExists(dst);}
                 // 如果是目录，新建目标文件夹后遍历
                 if(!Files.exists(dst)){mkdirs(dst);}
-                la(src).stream().forEach(x -> moveFollowLinks(x, dst.resolve(x.getFileName())));
+                la(src).stream().forEach(x -> {
+                    if(Files.isSymbolicLink(x)){
+                        // 符号链接采用复制
+                        copyFollowLinks(x, dst.resolve(x.getFileName()));
+                    }else {
+                        moveFollowLinks(x, dst.resolve(x.getFileName()));
+                    }
+                });
+                if(! Files.isSymbolicLink(src)){
+                    // 如果文件夹中含有符号链接，报错属于正常
+                    Files.deleteIfExists(src);
+                }
             }else if(Files.isRegularFile(src)){
                 // 如果是文件
                 Files.move(src, dst, StandardCopyOption.REPLACE_EXISTING);
@@ -718,10 +746,31 @@ public class System_Utils {
             }else{
                 throw new Exception("请检查文件是否存在（非目录亦非常规文件）");
             }
-            return tree(dst);
+        } catch (Exception e) {
+            System.out.println("moveFollowLinks e = " + e);
+        }
+        return tree(dst);
+    }
+
+    /**
+     * 移动当前目录中除了点文件以外的文件(仅允许目录)，且不跟随符号链接
+     * @param src
+     * @param dst
+     * @return
+     */
+    public static LinkedList<Path> moveExcludeDotfiles(Path src, Path dst){
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            // 不是目录或者是符号链接的无效
+            if(! Files.isDirectory(src) || Files.isSymbolicLink(src)){
+                throw new Exception("文件类型错误，仅允许文件夹");
+            }
+            // 列出当前目录
+            ls(src).stream().forEach(x->paths.addAll(move(x, dst.resolve(x.getFileName()))));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return paths;
     }
 
 
@@ -753,24 +802,32 @@ public class System_Utils {
         return paths;
     }
 
-
-    public static LinkedList<Path> rm(Path path, boolean action, boolean dotFiles){//TODO
+    /**
+     * 删除文件、文件夹
+     * @param path
+     * @param action 是否执行
+     * @return
+     */
+    public static LinkedList<Path> rmAll(Path path, boolean action){
         LinkedList<Path> paths = new LinkedList<>();
         try {
             // 是目录，且不是符号链接
             if(Files.isDirectory(path) && ! Files.isSymbolicLink(path)){
-                la(path).stream().forEach(x -> {
-                    try {
-                        Files.deleteIfExists(x);
-                        paths.add(x);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                // 下面三句一致
+                la(path).stream().forEach(x-> paths.addAll(rmAll(x, action)));
+                if(action){
+                    Files.deleteIfExists(path);
+                }else {
+                    System.out.println("拟删除: "+path);
+                }
             }else {
-                Files.deleteIfExists(path);
-                paths.add(path);
+                if(action){
+                    Files.deleteIfExists(path);
+                }else {
+                    System.out.println("拟删除: "+path);
+                }
             }
+            paths.add(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -802,6 +859,25 @@ public class System_Utils {
         return paths;
     }
 
+    /**
+     * 删除当前目录中除了点文件以外的文件(仅允许目录)
+     * @param path
+     * @return
+     */
+    public static LinkedList<Path> rmExcludeDotfiles(Path path){
+        LinkedList<Path> paths = new LinkedList<>();
+        try {
+            // 不是目录或者是符号链接的无效
+            if(! Files.isDirectory(path) || Files.isSymbolicLink(path)){
+                throw new Exception("文件类型错误，仅允许文件夹");
+            }
+            // 列出当前目录
+            ls(path).stream().forEach(x->paths.addAll(rmAll(x)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return paths;
+    }
 
     /**
      * tree
