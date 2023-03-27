@@ -244,6 +244,41 @@ public class test {
   - `public static Map<String, Object> PKCS1_2_PKCS8(RSA_PEM pem)`——PKCS1转PKCS8
   - `public static RSA_PEM PKCS8_2_PKCS1(PrivateKey prk, PublicKey puk)`——PKCS8 转 PKCS1
 
+### System_Utils
+
+- System_Utils
+  - `checkSystemType()`——判断系统是Windows(0)、Linux(1)或者MacOS(2)或者其他（-1）
+  - `public static boolean isWindows()`——是否是Windows系统
+  - `public static LinkedList<LinkedList<String>> execCommandByRuntime(String cmd,LinkedList<File> logfile,boolean optionIfWindowsSetCharsetToGBK,boolean optionIfLinuxSetGnomeTerminalVisible,int optionTimestampMode,boolean verbose,long timeout,TimeUnit timeUnit)`——使用Runtime运行命令。cmd 字符串命令、logfile 日志文件，如果不生成，请填写null。仅提供长度一位：标准、错误全部在一个文件。提供两位：标准和错误分开输出、optionIfWindowsSetCharsetToGBK 如果是Windows系统，启用GBK编码、optionIfLinuxSetGnomeTerminalVisible 如果是Linux系统，使用GNOME Terminal运行、optionTimestampMode 文件输出带时间戳的模式（其他: 不带时间，1：LocalDateTime 2023-03-20T21:57:15.676611，2:ZonedDateTime 2023-03-20T21:57:15.677782+08:00[Asia/Shanghai]，3:时间-中文-毫秒 2023年03月20日22时02分40.602148秒，4:毫秒时间戳) 1679320718584）、verbose 是否直接输出到命令行、timeout 超时 小于等于0忽略、timeUnit 时间单位，如果timeout小于等于0，这个参数无效、@return LinkedList<LinkedList<String>> 列表1(0):标准输出 列表2(1):标准错误 列表3(2):退出码
+  - `public static LinkedList<LinkedList<String>> execCommandByRuntime(String cmd)`——仅运行命令
+  - `public static String execCommandByProcessBuilder(String cmd)`——仅运行命令（不能带空格）
+  - `public static String execCommandByProcessBuilder(String[] cmd)`——仅运行命令（允许空格）
+  - `public static LinkedList<LinkedList<String>> execCommandByProcessBuilder(String cmd,File[] logfile,boolean redirectErrorStream,long timeout,TimeUnit timeUnit)`——使用ProcessBuilder运行命令。cmd 命令（不允许空格）、logfile null为无日志文件。每次运行日志都会被覆盖！如果重定向错误日志，请提供一个日志文件。如果没有重定向，请提供两个、redirectErrorStream 是否重定向错误（一般为是）、timeout 超时 小于等于0时无效、timeUnit 单位、 @return 标准输出 标准错误 退出码
+  - `public static LinkedList<LinkedList<String>> execCommandByProcessBuilder(String[] cmd,File[] logfile,boolean redirectErrorStream,long timeout,TimeUnit timeUnit)`——使用ProcessBuilder运行命令 命令（允许空格）
+  - `public static Path mkdir(Path path, boolean isMkdirs)`——创建文件夹
+  - `public static Path mkdirs(Path path)`——mkdir -p
+  - `public static Path mkdir(Path path)`——mkdir 存在会报错
+  - `public static Path touch(Path path, boolean overwrite)`——创建文件
+  - `public static Path touch(Path path)`——touch 直接覆盖
+  - `public static LinkedList<Path> copy(Path src, Path dst)`——复制文件或文件夹（覆盖）
+  - `public static LinkedList<Path> copyFollowLinks(Path src, Path dst)`——复制文件或文件夹（覆盖）
+  - `public static LinkedList<Path> copyExcludeDotfiles(Path src, Path dst)`——复制当前目录中除了点文件以外的文件(仅允许目录)，且不跟随符号链接
+  - `public static LinkedList<Path> move(Path src, Path dst)`——移动文件或文件夹（覆盖）
+  - `public static LinkedList<Path> moveFollowLinks(Path src, Path dst)`——移动文件或文件夹（覆盖）
+  - `public static LinkedList<Path> moveExcludeDotfiles(Path src, Path dst)`——移动当前目录中除了点文件以外的文件(仅允许目录)，且不跟随符号链接
+  - `public static LinkedList<Path> rm(Path path)`——rm 删除文件（不能删除文件夹和隐藏文件），如果是目录，仅会删除目录中的文件（没有递归）
+  - `public static LinkedList<Path> rmAll(Path path, boolean action)`——删除文件、文件夹
+  - `public static LinkedList<Path> rmAll(Path path)`——rm -r递归删除删除文件(包括隐藏文件)、文件夹
+  - `public static LinkedList<Path> rmExcludeDotfiles(Path path)`——删除当前目录中除了点文件以外的文件(仅允许目录)
+  - `public static LinkedList<Path> tree(Path path, int level, boolean includeHidden, boolean followLinks)`——tree列出所有文件
+  - `public static LinkedList<Path> tree(Path path)`——tree 列出所有（不跟随Link）
+  - `public static LinkedList<Path> la(Path path)`——ls -a 列出包括隐藏文件在内的文件
+  - `public static LinkedList<Path> ls(Path path)`——ls列出文件（隐藏文件除外）
+  - `public static boolean isDotfiles(Path path)`——是否是点开头文件（隐藏文件）
+  - `public static boolean isInDotDirectory(Path path)`——是否在点目录中（隐藏目录），是的话返回true，注意：并不会因为是隐藏文件而true，只专注目录
+  - `public static Object[] mergeArrays(Object[] a, Object[] b)`——合并两个数组
+  - `public static LinkedList arrayList2LinkedList(List e)`——List转LinkedList
+
 ## Python
 
 引入：`import 【脚本名称】`
@@ -509,6 +544,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True)`——`to hide a software from regedit`, 添加`Dword SystemComponent 1`
 
 ## 更新日志
+
+- 2023.03.27——0.1.2
+  - Java新增System_Utils模块
 
 - 2023.03.16——0.1.1
   - Java优化了IO模块，支持追加写入

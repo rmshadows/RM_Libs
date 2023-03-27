@@ -75,7 +75,7 @@ public class System_Utils {
      * @param timeout 超时 小于等于0忽略
      * @param timeUnit 时间单位，如果timeout小于等于0，这个参数无效
      * @return LinkedList<LinkedList<String>> 列表1(0):标准输出 列表2(1):标准错误 列表3(2):退出码
-     *
+     * public static LinkedList<LinkedList<String>> execCommandByRuntime(String cmd,LinkedList<File> logfile,boolean optionIfWindowsSetCharsetToGBK,boolean optionIfLinuxSetGnomeTerminalVisible,int optionTimestampMode,boolean verbose,long timeout,TimeUnit timeUnit)
      * 其他： 使用Runtime执行命令感觉是比较方便的，直接可以将命令写入exec()中。如果仅仅是这样写的话，转码是会一直卡死在那里的。而你将命令直接放到终端中执行，又不会出现问题。
      * 原因就在转码时候，会输出大量的信息(标准输出和标准错误)，如果不清理java的缓存区，就会导致缓存区满而命令无法继续执行的情况。
      * 那么解决办法肯定就是清理缓存区，而使用Runtime清理的话，你至少得再开另外一个线程，才能同时getInputStream和getErrorStream，这样并不是我喜欢的，所以便采用了ProcessBuilder
@@ -357,6 +357,7 @@ public class System_Utils {
      * @param timeout 超时 小于等于0时无效
      * @param timeUnit 单位
      * @return 标准输出 标准错误 退出码
+     * public static LinkedList<LinkedList<String>> execCommandByProcessBuilder(String cmd,File[] logfile,boolean redirectErrorStream,long timeout,TimeUnit timeUnit)
      */
     public static LinkedList<LinkedList<String>> execCommandByProcessBuilder(String cmd,
                                                                              File[] logfile,
@@ -440,7 +441,7 @@ public class System_Utils {
     }
 
     /**
-     * 使用ProcessBuilder运行命令
+     * 使用ProcessBuilder运行命令 命令（允许空格）
      * @param cmd 命令（允许空格）
      * @param logfile null为无日志文件。每次运行日志都会被覆盖！如果重定向错误日志，请提供一个日志文件。如果没有重定向，请提供两个
      * @param redirectErrorStream 是否重定向错误（一般为是）
@@ -560,7 +561,7 @@ public class System_Utils {
         }
     }
     /**
-     * mkdir 存在报错
+     * mkdir 存在会报错
      * @param path
      * @return
      */
@@ -685,7 +686,7 @@ public class System_Utils {
     }
 
     /**
-     * 移动文件或文件夹（覆盖）
+     *  mv 移动文件或文件夹（覆盖）
      * @param src
      * @param dst
      * @return 返回tree dst文件夹内容
@@ -880,7 +881,7 @@ public class System_Utils {
     }
 
     /**
-     * tree
+     * tree 列出所有文件
      * @param path 路径
      * @param level 遍历深度 （小于等于0无效）
      * @param includeHidden 是否包含隐藏文件
