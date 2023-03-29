@@ -63,13 +63,14 @@ public class Datetime_Utils {
 	 * 返回d1， d2时间差数据
 	 * @param d1
 	 * @param d2
-	 * @return 列表：1.int数组年月日 2.字符串时间差
+	 * @return 列表：0:年 1:月 2:日 3:字符串时间差
 	 */
-	public static LinkedList<Object> periodLocalDate(LocalDate d1, LocalDate d2){
-		LinkedList<Object> ll = new LinkedList<>();
+	public static LinkedList<String> periodLocalDate(LocalDate d1, LocalDate d2){
+		LinkedList<String> ll = new LinkedList<>();
 		Period p = Period.between(d1, d2);
-		//
-		ll.add(new int[]{p.getYears(), p.getMonths(), p.getDays()});
+		ll.add(String.valueOf(p.getYears()));
+		ll.add(String.valueOf(p.getMonths()));
+		ll.add(String.valueOf(p.getDays()));
 		// 时间差字符串
 		String s = "目标日期 "+ d1 +" 距离 "+ d2 +" 的时间差："+p.getYears()+" 年 "+p.getMonths()+" 月 "+p.getDays()+" 天";
 		ll.add(s);
@@ -209,7 +210,7 @@ public class Datetime_Utils {
 	/**
 	 * 获取格式
 	 * 使用：LocalDate.parse(Text, formatter);
-	 * @param format 如"yyyy-MM-dd" "yyyy年MM月dd日HH时mm分ss.SSSSSSSSS秒" S最多9位
+	 * @param format 如"yyyy-MM-dd"
 	 * @return DateTimeFormatter
 	 */
 	public static DateTimeFormatter getFormatter(String format){
