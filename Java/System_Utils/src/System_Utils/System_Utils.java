@@ -57,6 +57,14 @@ public class System_Utils {
         }
     }
 
+    /**
+     * 是否以管理员运行
+     * @return
+     */
+    public static boolean isRunAsAdministrator(){
+        return AdministratorChecker.IS_RUNNING_AS_ADMINISTRATOR;
+    }
+
     // Execute Command
     /**
      * 使用Runtime运行命令

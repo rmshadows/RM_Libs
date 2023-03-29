@@ -249,6 +249,7 @@ public class test {
 - System_Utils
   - `checkSystemType()`——判断系统是Windows(0)、Linux(1)或者MacOS(2)或者其他（-1）
   - `public static boolean isWindows()`——是否是Windows系统
+  - `public static boolean isRunAsAdministrator()`——是否以管理员运行
   - `public static LinkedList<LinkedList<String>> execCommandByRuntime(String cmd,LinkedList<File> logfile,boolean optionIfWindowsSetCharsetToGBK,boolean optionIfLinuxSetGnomeTerminalVisible,int optionTimestampMode,boolean verbose,long timeout,TimeUnit timeUnit)`——使用Runtime运行命令。cmd 字符串命令、logfile 日志文件，如果不生成，请填写null。仅提供长度一位：标准、错误全部在一个文件。提供两位：标准和错误分开输出、optionIfWindowsSetCharsetToGBK 如果是Windows系统，启用GBK编码、optionIfLinuxSetGnomeTerminalVisible 如果是Linux系统，使用GNOME Terminal运行、optionTimestampMode 文件输出带时间戳的模式（其他: 不带时间，1：LocalDateTime 2023-03-20T21:57:15.676611，2:ZonedDateTime 2023-03-20T21:57:15.677782+08:00[Asia/Shanghai]，3:时间-中文-毫秒 2023年03月20日22时02分40.602148秒，4:毫秒时间戳) 1679320718584）、verbose 是否直接输出到命令行、timeout 超时 小于等于0忽略、timeUnit 时间单位，如果timeout小于等于0，这个参数无效、@return LinkedList<LinkedList<String>> 列表1(0):标准输出 列表2(1):标准错误 列表3(2):退出码
   - `public static LinkedList<LinkedList<String>> execCommandByRuntime(String cmd)`——仅运行命令
   - `public static String execCommandByProcessBuilder(String cmd)`——仅运行命令（不能带空格）
@@ -278,6 +279,7 @@ public class test {
   - `public static boolean isInDotDirectory(Path path)`——是否在点目录中（隐藏目录），是的话返回true，注意：并不会因为是隐藏文件而true，只专注目录
   - `public static Object[] mergeArrays(Object[] a, Object[] b)`——合并两个数组
   - `public static LinkedList arrayList2LinkedList(List e)`——List转LinkedList
+- AdministratorChecker——辅助类
 
 ## Python
 

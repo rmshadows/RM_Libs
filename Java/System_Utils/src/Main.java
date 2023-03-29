@@ -4,12 +4,12 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException{
           // 使用Runtime运行命令
 //        testRuntime();
         // 使用ProcessBuilder
 //        testProcessBuilder();
-
+        System.out.println("System_Utils.isRunAsAdministrator() = " + System_Utils.isRunAsAdministrator());
     }
 
     public static void testProcessBuilder()  {
