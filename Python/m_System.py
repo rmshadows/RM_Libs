@@ -438,6 +438,56 @@ def displaySystemInfo():
             print("网卡名: {}    MAC:{}    IP: {}".format(i, imac, iip))
 
 
+def javabyte2pythonbyte(javabyte):
+    """
+    Java byte 转 Python byte
+    Args:
+        javabyte:
+
+    Returns:
+
+    """
+    return javabyte % 256
+
+
+def pythonbyte2javabyte(pythonbyte):
+    """
+    Python byte转Java byte
+    Args:
+        pythonbyte:
+
+    Returns:
+
+    """
+    return int(pythonbyte) - 256 if int(pythonbyte) > 127 else int(pythonbyte)
+
+
+def javabytes2pythonbytes(javabytes):
+    """
+    Java byte数组转PythonByte数组
+    Args:
+        javabytes:
+
+    Returns:
+
+    """
+    return bytes(i % 256 for i in javabytes)
+    # return bytes(map(javabyte2pythonbyte, javabytes))
+
+
+def pythonbytes2javabytes(pythonbytes):
+    """
+    Python byte数组转Java byte数组
+    https://www.jianshu.com/p/b793b81088de
+    Args:
+        pythonbytes:
+
+    Returns:
+
+    """
+    return [int(i) - 256 if int(i) > 127 else int(i) for i in pythonbytes]
+
+
 if __name__ == '__main__':
     print("是否是管理员：{}".format(checkAdministrator()))
     execCommand("ls", 0, True)

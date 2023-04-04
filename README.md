@@ -523,6 +523,10 @@ if __name__ == '__main__':
 - `averageSplitList(list2split:list, n:int)`——自动平均分配列表
 - `splitListInto(list2split:list, n:int)`——将列表强制分为n个
 - `displaySystemInfo()`——打印系统信息，仅Windows和Linux
+- `javabyte2pythonbyte(javabyte)`——Python byte转Java byte
+- `javabytes2pythonbytes(javabytes)`——Java byte数组转PythonByte数组
+- `pythonbytes2javabytes(pythonbytes)`——Python byte数组转Java byte数组
+- `pythonbyte2javabyte(pythonbyte)`——Python byte转Java byte
 
 例:
 
@@ -565,9 +569,10 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.4.5——0.1.3
+  - Python System模块新增Java Python byte数组转换
 - 2023.03.27——0.1.2
   - Java新增System_Utils模块
-
 - 2023.03.16——0.1.1
   - Java优化了IO模块，支持追加写入
 - 2023.03.13——0.1.0
