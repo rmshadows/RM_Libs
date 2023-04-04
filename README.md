@@ -89,6 +89,12 @@ testPrintln
 ### AES_Utils
 
 >AES模块，CBC模式和CFB模式
+>
+>注意：byte[] 数据
+>
+>Python3： 0~256
+>
+>java:     -127~128
 
 - AES CBC
 - AES CFB
@@ -197,6 +203,12 @@ public class test {
 
 ### IO_Utils
 
+>注意：byte[] 数据
+>
+>Python3： 0~256
+>
+>java:     -127~128
+
 - IO_Utils
   - `public static LinkedList<String> readUsingBufferedReader(File f)`——读取文件，以行位单位返回列表，仅适用于单行少的，返回每一行的列表。
   - `public static File writeUsingBufferedWriter(File f, LinkedList<String> lines, boolean appendMode)`——给定行的列表写入文件
@@ -301,6 +313,12 @@ public class test {
 ### m_AES
 
 >与Java无缝衔接，支持CFB（默认32-256位）、CBC模式（默认长度16-128位）
+>
+>注意：byte[] 数据
+>
+>Python3： 0~256
+>
+>java:     -127~128
 
 - `class AES_CFB`
   - `def padding(self, pwd, leng)`——填充到指定位数
