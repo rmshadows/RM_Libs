@@ -291,6 +291,11 @@ public class test {
   - `public static boolean isInDotDirectory(Path path)`——是否在点目录中（隐藏目录），是的话返回true，注意：并不会因为是隐藏文件而true，只专注目录
   - `public static Object[] mergeArrays(Object[] a, Object[] b)`——合并两个数组
   - `public static LinkedList arrayList2LinkedList(List e)`——List转LinkedList
+  - `private static HashMap<Integer, Integer> getPythonJavaByteMap(boolean pythonBytesKey)`——私有方法，返回Python Bytes对应的JavaBytes 字典
+  - `public static byte pythonbyte2javabyte(int pybyte)`——Python byte转 Java byte
+  - `public static int javabyte2pythonbyte(int jbyte)`——Java byte转 Python byte
+  - `public static byte[] pythonbytes2javabytes(byte[] pybytes)`——Pythonbyte数组转Javabyte数组
+  - `public static int[] javabytes2pythonbytes(byte[] jbytes)`——Javabyte数组转Pythonbyte数组
 - AdministratorChecker——辅助类
 
 ## Python
@@ -571,6 +576,7 @@ if __name__ == '__main__':
 
 - 2023.4.5——0.1.3
   - Python System模块新增Java Python byte数组转换
+  - Java System模块新增Java Python byte数组转换
 - 2023.03.27——0.1.2
   - Java新增System_Utils模块
 - 2023.03.16——0.1.1

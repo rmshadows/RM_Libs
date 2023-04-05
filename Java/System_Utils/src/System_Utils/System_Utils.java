@@ -1046,5 +1046,78 @@ public class System_Utils {
         e.stream().forEach(x->linkedList.add(x));
         return linkedList;
     }
+    
+    
+    /**
+     * 私有方法，返回Python Bytes对应的JavaBytes 字典
+     * @param pythonBytesKey key是Python的字节数组，否则是Java的字节数组
+     * @return
+     */
+    private static HashMap<Integer, Integer> getPythonJavaByteMap(boolean pythonBytesKey){
+        HashMap<Integer, Integer> hashMap = new HashMap<>();
+        int b = -128;
+        // 0~127相同
+        for (int i = 0; i <= 127; i++) {
+            hashMap.put(i, i);
+        }
+        if(pythonBytesKey){
+            // Python 0~255 Java -128~127
+            for (int i = 128; i < 256; i++) {
+                hashMap.put(i, b);
+                b++;
+            }
+        }else {
+            for (int i = 128; i < 256; i++) {
+                hashMap.put(b, i);
+                b++;
+            }
+        }
+        return hashMap;
+    }
+
+
+    /**
+     * Python byte转 Java byte
+     * @param pybyte
+     * @return
+     */
+    public static byte pythonbyte2javabyte(int pybyte){
+        return getPythonJavaByteMap(true).get(pybyte).byteValue();
+    }
+
+    /**
+     * Java byte转 Python byte
+     * @param jbyte
+     * @return
+     */
+    public static int javabyte2pythonbyte(int jbyte){
+        return getPythonJavaByteMap(false).get(jbyte).intValue();
+    }
+
+    /**
+     * Pythonbyte数组转Javabyte数组
+     * @param pybytes
+     * @return
+     */
+    public static byte[] pythonbytes2javabytes(byte[] pybytes){
+        byte[] r = new byte[pybytes.length];
+        for (int i = 0; i < pybytes.length; i++) {
+            r[i] = pythonbyte2javabyte(pybytes[i]);
+        }
+        return r;
+    }
+
+    /**
+     * Javabyte数组转Pythonbyte数组
+     * @param jbytes
+     * @return
+     */
+    public static int[] javabytes2pythonbytes(byte[] jbytes){
+        int[] r = new int[jbytes.length];
+        for (int i = 0; i < jbytes.length; i++) {
+            r[i] = javabyte2pythonbyte(jbytes[i]);
+        }
+        return r;
+    }
 
 }
