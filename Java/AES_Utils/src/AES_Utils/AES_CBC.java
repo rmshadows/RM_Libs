@@ -20,11 +20,11 @@ public class AES_CBC {
     private static final String ENCRY_ALGORITHM = "AES";//加密方法名称
     private static final String CIPHER_MODE = "AES/CBC/PKCS5Padding";//填充方式
     private static final String CHARACTER = "UTF-8";//编码
-    private static int PWD_SIZE = 16; //默认采用128位的Key 16byte
+    private int PWD_SIZE = 16; //默认采用128位的Key 16byte
     // 密钥 keyA
-    private static String password = null;
+    private String password = null;
     // vi偏移量 keyB
-    private static String iv_spec = null;
+    private String iv_spec = null;
 
     /**
      * 默认16位

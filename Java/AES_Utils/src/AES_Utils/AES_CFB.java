@@ -13,26 +13,26 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AES_CFB {
     // 仅用于Debug，不加密
-    private static boolean debug_mode = false;
+    final private static boolean debug_mode = false;
     private static final String CipherMode = "AES/CFB/NoPadding";// 与Python默认配置兼容
     //    private static final String CipherMode = "AES/CFB/PKCS5Padding";// 使用CFB加密，需要设置IV
     // 偏移量
-    private static byte[] cfb_iv;
+    private byte[] cfb_iv;
     // 密钥长度
-    private static int key_length = 32;
+    private int key_length = 32;
     // 密码
-    private static byte[] cfb_key;
+    private byte[] cfb_key;
     private static final String CHARACTER = "UTF-8";
 
-    public static int getKey_length() {
+    public int getKey_length() {
         return key_length;
     }
 
-    public static void setKey_length(int key_length) {
-        AES_CFB.key_length = key_length;
+    public void setKey_length(int key_length) {
+        this.key_length = key_length;
     }
 
-    public static String getKey() {
+    public String getKey() {
         try {
             return new String(cfb_key, CHARACTER);
         } catch (UnsupportedEncodingException e) {
@@ -40,11 +40,11 @@ public class AES_CFB {
         }
     }
 
-    public static void setKey(String key) {
-        AES_CFB.cfb_key = AES_Tools.padding(key, AES_CFB.key_length);
+    public void setKey(String key) {
+        cfb_key = AES_Tools.padding(key, key_length);
     }
 
-    public static String getCfb_iv() {
+    public String getCfb_iv() {
         try {
             return new String(cfb_iv, CHARACTER);
         } catch (UnsupportedEncodingException e) {
@@ -52,24 +52,24 @@ public class AES_CFB {
         }
     }
 
-    public static void setCfb_iv(String cfb_iv) {
-        AES_CFB.cfb_iv = AES_Tools.padding(cfb_iv, 16);
+    public void setCfb_iv(String cfb_iv) {
+        this.cfb_iv = AES_Tools.padding(cfb_iv, 16);
     }
 
     public AES_CFB(String passwd, String iv, int pwd_len) {
-        AES_CFB.key_length = pwd_len;
-        AES_CFB.cfb_key = AES_Tools.padding(passwd, key_length);
-        AES_CFB.cfb_iv = AES_Tools.padding(iv, 16);
+        key_length = pwd_len;
+        cfb_key = AES_Tools.padding(passwd, key_length);
+        cfb_iv = AES_Tools.padding(iv, 16);
     }
 
     public AES_CFB(String passwd, String iv) {
         cfb_key = AES_Tools.padding(passwd, key_length);
-        AES_CFB.cfb_iv = AES_Tools.padding(iv, 16);
+        cfb_iv = AES_Tools.padding(iv, 16);
     }
 
     public AES_CFB(String passwd){
-        AES_CFB.cfb_key = AES_Tools.padding(passwd, key_length);
-        AES_CFB.cfb_iv = AES_Tools.padding("", 16);
+        cfb_key = AES_Tools.padding(passwd, key_length);
+        cfb_iv = AES_Tools.padding("", 16);
     }
 
     /**
@@ -88,8 +88,7 @@ public class AES_CFB {
                 e.printStackTrace();
             }
             data = bytesEncrypt(data, AES_Tools.padding(password, key_length), AES_Tools.padding(iv,16));
-            String result = AES_Tools.bytes2hex(data);
-            return result;
+            return AES_Tools.bytes2hex(data);
         }else {
             return clear_content;
         }
@@ -109,8 +108,7 @@ public class AES_CFB {
                 e.printStackTrace();
             }
             data = bytesEncrypt(data, cfb_key, cfb_iv);
-            String result = AES_Tools.bytes2hex(data);
-            return result;
+            return AES_Tools.bytes2hex(data);
         }else {
             return clear_content;
         }

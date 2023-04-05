@@ -221,6 +221,8 @@ public class test {
 
 ### RSA_Utils
 
+>依赖com.github.xiangyuecn.rsajava
+
 - `com.github.xiangyuecn.rsajava`
   - 处理PKCS1的依赖，感谢[RSA-java](https://github.com/xiangyuecn/RSA-java)项目
 - RSA_PKCS1_Utils
@@ -257,6 +259,8 @@ public class test {
   - `public static RSA_PEM PKCS8_2_PKCS1(PrivateKey prk, PublicKey puk)`——PKCS8 转 PKCS1
 
 ### System_Utils
+
+>依赖：Datetime_Utils、IO_Utils、System_Utils
 
 - System_Utils
   - `checkSystemType()`——判断系统是Windows(0)、Linux(1)或者MacOS(2)或者其他（-1）
@@ -574,6 +578,10 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.4.6——0.1.4
+  - Java AES模块由类调用改为示例调用
+  - Python AES模块由类调用改为示例调用
+  - 补充了Java项目依赖关系
 - 2023.4.5——0.1.3
   - Python System模块新增Java Python byte数组转换
   - Java System模块新增Java Python byte数组转换

@@ -294,6 +294,7 @@ def displaySystemInfo():
     Returns:
         None
     """
+    # 非Windows系统请注释掉
     import wmi
     import socket
     if IS_WINDOWS:
