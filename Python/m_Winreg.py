@@ -1,9 +1,34 @@
 #!/usr/bin/python3
 """
 此模块用于Windows注册表修改
+DOC: https://docs.python.org/zh-cn/3/library/winreg.html#winreg.SaveKey
 """
 import winreg
 import os.path as op
+
+import os, sys
+import _winreg
+import win32api
+import win32security
+
+#
+# You need to have SeBackupPrivilege enabled for this to work
+# https://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/
+#
+
+priv_flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
+hToken = win32security.OpenProcessToken (win32api.GetCurrentProcess (), priv_flags)
+privilege_id = win32security.LookupPrivilegeValue (None, "SeBackupPrivilege")
+win32security.AdjustTokenPrivileges (hToken, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)])
+
+key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r'Software\Microsoft\Windows\CurrentVersion\Run')
+
+filepath = r'C:\key.reg'
+
+if os.path.exists (filepath):
+  os.unlink (filepath)
+
+_winreg.SaveKey (key, filepath)
 
 
 def __debug():
@@ -12,13 +37,15 @@ def __debug():
     reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"")
     # print(reg)
     PATH = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\WIC"
-    saveKeyEx(PATH, r"C:\Users\testing\Desktop\reg.txt")
+    saveKeyEx(PATH, r"C:\Users\testing\Desktop\reg")
     print("====END====")
 
 
 def saveKey(key, filepath):
     """
+    TODO
     Not available yet
+    https://stackoverflow.com/questions/30984406/winreg-savekey-error-a-required-privilege-is-not-held-by-the-client
     Args:
         key:
         filepath:
@@ -34,6 +61,7 @@ def saveKey(key, filepath):
 
 def saveKeyEx(fullpath, filepath):
     """
+    TODO
     Not available yet
     Args:
         fullpath:
