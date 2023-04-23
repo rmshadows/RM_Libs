@@ -3,32 +3,11 @@
 此模块用于Windows注册表修改
 DOC: https://docs.python.org/zh-cn/3/library/winreg.html#winreg.SaveKey
 """
+import m_System
+
+import os
 import winreg
 import os.path as op
-
-import os, sys
-import _winreg
-import win32api
-import win32security
-
-#
-# You need to have SeBackupPrivilege enabled for this to work
-# https://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/
-#
-
-priv_flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
-hToken = win32security.OpenProcessToken (win32api.GetCurrentProcess (), priv_flags)
-privilege_id = win32security.LookupPrivilegeValue (None, "SeBackupPrivilege")
-win32security.AdjustTokenPrivileges (hToken, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)])
-
-key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r'Software\Microsoft\Windows\CurrentVersion\Run')
-
-filepath = r'C:\key.reg'
-
-if os.path.exists (filepath):
-  os.unlink (filepath)
-
-_winreg.SaveKey (key, filepath)
 
 
 def __debug():
@@ -37,23 +16,60 @@ def __debug():
     reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"")
     # print(reg)
     PATH = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\WIC"
-    saveKeyEx(PATH, r"C:\Users\testing\Desktop\reg")
+    # exportReg(PATH, "1.reg")
+    importReg(PATH, "1.reg")
     print("====END====")
+
+
+def exportReg(fullpath, filepath):
+    """
+    导出注册表
+    Args:
+        fullpath:
+        filepath:
+
+    Returns:
+
+    """
+    if op.exists(filepath):
+        os.unlink(filepath)
+    cmd = "reg export {} {}".format(fullpath, filepath)
+    m_System.execCommand(cmd)
+
+
+def importReg(filepath):
+    """
+    导入注册表
+    Args:
+        filepath:
+
+    Returns:
+
+    """
+    cmd = "reg import {}".format(filepath)
+    m_System.execCommand(cmd)
 
 
 def saveKey(key, filepath):
     """
-    TODO
-    Not available yet
-    https://stackoverflow.com/questions/30984406/winreg-savekey-error-a-required-privilege-is-not-held-by-the-client
+    DISCARD 弃用
+    导出注册表
     Args:
-        key:
+        key: 已经打开的key
         filepath:
 
     Returns:
 
     """
     try:
+        import win32api  # pywin32
+        import win32security
+        priv_flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
+        hToken = win32security.OpenProcessToken(win32api.GetCurrentProcess(), priv_flags)
+        privilege_id = win32security.LookupPrivilegeValue(None, "SeBackupPrivilege")
+        win32security.AdjustTokenPrivileges(hToken, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)])
+        if op.exists(filepath):
+            os.unlink(filepath)
         winreg.SaveKey(key, filepath)
     except Exception as e:
         print("saveKey(key, filepath): {}".format(e))
@@ -61,8 +77,8 @@ def saveKey(key, filepath):
 
 def saveKeyEx(fullpath, filepath):
     """
-    TODO
-    Not available yet
+    DISCARD 弃用
+    导出注册表
     Args:
         fullpath:
         filepath:
@@ -71,10 +87,47 @@ def saveKeyEx(fullpath, filepath):
 
     """
     try:
+        import win32api  # pywin32
+        import win32security
+        # https://stackoverflow.com/questions/30984406/winreg-savekey-error-a-required-privilege-is-not-held-by-the-client
+        # You need to have SeBackupPrivilege enabled for this to work
+        # https://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/
+        priv_flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
+        hToken = win32security.OpenProcessToken(win32api.GetCurrentProcess(), priv_flags)
+        privilege_id = win32security.LookupPrivilegeValue(None, "SeBackupPrivilege")
+        win32security.AdjustTokenPrivileges(hToken, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)])
+        if op.exists(filepath):
+            os.unlink(filepath)
         key = getKeyEx(fullpath)
         winreg.SaveKey(key, filepath)
     except Exception as e:
         print("saveKeyEx(fullpath, filepath): {}".format(e))
+
+
+def loadKey(fullpath, filepath):
+    """
+    DISCARD 弃用
+    导入注册表
+    在指定键之下创建一个子键，并将指定文件中的注册表信息存入该子键中。
+    该文件必须是用 SaveKey() 函数创建的。在文件分配表（FAT）文件系统中，文件名可能不带扩展名。
+    Args:
+        fullpath:
+        filepath:
+
+    Returns:
+
+    """
+    try:
+        import win32api  # pywin32
+        import win32security
+        priv_flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
+        hToken = win32security.OpenProcessToken(win32api.GetCurrentProcess(), priv_flags)
+        privilege_id = win32security.LookupPrivilegeValue(None, "SeBackupPrivilege")
+        win32security.AdjustTokenPrivileges(hToken, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)])
+        s = splitRootPath(fullpath)
+        winreg.LoadKey(s[0], s[1], filepath)
+    except Exception as e:
+        print("loadKey(fullpath, filepath): {}".format(e))
 
 
 def createValue(key, subname, type, value):
@@ -111,7 +164,7 @@ def deleteValueEx(fullpath, value):
     """
     删除值
     Args:
-        key:
+        fullpath:
         value:
 
     Returns:
