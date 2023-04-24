@@ -364,6 +364,17 @@ if __name__ == '__main__':
     print("KEY:12345 IV:54321 KEY_SIZE: 32 解密：" + cipher.ex_decrypt(es, "12345", "54321"))
 ```
 
+### m_Array
+
+> 列表、字典等的处理
+
+- `averageSplitList(list2split:list, n:int)`——自动平均分配列表
+- `splitListInto(list2split:list, n:int)`——将列表强制分为n个
+- `permutation(lst, len)`——对给定的列表进行排列组合
+- `sortListBy(list, byIndex = 0, reverse = False)`——列表排序
+- `sortDictByValue(dict, reverse = False)`——按值排序字典
+- `sortDictByKey(dict, reverse = False)`——按key排序字典
+
 ### m_ColorStdout
 
 - `wprint(content, color=4)`——Windows端打印彩色文字(颜色可选受限，可自行修改源码)
@@ -529,8 +540,6 @@ if __name__ == '__main__':
 - `copyFD(src, dst)`——复制文件或者文件夹
 - `moveFD(src, dst)`——移动文件或者文件夹
 - `getSuffixFile(suffix, directory=".")`——返回文件夹下的带后缀的文件
-- `averageSplitList(list2split:list, n:int)`——自动平均分配列表
-- `splitListInto(list2split:list, n:int)`——将列表强制分为n个
 - `displaySystemInfo()`——打印系统信息，仅Windows和Linux
 - `javabyte2pythonbyte(javabyte)`——Python byte转Java byte
 - `javabytes2pythonbytes(javabytes)`——Java byte数组转PythonByte数组
@@ -578,6 +587,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.4.25——0.1.5
+  - Python新增`m_Array`
 - 2023.4.6——0.1.4
   - Java AES模块由类调用改为示例调用
   - Python AES模块由类调用改为示例调用

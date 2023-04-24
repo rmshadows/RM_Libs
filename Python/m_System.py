@@ -235,59 +235,6 @@ def moveFD(src, dst):
     return True
 
 
-def averageSplitList(list2split:list, n:int):
-    """
-    平均分配到列表
-    e.g.:
-    [1,2,3,4,5,6,7] 3
-    [1,2,3] [4,5,6] [7]
-    Args:
-        list2split: 列表
-        n: 平分后每份列表包含的个数n
-
-    Returns:
-
-    """
-    for i in range(0, len(list2split), n):
-        yield list2split[i:i + n]
-
-
-def splitListInto(list2split:list, n:int):
-    """
-    将列表强制分为n个
-    e.g.:
-    [1,2,3,4,5,6,7,8,9] 4
-    [[1, 2], [3, 4], [5, 6], [7, 8, 9]]
-    https://www.pythonheidong.com/blog/article/1090214/7731b9881faa69629e0d/
-    Args:
-        list2split: 列表
-        n: 份数
-
-    Returns:
-        分隔后的列表
-    """
-    if not isinstance(list2split, list) or not isinstance(n, int):
-        return []
-    ls_len = len(list2split)
-    if n <= 0 or 0 == ls_len:
-        return []
-    if n > ls_len:
-        return []
-    elif n == ls_len:
-        return [[i] for i in list2split]
-    else:
-        j = ls_len // n
-        k = ls_len % n
-        ### j,j,j,...(前面有n-1个j),j+k
-        # 步长j,次数n-1
-        ls_return = []
-        for i in range(0, (n - 1) * j, j):
-            ls_return.append(list2split[i:i + j])
-        # 算上末尾的j+k
-        ls_return.append(list2split[(n - 1) * j:])
-        return ls_return
-    
-
 def displaySystemInfo():
     """
     打印系统信息
