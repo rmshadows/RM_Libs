@@ -145,6 +145,11 @@ def createValue(key, subname, type, value):
 
     """
     winreg.SetValueEx(key, subname, 0, type, value)
+    # if existedSubkey(key, subname):
+    #     winreg.SetValueEx(key, subname, 0, type, value)
+    # else:
+    #     createSubkey(key, subname)
+    #     winreg.SetValueEx(key, subname, 0, type, value)
 
 
 def deleteValue(key, value):
@@ -428,9 +433,11 @@ def hideSoftware(name, is64Bit=True, accurate=True):
     is64Bit: 是否是64位
     accurate: 是否精准匹配，否的话只要名称含有某字段就执行
     :return: 是否找到该应用(并非是否执行成功！)
+    https://blog.csdn.net/wybshyy/article/details/52064296
     """
     regr = ""
     result = False
+    # HKEY_LOCAL_MACHINE
     if is64Bit:
         regr = getKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
     else:
@@ -439,7 +446,12 @@ def hideSoftware(name, is64Bit=True, accurate=True):
     for i in getSubkey(regr):
         try:
             # 假如知道键名，也可以直接取值
-            sub_key = getKeyEx(r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i))
+            if is64Bit:
+                sub_key = getKeyEx(
+                    r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i))
+            else:
+                sub_key = getKeyEx(
+                    r"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i))
             value, type, typename = getValue(sub_key, "DisplayName")
             # print("Display: {} , Type: {}, TypeName: {}".format(value, type, typename))
             # 找到软件
@@ -457,6 +469,37 @@ def hideSoftware(name, is64Bit=True, accurate=True):
                 try:
                     createValue(sub_key, r"SystemComponent", winreg.REG_DWORD, 1)
                     # winreg.SetValueEx(regr, "SystemComponent", 0, winreg.REG_DWORD, 1)
+                except Exception as e:
+                    print(e)
+                print("Software Found: "+i)
+        except Exception as e:
+            print("{} got wrong : {}".format(i, e))
+    # HKEY_CURRENT_USER
+    if is64Bit:
+        regr = getKey(winreg.HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
+    else:
+        regr = getKey(winreg.HKEY_CURRENT_USER,r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall")
+    # 遍历
+    for i in getSubkey(regr):
+        try:
+            if is64Bit:
+                sub_key = getKeyEx(
+                    r"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i))
+            else:
+                sub_key = getKeyEx(
+                    r"HKEY_CURRENT_USER\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i))
+            value, type, typename = getValue(sub_key, "DisplayName")
+            found = False
+            if accurate:
+                if name == str(value):
+                    found = True
+            else:
+                if name in str(value):
+                    found = True
+            if found:
+                result = True
+                try:
+                    createValue(sub_key, r"SystemComponent", winreg.REG_DWORD, 1)
                 except Exception as e:
                     print(e)
                 print("Software Found: "+i)
