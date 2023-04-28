@@ -218,7 +218,8 @@ def getValue(reg, valuename):
         reg: key
         valuename: 名称
     Returns:
-        value, type
+        value, type, typename
+        值 类型 类型名称
     """
     r = winreg.QueryValueEx(reg, valuename)
     value = r[0]
@@ -251,7 +252,7 @@ def getValueEx(fullpath, valuename):
         fullpath: 路径
         valuename: 名称
     Returns:
-        value, type, typename
+        value, type, typename 如: REG_BINARY
     """
     r = winreg.QueryValueEx(getKeyEx(fullpath), valuename)
     value = r[0]
@@ -410,7 +411,7 @@ def getSubkey(key, mode=0):
                 subKey.append(sk)
                 i += 1
         except Exception as e:
-            print(winreg.QueryInfoKey(key))
+            print("getSubkey(W): "+str(winreg.QueryInfoKey(key)))
             # print("\tsubKey(): {}".format(e))
     elif mode == 1:
         for i in range(0, getKeyInfo(key, 0)):
@@ -428,25 +429,22 @@ def hideSoftware(name, is64Bit=True, accurate=True):
     accurate: 是否精准匹配，否的话只要名称含有某字段就执行
     :return: 是否找到该应用(并非是否执行成功！)
     """
-    reg = ""
+    regr = ""
+    result = False
     if is64Bit:
-        reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
+        regr = getKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall")
     else:
-        reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall")
-    sk = getSubkey(reg)
+        regr = getKey(winreg.HKEY_LOCAL_MACHINE,r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall")
     # 遍历
-    for i in sk:
-        if is64Bit:
-            # 需要打开访问权限
-            reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i), 0, winreg.KEY_ALL_ACCESS)
-        else:
-            reg = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i), 0, winreg.KEY_ALL_ACCESS)
+    for i in getSubkey(regr):
         try:
             # 假如知道键名，也可以直接取值
-            value, type = winreg.QueryValueEx(reg, "DisplayName")
-            # print("Display: {} , Type: {}".format(value, type))
+            sub_key = getKeyEx(r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{}".format(i))
+            value, type, typename = getValue(sub_key, "DisplayName")
+            # print("Display: {} , Type: {}, TypeName: {}".format(value, type, typename))
             # 找到软件
             found = False
+            # 是否精确搜寻
             if accurate:
                 if name == str(value):
                     found = True
@@ -454,19 +452,21 @@ def hideSoftware(name, is64Bit=True, accurate=True):
                 if name in str(value):
                     found = True
             if found:
+                result = True
                 # 检查是否有SystemComponent
                 try:
-                    winreg.SetValueEx(reg, "SystemComponent", 0, winreg.REG_DWORD, 1)
+                    createValue(sub_key, r"SystemComponent", winreg.REG_DWORD, 1)
+                    # winreg.SetValueEx(regr, "SystemComponent", 0, winreg.REG_DWORD, 1)
                 except Exception as e:
                     print(e)
-                print("Software Found.")
-                return True
+                print("Software Found: "+i)
         except Exception as e:
-            print("{}  出错 : {}".format(i, e))
-    print("Software Not Found.")
+            print("{} got wrong : {}".format(i, e))
+    if not result:
+        print("Software Not Found.")
     # 关闭
-    winreg.CloseKey(reg)
-    return False
+    winreg.CloseKey(regr)
+    return result
 
 
 if __name__ == '__main__':
