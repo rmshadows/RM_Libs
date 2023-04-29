@@ -583,7 +583,7 @@ if __name__ == '__main__':
 - `getKey(root, Path, permission=winreg.KEY_ALL_ACCESS)`——打开注册表
 - `getKeyEx(fullpath, permission=winreg.KEY_ALL_ACCESS)`——打开注册表
 - `getSubkey(key, mode=0)`——给定注册表，返回子键名称列表
-- `hideSoftware(name, is64Bit=True, accurate=True)`——`to hide a software from regedit`, 添加`Dword SystemComponent 1`
+- `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
 
