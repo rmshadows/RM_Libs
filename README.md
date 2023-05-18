@@ -432,6 +432,10 @@ if __name__ == '__main__':
 - `formatOutput(dateTime, format=None ,datesplit="-", timesplit=":", datetimesplit=" ")`——格式化输出
 - `delayMsecond(t)`——精确到1ms的延迟ms定时器 1s = 1000毫秒
 
+### m_Debug
+
+- `def log(data, debugMode=True, note="", abfilepath=False)`——记录日志
+
 ### m_Excel
 
 - `def permutation(lst, len)`——对给定的列表进行排列组合
@@ -587,6 +591,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.5.19——0.1.6
+  - Python新增日志模块`m_Debug`
 - 2023.4.25——0.1.5
   - Python新增`m_Array`
 - 2023.4.6——0.1.4
