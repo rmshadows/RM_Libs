@@ -549,6 +549,7 @@ if __name__ == '__main__':
 - `javabytes2pythonbytes(javabytes)`——Java byte数组转PythonByte数组
 - `pythonbytes2javabytes(pythonbytes)`——Python byte数组转Java byte数组
 - `pythonbyte2javabyte(pythonbyte)`——Python byte转Java byte
+- `inputTimeout(str_msg, int_timeout_second)`——输入超时模块
 
 例:
 

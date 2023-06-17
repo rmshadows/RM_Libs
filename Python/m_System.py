@@ -7,6 +7,7 @@ import os
 import shutil
 from subprocess import Popen, PIPE
 import re
+from inputimeout import inputimeout, TimeoutOccurred
 
 
 IS_WINDOWS = os.sep == "\\"
@@ -434,6 +435,24 @@ def pythonbytes2javabytes(pythonbytes):
 
     """
     return [int(i) - 256 if int(i) > 127 else int(i) for i in pythonbytes]
+
+
+def inputTimeout(str_msg, int_timeout_second):
+    """
+    输入超时模块
+    Args:
+        str_msg: 询问信息
+        int_timeout_second: 超时时间
+
+    Returns:
+        输入,超时返回None
+    """
+    try:
+        c = inputimeout(prompt=str_msg, timeout=int_timeout_second)
+    except TimeoutOccurred:
+        c = None
+    finally:
+        return c
 
 
 if __name__ == '__main__':
