@@ -1,0 +1,14 @@
+{
+  "name": "system",
+  "version": "0.0.0",
+  "description": "系统组件",
+  "main": "system.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ryan",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "clipboardy": "^3.0.0"
+  }
+}

@@ -302,6 +302,12 @@ public class test {
   - `public static int[] javabytes2pythonbytes(byte[] jbytes)`——Javabyte数组转Pythonbyte数组
 - AdministratorChecker——辅助类
 
+## Node.js
+
+TODO....
+
+引入：`import 【脚本名称】`
+
 ## Python
 
 引入：`import 【脚本名称】`
@@ -592,6 +598,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.7.6——0.1.7(Dev)
+  - 新增Node.js项目库
 - 2023.5.19——0.1.6
   - Python新增日志模块`m_Debug`
 - 2023.4.25——0.1.5
