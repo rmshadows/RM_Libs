@@ -1,10 +1,15 @@
+/**
+ * 系统操作模块，默认同步直接返回值，异步返回Promise
+ */
 "use strict";
+import { rejects } from 'assert';
 import clipboard from 'clipboardy';
 import { log } from 'console';
 import { randomFill } from 'crypto';
-import { resolve } from 'dns';
+import { resolve, setDefaultResultOrder } from 'dns';
 import fs from 'fs';
 import { endianness } from 'os';
+import {List, Item} from 'linked-list'
 var fsPromise = fs.promises;
 
 /**
@@ -54,11 +59,11 @@ const onFailed = (fn) => {
  * clipboardy设置粘贴板
  * @param {string} content content 内容
  * @param {boolean} sync 是否同步， if true Doesn't work in browsers.
- * @returns 返回字符串内容
+ * @returns 返回字符串内容/async: None
  */
-export const setClipboard = async (content, sync = true) => {
-    let result = false;
+export const setClipboard = (content, sync = true) => {
     if (sync) {
+        let result = false;
         // Doesn't work in browsers.
         try {
             clipboard.writeSync(content);
@@ -71,44 +76,31 @@ export const setClipboard = async (content, sync = true) => {
         } catch (error) {
             console.log("setClipboard failed:" + error);
         }
+        return result;
     } else {
-        clipboard.write(content).then(async () => {
-            if (await clipboard.read() === content) {
-                result = true;
-            } else {
-                console.log("setClipboard: 似乎失败了");
-            }
-            console.log("setClipboard:设置粘贴板:" + content);
-        }).catch((err) => {
-            console.log("setClipboard failed:" + error);
-        });
+        return clipboard.write(content);
     }
-    return result;
 };
 
 
 /**
  * clipboardy获取系统粘贴板信息
  * @param {boolean} sync 是否同步，If false, Doesn't work in browsers.
- * @returns 返回字符串内容
+ * @returns 返回字符串内容/async:Promise
  */
-export const getClipboard = async (sync = true) => {
-    let content = "";
+export const getClipboard = (sync = true) => {
     if (sync) {
+        let content = "";
         try {
             content = clipboard.readSync();
             console.log("getClipboard:粘贴板读取:" + content);
         } catch (error) {
             console.log("getClipboard failed:" + error);
         }
+        return content;
     } else {
-        clipboard.read().then((data) => {
-            console.log("getClipboard:粘贴板读取:" + (content = data));
-        }).catch((err) => {
-            console.log("getClipboard(): " + err);
-        });
+        return clipboard.read();
     }
-    return content;
 }
 
 
@@ -116,15 +108,21 @@ export const getClipboard = async (sync = true) => {
  * 文件IO操作
  */
 
-export const fileType = async (filepath, sync = true) => {
+/**
+ * 判断文件类型 文件：1 文件夹：2 链接文件：3
+ * @param {String} filepath 
+ * @param {boolean} sync 
+ * @returns Number / Promise
+ */
+export const fileType = (filepath, sync = true) => {
     let fn = getExecFunction().name;
-    let t = 0;
     try {
         if (sync) {
+            let t = 0;
             let fstat = fs.lstatSync(filepath);
             if (fstat.isSymbolicLink()) {
                 console.log(filepath + "是链接文件");
-                return 3;
+                t = 3;
             } else if (fstat.isFile()) {
                 console.log(filepath + "是文件");
                 return 1;
@@ -135,8 +133,10 @@ export const fileType = async (filepath, sync = true) => {
                 console.log(filepath + "处于未知状态");
                 return -1;
             }
+            return t;
         } else {
-            t = await fsPromise.lstat(filepath).then((fstat) => {
+            return fsPromise.lstat(filepath).then((fstat) => {
+                console.log(typeof fstat);
                 if (fstat.isSymbolicLink()) {
                     console.log(filepath + "是链接文件");
                     return 3;
@@ -152,15 +152,32 @@ export const fileType = async (filepath, sync = true) => {
                 }
             });
         }
-        return t;
     } catch (error) {
         console.log("fileType(): " + error);
     }
 }
 
-var a = fileType("3", true)
-console.log(typeof (a));
-console.log(a);
+
+export const ls = (filepath, sync = true) => {
+    if (sync) {
+        try {
+            let files = new List();
+            files = fs.readdirSync(filepath);
+            files.forEach(el => {
+                if (el[0] === "."){
+                    files.detach(el);
+                }
+            });
+            console.log(files);
+        } catch (error) {
+            console.log("ls:"+error);
+        }
+    } else {
+        console.log();
+    }
+}
+
+ls(".");
 
 /**
  * 新建文件夹
