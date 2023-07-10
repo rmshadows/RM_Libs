@@ -9,7 +9,9 @@ import { randomFill } from 'crypto';
 import { resolve, setDefaultResultOrder } from 'dns';
 import fs from 'fs';
 import { endianness } from 'os';
-import {List, Item} from 'linked-list'
+import * as L from 'list'
+import { exit } from 'process';
+import path from 'path';
 var fsPromise = fs.promises;
 
 /**
@@ -72,7 +74,7 @@ export const setClipboard = (content, sync = true) => {
             } else {
                 console.log("setClipboard: 似乎失败了");
             }
-            console.log("setClipboard:设置粘贴板:" + content);
+            // console.log("setClipboard:设置粘贴板:" + content);
         } catch (error) {
             console.log("setClipboard failed:" + error);
         }
@@ -93,7 +95,7 @@ export const getClipboard = (sync = true) => {
         let content = "";
         try {
             content = clipboard.readSync();
-            console.log("getClipboard:粘贴板读取:" + content);
+            // console.log("getClipboard:粘贴板读取:" + content);
         } catch (error) {
             console.log("getClipboard failed:" + error);
         }
@@ -121,13 +123,13 @@ export const fileType = (filepath, sync = true) => {
             let t = 0;
             let fstat = fs.lstatSync(filepath);
             if (fstat.isSymbolicLink()) {
-                console.log(filepath + "是链接文件");
+                // console.log(filepath + "是链接文件");
                 t = 3;
             } else if (fstat.isFile()) {
-                console.log(filepath + "是文件");
+                // console.log(filepath + "是文件");
                 return 1;
             } else if (fstat.isDirectory()) {
-                console.log(filepath + "是文件夹");
+                // console.log(filepath + "是文件夹");
                 return 2;
             } else {
                 console.log(filepath + "处于未知状态");
@@ -138,13 +140,13 @@ export const fileType = (filepath, sync = true) => {
             return fsPromise.lstat(filepath).then((fstat) => {
                 console.log(typeof fstat);
                 if (fstat.isSymbolicLink()) {
-                    console.log(filepath + "是链接文件");
+                    // console.log(filepath + "是链接文件");
                     return 3;
                 } else if (fstat.isFile()) {
-                    console.log(filepath + "是文件");
+                    // console.log(filepath + "是文件");
                     return 1;
                 } else if (fstat.isDirectory()) {
-                    console.log(filepath + "是文件夹");
+                    // console.log(filepath + "是文件夹");
                     return 2;
                 } else {
                     console.log(filepath + "处于未知状态");
@@ -157,27 +159,144 @@ export const fileType = (filepath, sync = true) => {
     }
 }
 
-
-export const ls = (filepath, sync = true) => {
+/**
+ * ls
+ * @param {string} filepath 路径
+ * @param {boolean} sync 是否同步 默认true
+ * @param {boolean} showHidden 是否显示隐藏文件 默认否
+ * @param {boolean} followLinks 是否跟随链接文件，默认否
+ * @param {boolean} absolutePath 是否返回绝对路径，默认是
+ * @returns 列表
+ */
+export const ls = (filepath, sync = true, showHidden = false, followLinks = false, absolutePath = true) => {
+    filepath = path.resolve(filepath);
     if (sync) {
         try {
-            let files = new List();
-            files = fs.readdirSync(filepath);
-            files.forEach(el => {
-                if (el[0] === "."){
-                    files.detach(el);
-                }
-            });
-            console.log(files);
+            // 如果是文件
+            if (fileType(filepath) == 1) {
+                return [filepath];
+            }
+            if (fileType(filepath) == 3 && !followLinks) {
+                // console.log("所给的路径是链接。");
+                return [filepath];
+            }
+            let files = L.from(fs.readdirSync(filepath));
+            if (!showHidden) {
+                files = L.filter((el) => {
+                    if (el.substring(0, 1) == ".") {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }, files);
+            };
+            // 返回绝对路径
+            if (absolutePath){
+                let abFiles = L.empty();
+                L.forEach((item) => {
+                    abFiles = L.append(path.resolve(item), abFiles);
+                }, files);
+                return L.toArray(abFiles);
+            }else{
+                return L.toArray(files);
+            }
         } catch (error) {
-            console.log("ls:"+error);
+            console.log("ls:" + error);
         }
     } else {
-        console.log();
+        // 如果是文件
+        if (fileType(filepath) == 1) {
+            return [filepath];
+        }
+        if (fileType(filepath) == 3 && !followLinks) {
+            throw new TypeError("所给的路径是链接。");
+        }
+        return fsPromise.readdir(filepath).then(x => {
+            let files = L.from(x);
+            if (!showHidden) {
+                files = L.filter((el) => {
+                    if (el.substring(0, 1) == ".") {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }, files);
+            };
+            // 返回绝对路径
+            if (absolutePath){
+                let abFiles = L.empty();
+                L.forEach((item) => {
+                    abFiles = L.append(path.resolve(item), abFiles);
+                }, files);
+                return L.toArray(abFiles);
+            }else{
+                return L.toArray(files);
+            }
+        });
     }
 }
 
-ls(".");
+/**
+ * 模拟la
+ * @param {string} filepath  
+ * @param {boolean} sync 
+ * @param {boolean} followLinks 
+ * @param {boolean} absolutePath 
+ * @returns 
+ */
+export const la = (filepath, sync = true, followLinks = false, absolutePath = true) => {
+    return ls(filepath, sync, true, followLinks, absolutePath);
+}
+
+
+export const tree = (filepath, sync = true, showHidden = false, followLinks = false) => {
+    filepath = path.resolve(filepath);
+    console.log("tree Input: "+ filepath);
+    let tfs = L.empty();
+    if (sync) {
+        try {
+            // 如果root是文件
+            if (fileType(filepath) == 1) {
+                return [filepath];
+            }
+            if (fileType(filepath) == 3 && !followLinks) {
+                // console.log("所给的路径是链接。");
+                return [filepath];
+            }
+            if (ls(item, true, showHidden, followLinks).length == 0) {
+                // 空目录当作文件处理
+                tfs = L.append(item, tfs);
+            }
+            // 先获取根目录文件
+            let root_dir = ls(filepath, true, showHidden, followLinks);
+            root_dir.forEach(item => {
+                // 不是文件就递归再看 eg:/home/msystem/node_modules
+                let rtfs = L.from(tree(item, true, showHidden, followLinks));
+                // console.log("非文件："+item);
+                tfs = L.concat(rtfs, tfs);
+
+                console.log("item: "+item);
+                // 是文件直接添加
+                if (fileType(item) != 2) {
+                    tfs = L.append(item, tfs);
+                } else {
+                }
+            });
+            return L.toArray(tfs);
+        } catch (error) {
+
+        }
+    } else {
+
+    }
+
+    return ls(filepath, sync, true, followLinks);
+}
+
+// let a = tree(".");
+// TODO: 绝对路径有问题
+let a = ls("123");
+console.log(a);
 
 /**
  * 新建文件夹
