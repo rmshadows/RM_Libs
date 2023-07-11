@@ -7,11 +7,13 @@ import clipboard from 'clipboardy';
 import { log } from 'console';
 import { randomFill } from 'crypto';
 import { resolve, setDefaultResultOrder } from 'dns';
-import fs from 'fs';
+import fs, { unwatchFile } from 'fs';
 import { endianness } from 'os';
 import * as L from 'list'
 import { exit } from 'process';
 import path from 'path';
+import chalk from 'chalk';
+import { addAbortSignal } from 'stream';
 var fsPromise = fs.promises;
 
 /**
@@ -107,9 +109,166 @@ export const getClipboard = (sync = true) => {
 
 
 /**
- * 文件IO操作
+ * Std out
  */
 
+/**
+ * 简单的终端颜色 模式 ：成功绿0，失败红1，信息蓝2，信息黄3，信息紫4，信息黑5，信息白6
+ * fg, bg:
+    前景            背景              颜色
+    ---------------------------------------
+    30                40              黑色
+    31                41              紅色
+    32                42              綠色
+    33                43              黃色
+    34                44              藍色
+    35                45              紫紅色
+    36                46              青藍色
+    37                47              白色
+ * 
+ * display:
+    0                终端默认设置
+    1                高亮显示
+    4                使用下划线
+    5                italic 闪烁(暂不支持闪烁，用italic代替)
+    7                反显
+    8                不可见
+ * @param {*} str 字符串
+ * @param {*} fg 前景色
+ * @param {*} bg 背景色
+ * @param {*} display 显示模式
+ */
+export const print = (str, fg = 31, bg = 0, display = 1) => {
+    var logd = chalk;
+    if (display == 0) {
+        logd = logd.reset;
+    } else if (display == 1) {
+        logd = logd.bold;
+    } else if (display == 4) {
+        logd = logd.underline;
+    } else if (display == 5) {
+        // 暂不支持闪烁
+        logd = logd.italic;
+    } else if (display == 7) {
+        logd = logd.inverse;
+    } else if (display == 8) {
+        logd = logd.hidden;
+    }
+    if (fg == 30) {
+        logd = logd.blackBright;
+    } else if (fg == 31) {
+        logd = logd.redBright;
+    } else if (fg == 32) {
+        logd = logd.greenBright;
+    } else if (fg == 33) {
+        logd = logd.yellowBright;
+    } else if (fg == 34) {
+        logd = logd.blueBright;
+    } else if (fg == 35) {
+        logd = logd.magentaBright;
+    } else if (fg == 36) {
+        logd = logd.cyanBright;
+    } else if (fg == 37) {
+        logd = logd.whiteBright;
+    }
+
+    if (bg == 40) {
+        logd = logd.bgBlackBright;
+    } else if (bg == 41) {
+        logd = logd.bgRedBright;
+    } else if (bg == 42) {
+        logd = logd.bgGreenBright;
+    } else if (bg == 43) {
+        logd = logd.bgYellowBright;
+    } else if (bg == 44) {
+        logd = logd.bgBlueBright;
+    } else if (bg == 45) {
+        logd = logd.bgMagentaBright;
+    } else if (bg == 46) {
+        logd = logd.bgCyanBright;
+    } else if (bg == 47) {
+        logd = logd.bgWhiteBright;
+    }
+    console.log(logd(str));
+}
+
+/**
+ * 常用显示
+0:成功 绿 success s
+1:失败 红 error e
+2:信息 蓝 info i
+3:警告 黄 warn w
+4:白 message  m
+ * @param {*} str 
+ * @param {*} mode 
+ */
+export const prompt = (str, mode = 4) => {
+    if (mode == 0 || mode == "s") {
+        print(str, 32);
+    } else if (mode == 1 || mode == "e") {
+        print(str, 31);
+    } else if (mode == 2 || mode == "i") {
+        print(str, 34);
+    } else if (mode == 3 || mode == "w") {
+        print(str, 33);
+    } else if (mode == 4 || mode == "m") {
+        print(str, 37);
+    }
+}
+
+
+/**
+ * 打印列表
+ * @param {Array} list 
+ * @param {*} promptMode 
+ */
+export const prlst = (list, promptMode = 0) => {
+    list.forEach((x) => {
+        prompt(x, promptMode);
+    });
+}
+
+/**
+ * 返回环境变量分隔符
+ * @returns 
+ */
+export const getPathSeparator = () => {
+    return path.delimiter;
+}
+
+/**
+ * 获取环境变量
+ * @returns 
+ */
+export const getPath = () => {
+    let p = L.empty();
+    process.env.PATH.split(path.delimiter).forEach(function (dir) {
+        p = L.append(dir, p);
+    });
+    return L.toArray(p);
+}
+
+
+/**
+ * 获取文件分隔符
+ * @returns 
+ */
+export const getFileSeparator = () => {
+    return path.sep;
+}
+
+/**
+ * 是否是Windows系统
+ * @returns 
+ */
+export const isWindows = () => {
+    return getFileSeparator() == "\\";
+}
+
+
+/**
+ * 文件IO操作
+ */
 /**
  * 判断文件类型 文件：1 文件夹：2 链接文件：3
  * @param {String} filepath 
@@ -168,7 +327,7 @@ export const fileType = (filepath, sync = true) => {
  * @param {boolean} absolutePath 是否返回绝对路径，默认是
  * @returns 列表
  */
-export const ls = (filepath, sync = true, showHidden = false, followLinks = false, absolutePath = true) => {
+export const ls = (filepath, sync = true, showHidden = false, followLinks = true, absolutePath = true) => {
     filepath = path.resolve(filepath);
     if (sync) {
         try {
@@ -176,11 +335,21 @@ export const ls = (filepath, sync = true, showHidden = false, followLinks = fals
             if (fileType(filepath) == 1) {
                 return [filepath];
             }
+            // 如果是链接文件 且不跟随 followLinks == false
             if (fileType(filepath) == 3 && !followLinks) {
                 // console.log("所给的路径是链接。");
                 return [filepath];
+            } else if (fileType(filepath) == 3 && followLinks) {
+                try {
+                    filepath = fs.realpathSync(filepath);
+                } catch (error) {
+                    console.log("ls: " + filepath + " 可能是损坏的链接文件");
+                    return [filepath];
+                }
             }
+            // 接下来是目录处理
             let files = L.from(fs.readdirSync(filepath));
+            // 如果不显示隐藏文件
             if (!showHidden) {
                 files = L.filter((el) => {
                     if (el.substring(0, 1) == ".") {
@@ -191,13 +360,26 @@ export const ls = (filepath, sync = true, showHidden = false, followLinks = fals
                 }, files);
             };
             // 返回绝对路径
-            if (absolutePath){
+            if (absolutePath) {
                 let abFiles = L.empty();
                 L.forEach((item) => {
-                    abFiles = L.append(path.resolve(item), abFiles);
+                    item = path.join(filepath, item);
+                    // 如果是链接, 且跟随链接
+                    if (fileType(item) == 3 && followLinks) {
+                        let lf;
+                        try {
+                            lf = fs.realpathSync(item);
+                        } catch (error) {
+                            console.log("ls: " + item + " 可能是损坏的链接文件");
+                            lf = item;
+                        }
+                        abFiles = L.append(lf, abFiles);
+                    } else {
+                        abFiles = L.append(item, abFiles);
+                    }
                 }, files);
                 return L.toArray(abFiles);
-            }else{
+            } else {
                 return L.toArray(files);
             }
         } catch (error) {
@@ -208,8 +390,17 @@ export const ls = (filepath, sync = true, showHidden = false, followLinks = fals
         if (fileType(filepath) == 1) {
             return [filepath];
         }
+        // 如果是链接文件 且不跟随 followLinks == false
         if (fileType(filepath) == 3 && !followLinks) {
-            throw new TypeError("所给的路径是链接。");
+            // console.log("所给的路径是链接。");
+            return [filepath];
+        } else if (fileType(filepath) == 3 && followLinks) {
+            try {
+                filepath = fs.realpathSync(filepath);
+            } catch (error) {
+                console.log("ls: " + filepath + " 可能是损坏的链接文件");
+                return [filepath];
+            }
         }
         return fsPromise.readdir(filepath).then(x => {
             let files = L.from(x);
@@ -223,18 +414,32 @@ export const ls = (filepath, sync = true, showHidden = false, followLinks = fals
                 }, files);
             };
             // 返回绝对路径
-            if (absolutePath){
+            if (absolutePath) {
                 let abFiles = L.empty();
                 L.forEach((item) => {
-                    abFiles = L.append(path.resolve(item), abFiles);
+                    item = path.join(filepath, item);
+                    // 如果是链接, 且跟随链接
+                    if (fileType(item) == 3 && followLinks) {
+                        let lf;
+                        try {
+                            lf = fs.realpathSync(item);
+                        } catch (error) {
+                            console.log("ls: " + item + " 可能是损坏的链接文件");
+                            lf = item;
+                        }
+                        abFiles = L.append(lf, abFiles);
+                    } else {
+                        abFiles = L.append(item, abFiles);
+                    }
                 }, files);
                 return L.toArray(abFiles);
-            }else{
+            } else {
                 return L.toArray(files);
             }
         });
     }
 }
+
 
 /**
  * 模拟la
@@ -249,42 +454,55 @@ export const la = (filepath, sync = true, followLinks = false, absolutePath = tr
 }
 
 
+/**
+ * tree 返回目录下所有文件，包括空文件夹(包含当前文件夹)
+ * @param {*} filepath 
+ * @param {*} sync 
+ * @param {*} showHidden 
+ * @param {*} followLinks  如果给定root是链接，则follow links
+ * @returns 
+ */
 export const tree = (filepath, sync = true, showHidden = false, followLinks = false) => {
     filepath = path.resolve(filepath);
-    console.log("tree Input: "+ filepath);
     let tfs = L.empty();
+    // 如果root是链接文件 直接跟随
+    if (fileType(filepath) == 3) {
+        try {
+            filepath = fs.realpathSync(filepath);
+        } catch (error) {
+            console.log("tree: "+filepath + " 可能是损坏的链接文件");
+            return [filepath];
+        }
+    }
     if (sync) {
         try {
             // 如果root是文件
             if (fileType(filepath) == 1) {
                 return [filepath];
             }
+            // 如果不跟随链接
             if (fileType(filepath) == 3 && !followLinks) {
-                // console.log("所给的路径是链接。");
+                prompt(filepath, "2")
                 return [filepath];
             }
-            if (ls(item, true, showHidden, followLinks).length == 0) {
+            if (ls(filepath, true, showHidden, followLinks).length == 0) {
                 // 空目录当作文件处理
-                tfs = L.append(item, tfs);
+                return [filepath];
             }
             // 先获取根目录文件
+            // 添加当前路径 TODO
+            tfs = L.list(filepath);
             let root_dir = ls(filepath, true, showHidden, followLinks);
             root_dir.forEach(item => {
                 // 不是文件就递归再看 eg:/home/msystem/node_modules
                 let rtfs = L.from(tree(item, true, showHidden, followLinks));
                 // console.log("非文件："+item);
                 tfs = L.concat(rtfs, tfs);
-
-                console.log("item: "+item);
-                // 是文件直接添加
-                if (fileType(item) != 2) {
-                    tfs = L.append(item, tfs);
-                } else {
-                }
             });
+            console.log("返回: " + L.toArray(tfs));
             return L.toArray(tfs);
         } catch (error) {
-
+            console.log(error);
         }
     } else {
 
@@ -293,9 +511,12 @@ export const tree = (filepath, sync = true, showHidden = false, followLinks = fa
     return ls(filepath, sync, true, followLinks);
 }
 
-// let a = tree(".");
-// TODO: 绝对路径有问题
-let a = ls("123");
+
+// TODO:解决子目录破损链接的死循环状态
+// let a = tree("4", true, true, true);
+// let a = tree("4", true, true, false);
+let a = tree("4");
+// let a = ls("4", true, true, true, true);
 console.log(a);
 
 /**
