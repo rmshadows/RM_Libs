@@ -10,7 +10,7 @@ import { resolve, setDefaultResultOrder } from 'dns';
 import fs, { unwatchFile } from 'fs';
 import { endianness } from 'os';
 import * as L from 'list'
-import { exit } from 'process';
+import { debugPort, exit } from 'process';
 import path from 'path';
 import chalk from 'chalk';
 import { addAbortSignal } from 'stream';
@@ -217,6 +217,22 @@ export const prompt = (str, mode = 4) => {
 }
 
 
+export const prompts = (str) => {
+    prompt(str, "s");
+}
+export const prompte = (str) => {
+    prompt(str, "e");
+}
+export const prompti = (str) => {
+    prompt(str, "i");
+}
+export const promptw = (str) => {
+    prompt(str, "w");
+}
+export const promptm = (str) => {
+    prompt(str, "m");
+}
+
 /**
  * 打印列表
  * @param {Array} list 
@@ -263,6 +279,18 @@ export const getFileSeparator = () => {
  */
 export const isWindows = () => {
     return getFileSeparator() == "\\";
+}
+
+
+/**
+ * 去除重复数组元素
+ * @param {*} arr 
+ * @returns 
+ */
+export const arrayRemoveDuplicates = (arr) => {
+    return arr.filter(function (elem, index, self) {
+        return index === self.indexOf(elem);
+    });
 }
 
 
@@ -340,11 +368,12 @@ export const ls = (filepath, sync = true, showHidden = false, followLinks = true
                 // console.log("所给的路径是链接。");
                 return [filepath];
             } else if (fileType(filepath) == 3 && followLinks) {
-                try {
-                    filepath = fs.realpathSync(filepath);
-                } catch (error) {
-                    console.log("ls: " + filepath + " 可能是损坏的链接文件");
-                    return [filepath];
+                let tr = filepath = fileLinkedto(filepath)
+                // 如果链接可用
+                if (tr[1]) {
+                    filepath = tr[0]
+                } else {
+                    return [filepath]
                 }
             }
             // 接下来是目录处理
@@ -455,69 +484,107 @@ export const la = (filepath, sync = true, followLinks = false, absolutePath = tr
 
 
 /**
- * tree 返回目录下所有文件，包括空文件夹(包含当前文件夹)
+ * 返回链接文件指向
+ * @param {*} filepath 链接文件
+ * @returns [链接地址， 链接好坏]
+ */
+export const fileLinkedto = (filepath) => {
+    let flt = "";
+    let flc = false;
+    if (fileType(filepath) == 3) {
+        try {
+            fs.realpathSync(filepath);
+            flc = true;
+        } catch (error) {
+            console.log("fileLinkedto: " + filepath + " 可能是损坏的链接文件");
+            flc = false;
+        }
+        try {
+            flt = fs.readlinkSync(filepath);
+        } catch (error) {
+            console.log("fileLinkedto: " + filepath + error);
+        }
+    }
+    return [flt, flc];
+}
+
+/**
+ * tree 返回目录下所有文件，包括空文件夹(包含当前文件夹) 仅有同步方法
  * @param {*} filepath 
- * @param {*} sync 
  * @param {*} showHidden 
  * @param {*} followLinks  如果给定root是链接，则follow links
  * @returns 
  */
-export const tree = (filepath, sync = true, showHidden = false, followLinks = false) => {
+export const tree = (filepath, showHidden = false, followLinks = false) => {
     filepath = path.resolve(filepath);
     let tfs = L.empty();
+    // 添加当前路径
+    tfs = L.list(filepath);
     // 如果root是链接文件 直接跟随
     if (fileType(filepath) == 3) {
-        try {
-            filepath = fs.realpathSync(filepath);
-        } catch (error) {
-            console.log("tree: "+filepath + " 可能是损坏的链接文件");
-            return [filepath];
+        // 获取链接地址
+        let tr = fileLinkedto(filepath)
+        if (tr[1]) {
+            // 如果链接可用 则跟随到实际指向
+            filepath = tr[0]
+        } else {
+            // 链接不可用，直接返回
+            return [filepath]
         }
     }
-    if (sync) {
-        try {
-            // 如果root是文件
-            if (fileType(filepath) == 1) {
-                return [filepath];
-            }
-            // 如果不跟随链接
-            if (fileType(filepath) == 3 && !followLinks) {
-                prompt(filepath, "2")
-                return [filepath];
-            }
-            if (ls(filepath, true, showHidden, followLinks).length == 0) {
-                // 空目录当作文件处理
-                return [filepath];
-            }
-            // 先获取根目录文件
-            // 添加当前路径 TODO
-            tfs = L.list(filepath);
-            let root_dir = ls(filepath, true, showHidden, followLinks);
-            root_dir.forEach(item => {
-                // 不是文件就递归再看 eg:/home/msystem/node_modules
-                let rtfs = L.from(tree(item, true, showHidden, followLinks));
-                // console.log("非文件："+item);
-                tfs = L.concat(rtfs, tfs);
+    // 如果root是文件
+    if (fileType(filepath) == 1) {
+        return [filepath];
+    }
+    // root是空目录当作文件处理
+    if (la(filepath).length == 0) {
+        return [filepath];
+    }
+    // 其他情况(目录) ! 除非跟随链接, 目录中的链接不可以再使用tree
+    try {
+        // 获取目录下的子文件
+        let root_dir = ls(filepath, true, showHidden, followLinks);
+        root_dir.forEach(item => {
+            let dup = false;
+            // 检查有无重复
+            L.toArray(tfs).forEach(el => {
+                el = String(el);
+                // 先检查源文件是否重复
+                if (String(item) == el) {
+                    prompt("tree: 重复项目(源文件): " + item, "e")
+                    dup = true;
+                }
+                // 如果跟随链接，就检查链接实际指向有无重复
+                // 如果是链接文件(前面检查没有重复de)
+                if (fileType(item) == 3 && followLinks) {
+                    if (String(fileLinkedto(item)[0]) == el) {
+                        prompt("tree: 重复项目(链接文件 " + item + " 指向): " + fileLinkedto(item)[0], "e")
+                        dup = true;
+                    }
+                }
             });
-            console.log("返回: " + L.toArray(tfs));
-            return L.toArray(tfs);
-        } catch (error) {
-            console.log(error);
-        }
-    } else {
-
+            // 文件没重复
+            if (!dup) {
+                // 如果是链接，且不跟随(因为直接使用tree读取链接默认第一级跟随),直接返回
+                if (fileType(item) == 3 && !followLinks) {
+                    tfs = L.append(item, tfs);
+                } else {
+                    // 不是链接
+                    let rtfs = L.from(tree(item, showHidden, followLinks));
+                    tfs = L.concat(rtfs, tfs);
+                }
+            }
+        });
+        // 过滤重复 
+        return arrayRemoveDuplicates(L.toArray(tfs));
+    } catch (error) {
+        console.log(error);
     }
-
-    return ls(filepath, sync, true, followLinks);
 }
 
 
-// TODO:解决子目录破损链接的死循环状态
-// let a = tree("4", true, true, true);
-// let a = tree("4", true, true, false);
-let a = tree("4");
-// let a = ls("4", true, true, true, true);
-console.log(a);
+tree("/home/ryan")
+
 
 /**
  * 新建文件夹
