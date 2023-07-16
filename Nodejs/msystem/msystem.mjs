@@ -2,22 +2,27 @@
  * 系统操作模块，默认同步直接返回值，异步返回Promise
  */
 "use strict";
-import { rejects } from 'assert';
 import clipboard from 'clipboardy';
-import { log } from 'console';
-import { randomFill } from 'crypto';
-import { resolve, setDefaultResultOrder } from 'dns';
-import fs, { unwatchFile } from 'fs';
-import { endianness } from 'os';
+import fs from 'fs';
 import * as L from 'list'
-import { debugPort, exit } from 'process';
 import path from 'path';
 import chalk from 'chalk';
-import { addAbortSignal } from 'stream';
+import fse from 'fs-extra';
+
 var fsPromise = fs.promises;
 
 /**
  * 模块内部函数
+export const cp = (src, dst, sync = true, recursive = false, overwrite = true) => {
+    let fn = getExecFunction().name;
+    if(sync){
+        try {
+        
+        } catch (error) {
+            console.log("%s: " + error, fn);
+        }
+    }
+}
  */
 /**
  * 获取当前运行的函数名称
@@ -581,60 +586,198 @@ export const tree = (filepath, showHidden = false, followLinks = false) => {
         console.log(error);
     }
 }
-
-
-tree("/home/ryan")
+export const treeSync = (filepath, showHidden = false, followLinks = false) => {
+    tree(filepath, showHidden, followLinks)
+}
 
 
 /**
- * 新建文件夹
- * @param {string} dir 路径
+ * 新建文件夹 注意Overwrite！会覆盖的！
+ * @param {string} dir 路径 
  * @param {boolean} sync 是否同步
- * @param {boolean} overwrite 是否覆盖
+ * @param {boolean} overwrite 是否覆盖 会清空原有的
  * @param {boolean} recursive (mkdir -p ?)是否递归
- * @param {function list} callback 回调函数 列表传入函数，成功与失败,允许传入一个参数列表
  * @param {string} mode 文件权限默认"0700"
  * @returns null
  */
-export const mkdir = (dir, sync = true, overwrite = false, recursive = false, callback = [onSuccess, onFailed], mode = "0700") => {
-    try {
-        let fn = getExecFunction().name;
-        if (fs.existsSync(dir)) {
-            console.log("mkdir:存在同名文件或者文件夹");
-            if (overwrite) {
-                rmDF(dir);
-            } else {
-                return;
-            }
-        }
-        if (sync) {
-            fs.mkdirSync(dir, { recursive: recursive, mode: mode });
+export const mkdir = (dir, sync = true, overwrite = false, recursive = false, mode = "0700") => {
+    let fn = getExecFunction().name;
+    if (fs.existsSync(dir)) {
+        console.log("%s: 存在同名文件或者文件夹", fn);
+        if (overwrite) {
+            rmDF(dir);
         } else {
-            // fs.mkdir(dir, { recursive: recursive, mode: mode }, (err, data) => defaultCallback(err, data, name));
-            fsPromise.mkdir(dir, { recursive: recursive, mode: mode }).then(() => {
-                callback[0]([fn]);
-            }).catch(() => {
-                callback[1]([fn]);
+            return;
+        }
+    }
+    if (sync) {
+        try {
+            fs.mkdirSync(dir, { recursive: recursive, mode: mode });
+        } catch (error) {
+            console.log("%s: " + error, fn);
+        }
+    } else {
+        // 同意替换
+        // fs.mkdir(dir, { recursive: recursive, mode: mode }, (err, data) => defaultCallback(err, data, name));
+        // fsPromise.mkdir(dir, { recursive: recursive, mode: mode }).then(() => {
+        //     callback[0]([fn]);
+        // }).catch(() => {
+        //     callback[1]([fn]);
+        // });
+        fsPromise.mkdir(dir, { recursive: recursive, mode: mode });
+    }
+}
+
+/**
+ * mkdir -p 注意Overwrite！会覆盖的！
+ * @param {*} path 
+ * @param {*} sync 
+ * @param {*} overwrite 注意Overwrite！会覆盖的！
+ * @param {*} mode 
+ */
+export const mkdirs = (path, sync = true, overwrite = false, mode = "0700") => {
+    mkdir(path, sync, overwrite, true, mode);
+}
+
+/**
+ * 删除文件
+ * @param {string} filepath 
+ * @param {boolean} sync 是否同步
+ * @param {boolean} recursive 是否递归
+ * @returns 
+ */
+export const rm = async (filepath, sync = true, recursive = false) => {
+    let fn = getExecFunction().name;
+    try {
+        if (sync) {
+            try {
+                fs.rmSync(filepath, { recursive: recursive });
+            } catch (error) {
+                console.log(fn + ": " + error);
+            }
+        } else {
+            return fsPromise.rm(filepath, { recursive: recursive });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+/**
+ * 清空目录
+ * @param {*} dir 目录
+ * @param {*} sync 是否同步
+ * @returns 
+ */
+export const rmClearDirectory = async (dir, sync = true) => {
+    let fn = getExecFunction().name;
+    // 判断是不是目录
+    if (fileType(dir) != 2) {
+        prompte(fn + ": " + dir + "不是目录！")
+        return;
+    }
+    try {
+        if (sync) {
+            try {
+                // 列出文件
+                let dfiles = la(dir);
+                dfiles.forEach(el => {
+                    rm(el, sync, true);
+                });
+            } catch (error) {
+                console.log(fn + ": " + error);
+            }
+        } else {
+            la(dir, false).then((files) => {
+                files.forEach(el => {
+                    rm(el, sync, true);
+                });
             });
         }
     } catch (error) {
-        console.log("mkdir:" + error);
+        console.log(error);
+    }
+}
+/**
+ * 删除文件或者文件夹
+ * @param {*} filepath 路径
+ * @param {*} sync 是否同步
+ * @returns 
+ */
+export const rmDF = async (filepath, sync = true) => {
+    let fn = getExecFunction().name;
+    if (sync) {
+        try {
+            return rm(filepath, sync, true);
+        } catch (error) {
+            console.log(fn + ": " + error);
+            return undefined;
+        }
+    } else {
+        rm(filepath, sync, true);
     }
 }
 
 
-// 删除文件
-export const rmDF = async (filepath, sync = true) => {
-    fn = getExecFunction().name;
-    try {
-        let isFile = fs.stat.isFile(filepath);
-        if (sync) {
-            fs.rmSync(filepath, { recursive: recursive });
-        } else {
-            // fs.rm()
+/**
+ * 复制文件
+ * 如果recursive是false，除了src dst，其他Option选项无效
+ * @param {string} src 
+ * @param {string} dst 
+ * @param {boolean} sync 是否同步
+ * @param {boolean} recursive 是则可以复制目录
+ * @param {boolean} overwrite 覆盖现有文件或目录，默认为 true。 请注意，如果将其设置为，复制操作将默默失败 false并且目的地存在。 使用 errorOnExist更改此行为的选项。 
+ * @param {boolean} errorOnExist  什么时候 overwrite是 false并且目的地存在，抛出错误。 默认为 false. 
+ * @param {boolean} dereference 取消引用符号链接，默认为 false. 
+ * @param {boolean} preserveTimestamps 为 true 时，会将上次修改和访问时间设置为原始源文件的时间。 当为 false 时，时间戳行为取决于操作系统。 默认为 false. 
+ * @param {Function} filter 过滤复制文件/目录的功能。 返回 true要复制该项目， false忽略它。 
+ */
+export const cp = (src, dst, sync = true, recursive = false, 
+    overwrite = true, errorOnExist=false,
+    dereference = false, preserveTimestamps=false, 
+    filter = (src, dest)=>{
+        return true;
+    }) => {
+    let fn = getExecFunction().name;
+    if(sync){
+        try {
+            if(recursive){
+                // 请注意，如果 src是一个目录，它将复制该目录内的所有内容，而不是整个目录本身
+                //（请参阅 问题＃537 https://github.com/jprichardson/node-fs-extra/issues/537 ）。 
+                if (fileType(src) == 2) {
+                    // 如果是目录
+                    fse.copySync(src, dst, { overwrite:overwrite, 
+                        errorOnExist: errorOnExist, 
+                        dereference: dereference, 
+                        preserveTimestamps: preserveTimestamps,
+                        filter: filter
+                    });
+                }else{
+                    fse.copySync(src, dst, { overwrite:overwrite, 
+                        errorOnExist: errorOnExist, 
+                        dereference: dereference, 
+                        preserveTimestamps: preserveTimestamps,
+                        filter: filter
+                    });
+                }
+            }else{
+                fs.copyFileSync(src, dst);
+            }
+        } catch (error) {
+            console.log("%s: " + error, fn);
         }
+    }else{
+
+    }
+}
+
+cp("1", "./3/", true, true)
+
+export const mv = (src, dst, overwrite = true) => {
+    // TODO
+    try {
+        fs.rename(oldname, newname);
     } catch (error) {
-        console.log(error);
+        console.log("readFileContent:" + error);
     }
 }
 
@@ -679,14 +822,5 @@ export const readFileContent = (filepath, readBinary = false, sync = true, callb
     return content;
 }
 
-
-export const mv = (src, dst) => {
-    // TODO
-    try {
-        fs.rename(oldname, newname);
-    } catch (error) {
-        console.log("readFileContent:" + error);
-    }
-}
 
 
