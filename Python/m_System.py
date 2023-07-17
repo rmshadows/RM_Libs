@@ -195,7 +195,7 @@ def rmFD(file_or_dir, expect=0):
 
 def copyFD(src, dst):
     """
-    复制文件或者文件夹
+    复制文件或者文件夹 不会覆盖！
     Args:
         src:
         dst:
@@ -243,9 +243,11 @@ def displaySystemInfo():
         None
     """
     # 非Windows系统请注释掉
-    import wmi
+    # import wmi
     import socket
     if IS_WINDOWS:
+        # 非Windows系统请注释掉
+        import wmi
         w = wmi.WMI()
         # 获取电脑使用者信息
         for CS in w.Win32_ComputerSystem():

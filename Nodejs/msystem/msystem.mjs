@@ -8,6 +8,9 @@ import * as L from 'list'
 import path from 'path';
 import chalk from 'chalk';
 import fse from 'fs-extra';
+import child_process from 'child_process';
+import { time } from 'console';
+import { kill } from 'process';
 
 var fsPromise = fs.promises;
 
@@ -59,6 +62,94 @@ const onSuccess = (fn) => {
 const onFailed = (fn) => {
     console.log(fn[0] + " Failed.");
 }
+
+
+// 切勿将未经处理的用户输入传递给此函数。 任何包含 shell 的输入 元字符可用于触发任意命令执行
+export const execCommand = (cmd, easymode = true, sync = true, pwd = ".", callback = (error, stdout, stderr) => {
+    if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+    }
+    console.log(`stdout: \n${stdout}`);
+    console.log(`stderr: \n${stderr}`);
+},
+    shell = "/bin/bash", timeout = undefined,
+    killSignal = 'SIGTERM', maxBuffer = 1024 * 1024,
+    encoding = 'utf-8', windowsHide = false) => {
+    // encoding = 'buffer'
+    let fn = getExecFunction().name;
+    if (sync) {
+        try {
+            if (easymode) {
+                return child_process.execSync(cmd, {
+                    cwd: pwd, shell: shell,
+                    timeout: timeout, killSignal: killSignal,
+                    maxBuffer: maxBuffer, encoding: encoding, windowsHide: windowsHide
+                });
+            } else {
+                // https://juejin.cn/s/node%E6%89%A7%E8%A1%8Cshell%E8%8E%B7%E5%8F%96%E5%AE%9E%E6%97%B6%E8%BE%93%E5%87%BA
+                // TODO
+                const { spawn } = require('child_process');
+                const ls = spawn('ls', ['-lh', '/usr']);
+
+                ls.stdout.on('data', (data) => {
+                    console.log(`stdout: ${data}`);
+                });
+
+                ls.stderr.on('data', (data) => {
+                    console.error(`stderr: ${data}`);
+                });
+
+                ls.on('close', (code) => {
+                    console.log(`child process exited with code ${code}`);
+                });
+            }
+        } catch (error) {
+            console.log("%s: " + error, fn);
+        }
+    } else {
+        if (easymode) {
+            child_process.exec(cmd, callback);
+        } else {
+            // https://juejin.cn/s/node%E6%89%A7%E8%A1%8Cshell%E8%8E%B7%E5%8F%96%E5%AE%9E%E6%97%B6%E8%BE%93%E5%87%BA
+            // TODO
+            const { spawn } = require('child_process');
+            const ls = spawn('ls', ['-lh', '/usr']);
+
+            ls.stdout.on('data', (data) => {
+                console.log(`stdout: ${data}`);
+            });
+
+            ls.stderr.on('data', (data) => {
+                console.error(`stderr: ${data}`);
+            });
+
+            ls.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+            });
+
+            // https://segmentfault.com/q/1010000023332928
+            // https://www.qiniu.com/qfans/qnso-23516740#comments
+            //https://devboke.com/back/55
+            const { spawn } = require('child_process');
+            const lss = spawn('ls', ['-lh', '/usr']);
+
+            ls.stdout.on('data', (data) => {
+                console.log(`stdout: ${data}`);
+            });
+
+            ls.stderr.on('data', (data) => {
+                console.error(`stderr: ${data}`);
+            });
+
+            ls.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+            });
+        }
+    }
+}
+
+console.log(execCommand("echo $SHELL", true, false));
 
 
 /**
@@ -489,6 +580,35 @@ export const la = (filepath, sync = true, followLinks = false, absolutePath = tr
 
 
 /**
+ * 返回给定扩展名的文件
+ * @param {string} filepath 某个目录
+ * @param {string} ext 扩展名
+ * @returns 
+ */
+export const lsFileExtfilter = (filepath, ext) => {
+    let fn = getExecFunction().name;
+    if (fileType(filepath) != 2) {
+        prompte("%s: 不是目录！", fn)
+        return [];
+    }
+    try {
+        let la_r = la(filepath);
+        // prlst(la_r)
+        let r_list = L.empty();
+        la_r.forEach(el => {
+            if (fileType(el) == 1 && path.extname(el) == "." + ext) {
+                r_list = L.append(el, r_list);
+            }
+        });
+        prlst(L.toArray(r_list))
+        return L.toArray(r_list);
+    } catch (error) {
+        console.log("%s: " + error, fn);
+    }
+}
+
+
+/**
  * 返回链接文件指向
  * @param {*} filepath 链接文件
  * @returns [链接地址， 链接好坏]
@@ -605,7 +725,7 @@ export const mkdir = (dir, sync = true, overwrite = false, recursive = false, mo
     if (fs.existsSync(dir)) {
         console.log("%s: 存在同名文件或者文件夹", fn);
         if (overwrite) {
-            rmDF(dir);
+            FD(dir);
         } else {
             return;
         }
@@ -703,7 +823,7 @@ export const rmClearDirectory = async (dir, sync = true) => {
  * @param {*} sync 是否同步
  * @returns 
  */
-export const rmDF = async (filepath, sync = true) => {
+export const rmFD = async (filepath, sync = true) => {
     let fn = getExecFunction().name;
     if (sync) {
         try {
@@ -731,56 +851,137 @@ export const rmDF = async (filepath, sync = true) => {
  * @param {boolean} preserveTimestamps 为 true 时，会将上次修改和访问时间设置为原始源文件的时间。 当为 false 时，时间戳行为取决于操作系统。 默认为 false. 
  * @param {Function} filter 过滤复制文件/目录的功能。 返回 true要复制该项目， false忽略它。 
  */
-export const cp = (src, dst, sync = true, recursive = false, 
-    overwrite = true, errorOnExist=false,
-    dereference = false, preserveTimestamps=false, 
-    filter = (src, dest)=>{
+export const cp = (src, dst, sync = true, recursive = false,
+    overwrite = true, errorOnExist = false,
+    dereference = false, preserveTimestamps = false,
+    filter = (src, dest) => {
         return true;
     }) => {
     let fn = getExecFunction().name;
-    if(sync){
+    let result = false;
+    if (sync) {
         try {
-            if(recursive){
+            if (recursive) {
                 // 请注意，如果 src是一个目录，它将复制该目录内的所有内容，而不是整个目录本身
                 //（请参阅 问题＃537 https://github.com/jprichardson/node-fs-extra/issues/537 ）。 
-                if (fileType(src) == 2) {
-                    // 如果是目录
-                    fse.copySync(src, dst, { overwrite:overwrite, 
-                        errorOnExist: errorOnExist, 
-                        dereference: dereference, 
-                        preserveTimestamps: preserveTimestamps,
-                        filter: filter
-                    });
-                }else{
-                    fse.copySync(src, dst, { overwrite:overwrite, 
-                        errorOnExist: errorOnExist, 
-                        dereference: dereference, 
-                        preserveTimestamps: preserveTimestamps,
-                        filter: filter
-                    });
-                }
-            }else{
+                fse.copySync(src, dst, {
+                    overwrite: overwrite,
+                    errorOnExist: errorOnExist,
+                    dereference: dereference,
+                    preserveTimestamps: preserveTimestamps,
+                    filter: filter
+                });
+                result = true;
+            } else {
                 fs.copyFileSync(src, dst);
+                result = true;
             }
         } catch (error) {
             console.log("%s: " + error, fn);
+            result = false;
         }
-    }else{
-
+        return result;
+    } else {
+        if (recursive) {
+            // 请注意，如果 src是一个目录，它将复制该目录内的所有内容，而不是整个目录本身
+            //（请参阅 问题＃537 https://github.com/jprichardson/node-fs-extra/issues/537 ）。 
+            fse.copySync(src, dst, {
+                overwrite: overwrite,
+                errorOnExist: errorOnExist,
+                dereference: dereference,
+                preserveTimestamps: preserveTimestamps,
+                filter: filter
+            });
+            fse.copy()
+        } else {
+            fs.copyFile(src, dst);
+        }
     }
 }
 
-cp("1", "./3/", true, true)
 
-export const mv = (src, dst, overwrite = true) => {
-    // TODO
+/**
+ * 复制文件、文件夹
+ * @param {string} src 
+ * @param {string} dst 
+ * @param {boolean} sync 是否同步
+ * @param {boolean} overwrite 覆盖现有文件或目录，默认为 true。 请注意，如果将其设置为，复制操作将默默失败 false并且目的地存在。 使用 errorOnExist更改此行为的选项。 
+ * @param {boolean} errorOnExist  什么时候 overwrite是 false并且目的地存在，抛出错误。 默认为 false. 
+ * @param {boolean} dereference 取消引用符号链接，默认为 false. 
+ * @param {boolean} preserveTimestamps 为 true 时，会将上次修改和访问时间设置为原始源文件的时间。 当为 false 时，时间戳行为取决于操作系统。 默认为 false. 
+ * @param {Function} filter 过滤复制文件/目录的功能。 返回 true要复制该项目， false忽略它。 
+ */
+export const cpFD = (src, dst, sync = true,
+    overwrite = true, errorOnExist = false,
+    dereference = false, preserveTimestamps = false,
+    filter = (s, d) => {
+        return true;
+    }) => {
+    return cp(src, dst,
+        sync, true,
+        overwrite, errorOnExist,
+        dereference, preserveTimestamps,
+        filter)
+}
+
+
+/**
+ * 移动文件（重命名）
+ * @param {string} src 源
+ * @param {string} dst 目的
+ * @param {boolean} sync 是否同步
+ * @returns 
+ */
+export const mv = (src, dst, sync = true) => {
+    let fn = getExecFunction().name;
+    let result = false;
+    if (sync) {
+        try {
+            fs.renameSync(src, dst);
+            result = true;
+        } catch (error) {
+            console.log("%s: " + error, fn);
+            result = false;
+        }
+        return result;
+    } else {
+        fsPromise.rename(src, dst);
+    }
+}
+
+
+/**
+ * 先复制再删除
+ * 如果recursive是false，除了src dst，其他Option选项无效
+ * @param {string} src 
+ * @param {string} dst 
+ * @param {boolean} overwrite 覆盖现有文件或目录，默认为 true。 请注意，如果将其设置为，复制操作将默默失败 false并且目的地存在。 使用 errorOnExist更改此行为的选项。 
+ * @param {boolean} errorOnExist  什么时候 overwrite是 false并且目的地存在，抛出错误。 默认为 false. 
+ * @param {boolean} dereference 取消引用符号链接，默认为 false. 
+ * @param {boolean} preserveTimestamps 为 true 时，会将上次修改和访问时间设置为原始源文件的时间。 当为 false 时，时间戳行为取决于操作系统。 默认为 false. 
+ * @param {Function} filter 过滤复制文件/目录的功能。 返回 true要复制该项目， false忽略它。 
+ */
+export const mvCPRM = (src, dst,
+    overwrite = true, errorOnExist = false,
+    dereference = false, preserveTimestamps = false,
+    filter = (s, d) => {
+        return true;
+    }) => {
+    let fn = getExecFunction().name;
     try {
-        fs.rename(oldname, newname);
+        if (cp(src, dst,
+            true, true,
+            overwrite, errorOnExist,
+            dereference, preserveTimestamps,
+            filter)) {
+            rmFD(src);
+        } else {
+            prompte("%s: 复制文件似乎出错了", fn)
+        }
     } catch (error) {
-        console.log("readFileContent:" + error);
+        console.log("%s: " + error, fn);
     }
 }
-
 
 
 /**
