@@ -3,11 +3,11 @@
  */
 "use strict";
 import clipboard from 'clipboardy';
-import fs from 'fs';
+import fs, { read } from 'fs';
 import * as L from 'list'
 import path from 'path';
 import chalk from 'chalk';
-import fse from 'fs-extra';
+import fse, { copy } from 'fs-extra';
 import child_process from 'child_process';
 import { time } from 'console';
 import { kill } from 'process';
@@ -63,145 +63,6 @@ const onFailed = (fn) => {
     console.log(fn[0] + " Failed.");
 }
 
-
-// 切勿将未经处理的用户输入传递给此函数。 任何包含 shell 的输入 元字符可用于触发任意命令执行
-export const execCommand = (cmd, easymode = true, sync = true, pwd = ".", callback = (error, stdout, stderr) => {
-    if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-    }
-    console.log(`stdout: \n${stdout}`);
-    console.log(`stderr: \n${stderr}`);
-},
-    shell = "/bin/bash", timeout = undefined,
-    killSignal = 'SIGTERM', maxBuffer = 1024 * 1024,
-    encoding = 'utf-8', windowsHide = false) => {
-    // encoding = 'buffer'
-    let fn = getExecFunction().name;
-    if (sync) {
-        try {
-            if (easymode) {
-                return child_process.execSync(cmd, {
-                    cwd: pwd, shell: shell,
-                    timeout: timeout, killSignal: killSignal,
-                    maxBuffer: maxBuffer, encoding: encoding, windowsHide: windowsHide
-                });
-            } else {
-                // https://juejin.cn/s/node%E6%89%A7%E8%A1%8Cshell%E8%8E%B7%E5%8F%96%E5%AE%9E%E6%97%B6%E8%BE%93%E5%87%BA
-                // TODO
-                const { spawn } = require('child_process');
-                const ls = spawn('ls', ['-lh', '/usr']);
-
-                ls.stdout.on('data', (data) => {
-                    console.log(`stdout: ${data}`);
-                });
-
-                ls.stderr.on('data', (data) => {
-                    console.error(`stderr: ${data}`);
-                });
-
-                ls.on('close', (code) => {
-                    console.log(`child process exited with code ${code}`);
-                });
-            }
-        } catch (error) {
-            console.log("%s: " + error, fn);
-        }
-    } else {
-        if (easymode) {
-            child_process.exec(cmd, callback);
-        } else {
-            // https://juejin.cn/s/node%E6%89%A7%E8%A1%8Cshell%E8%8E%B7%E5%8F%96%E5%AE%9E%E6%97%B6%E8%BE%93%E5%87%BA
-            // TODO
-            const { spawn } = require('child_process');
-            const ls = spawn('ls', ['-lh', '/usr']);
-
-            ls.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-            });
-
-            ls.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
-
-            ls.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-            });
-
-            // https://segmentfault.com/q/1010000023332928
-            // https://www.qiniu.com/qfans/qnso-23516740#comments
-            //https://devboke.com/back/55
-            const { spawn } = require('child_process');
-            const lss = spawn('ls', ['-lh', '/usr']);
-
-            ls.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-            });
-
-            ls.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
-
-            ls.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-            });
-        }
-    }
-}
-
-console.log(execCommand("echo $SHELL", true, false));
-
-
-/**
- * clipboardy粘贴板操作
- */
-/**
- * clipboardy设置粘贴板
- * @param {string} content content 内容
- * @param {boolean} sync 是否同步， if true Doesn't work in browsers.
- * @returns 返回字符串内容/async: None
- */
-export const setClipboard = (content, sync = true) => {
-    if (sync) {
-        let result = false;
-        // Doesn't work in browsers.
-        try {
-            clipboard.writeSync(content);
-            if (clipboard.readSync() === content) {
-                result = true;
-            } else {
-                console.log("setClipboard: 似乎失败了");
-            }
-            // console.log("setClipboard:设置粘贴板:" + content);
-        } catch (error) {
-            console.log("setClipboard failed:" + error);
-        }
-        return result;
-    } else {
-        return clipboard.write(content);
-    }
-};
-
-
-/**
- * clipboardy获取系统粘贴板信息
- * @param {boolean} sync 是否同步，If false, Doesn't work in browsers.
- * @returns 返回字符串内容/async:Promise
- */
-export const getClipboard = (sync = true) => {
-    if (sync) {
-        let content = "";
-        try {
-            content = clipboard.readSync();
-            // console.log("getClipboard:粘贴板读取:" + content);
-        } catch (error) {
-            console.log("getClipboard failed:" + error);
-        }
-        return content;
-    } else {
-        return clipboard.read();
-    }
-}
 
 
 /**
@@ -329,6 +190,210 @@ export const promptm = (str) => {
     prompt(str, "m");
 }
 
+
+/**
+ * 获取文件分隔符
+ * @returns 
+ */
+export const getFileSeparator = () => {
+    return path.sep;
+}
+
+
+/**
+ * 是否是Windows系统
+ * @returns 
+ */
+export const isWindows = () => {
+    return getFileSeparator() == "\\";
+}
+
+
+/**
+ * 运行命令
+ * 切勿将未经处理的用户输入传递给此函数。 任何包含 shell 的输入 元字符可用于触发任意命令执行
+ * [p.status, p.stdout, p.stderr, p.signal, p.error, p.pid]
+ * @param {string} cmd  要运行的命令
+ * @param {boolean} easymode true: exec false:spwan
+ * @param {boolean} sync 是否同步，默认true
+ * @param {string} pwd 子进程的当前工作目录
+ * @param {string} timeout 允许进程运行的最长时间（以毫秒为单位）。 默认值: undefined。
+ * @param {Function} callback child_process.exec的回调函数 callback = (error, stdout, stderr) => {...
+ * @param {boolean/string} shell 用于执行命令的 shell。 请参阅 shell 的要求和默认的 Windows shell。 默认值: true => Unix 上是 '/bin/sh'，Windows 上是 process.env.ComSpec
+ * @param {string} killSignal <string> | <integer> 衍生的进程将被终止时要使用的信号值。 默认值: 'SIGTERM'。
+ * @param {number} maxBuffer 标准输出或标准错误上允许的最大数据量（以字节为单位）。 如果超过，则子进程将终止并截断任何输出。 请参阅 maxBuffer 和 Unicode 的注意事项。 默认值: 1024 * 1024。
+ * @param {string} encoding  用于所有标准输入输出的输入和输出的编码。 默认值: 'utf-8'。
+ * @param {boolean} windowsHide 隐藏通常在 Windows 系统上创建的子进程控制台窗口。 默认值: false。
+ * @returns 
+ */
+export const execCommand = (cmd, easymode = true, sync = true,
+    pwd = ".", timeout = undefined,
+    callback = undefined, shell = true,
+    killSignal = 'SIGTERM', maxBuffer = 1024 * 1024,
+    encoding = 'utf-8', windowsHide = false) => {
+    // encoding = 'buffer'
+    let fn = getExecFunction().name;
+
+    if (callback == undefined) {
+        callback = (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+            }
+            console.log(`stdout: \n${stdout}`);
+            console.log(`stderr: \n${stderr}`);
+        }
+    }
+
+    if (shell === true) {
+        if (isWindows()) {
+            shell = "process.env.ComSpec"
+        } else {
+            shell = "/bin/bash"
+        }
+    }
+
+    if (sync) {
+        if (easymode) {
+            try {
+                return child_process.execSync(cmd, {
+                    cwd: pwd, shell: shell,
+                    timeout: timeout, killSignal: killSignal,
+                    maxBuffer: maxBuffer, encoding: encoding, windowsHide: windowsHide
+                });
+            } catch (error) {
+                console.log("%s: " + error, fn);
+                return error;
+            }
+        } else {
+            try {
+                // https://juejin.cn/s/node%E6%89%A7%E8%A1%8Cshell%E8%8E%B7%E5%8F%96%E5%AE%9E%E6%97%B6%E8%BE%93%E5%87%BA
+                /**
+                 * 
+                 * 返回: <Object>
+    pid <number> 子进程的 pid。
+    output <Array> 来自标准输入输出的输出的结果数组。
+    stdout <Buffer> | <string> output[1] 的内容。
+    stderr <Buffer> | <string> output[2] 的内容。
+    status <number> | <null> 子进程的退出码，如果子进程因信号而终止，则为 null。
+    signal <string> | <null> 用于终止子进程的信号，如果子进程没有因信号而终止，则为 null。
+    error <Error> 如果子进程失败或超时，则为错误对象。
+                 */
+                let c = cmd.split(" ");
+                let cmdopt = [];
+                let cn = -1;
+                c.forEach(el => {
+                    if (cn == -1) {
+                        cmd = el;
+                    } else {
+                        cmdopt[cn] = el;
+                    }
+                    cn += 1;
+                });
+                let p = child_process.spawnSync(cmd, cmdopt, {
+                    cwd: pwd, shell: shell,
+                    timeout: timeout, killSignal: killSignal,
+                    maxBuffer: maxBuffer, encoding: encoding, windowsHide: windowsHide
+                });
+                prompti(p.stdout);
+                prompte(p.stderr);
+                return [p.status, p.stdout, p.stderr, p.signal, p.error, p.pid]
+            } catch (error) {
+                console.log("%s: %s", fn, error);
+                return error;
+            }
+        }
+    } else {
+        if (easymode) {
+            child_process.exec(cmd, callback);
+        } else {
+            let c = cmd.split(" ");
+            let cmdopt = [];
+            let cn = -1;
+            c.forEach(el => {
+                if (cn == -1) {
+                    cmd = el;
+                } else {
+                    cmdopt[cn] = el;
+                }
+                cn += 1;
+            });
+            let p = child_process.spawn(cmd, cmdopt, {
+                cwd: pwd, shell: shell,
+                timeout: timeout, killSignal: killSignal,
+                maxBuffer: maxBuffer, encoding: encoding, windowsHide: windowsHide,
+
+            });
+
+            // p.stdout.on('data', (data) => {
+            //     console.log(`stdout: ${data}`);
+            // });
+
+            // p.stderr.on('data', (data) => {
+            //     console.error(`stderr: ${data}`);
+            // });
+
+            // p.on('close', (code) => {
+            //     console.log(`child process exited with code ${code}`);
+            // });
+            return p;
+        }
+    }
+}
+
+
+/**
+ * clipboardy粘贴板操作
+ */
+/**
+ * clipboardy设置粘贴板
+ * @param {string} content content 内容
+ * @param {boolean} sync 是否同步， if true Doesn't work in browsers.
+ * @returns 返回字符串内容/async: None
+ */
+export const setClipboard = (content, sync = true) => {
+    if (sync) {
+        let result = false;
+        // Doesn't work in browsers.
+        try {
+            clipboard.writeSync(content);
+            if (clipboard.readSync() === content) {
+                result = true;
+            } else {
+                console.log("setClipboard: 似乎失败了");
+            }
+            // console.log("setClipboard:设置粘贴板:" + content);
+        } catch (error) {
+            console.log("setClipboard failed:" + error);
+        }
+        return result;
+    } else {
+        return clipboard.write(content);
+    }
+};
+
+
+/**
+ * clipboardy获取系统粘贴板信息
+ * @param {boolean} sync 是否同步，If false, Doesn't work in browsers.
+ * @returns 返回字符串内容/async:Promise
+ */
+export const getClipboard = (sync = true) => {
+    if (sync) {
+        let content = "";
+        try {
+            content = clipboard.readSync();
+            // console.log("getClipboard:粘贴板读取:" + content);
+        } catch (error) {
+            console.log("getClipboard failed:" + error);
+        }
+        return content;
+    } else {
+        return clipboard.read();
+    }
+}
+
+
 /**
  * 打印列表
  * @param {Array} list 
@@ -358,23 +423,6 @@ export const getPath = () => {
         p = L.append(dir, p);
     });
     return L.toArray(p);
-}
-
-
-/**
- * 获取文件分隔符
- * @returns 
- */
-export const getFileSeparator = () => {
-    return path.sep;
-}
-
-/**
- * 是否是Windows系统
- * @returns 
- */
-export const isWindows = () => {
-    return getFileSeparator() == "\\";
 }
 
 
@@ -991,37 +1039,54 @@ export const mvCPRM = (src, dst,
  * @param {*} sync 是否同步
  * @returns 内容
  */
-export const readFileContent = (filepath, readBinary = false, sync = true, callback = defaultCallback) => {
+export const readFileContent = (filepath, readBinary = false, sync = true, encoding = 'utf-8', callback = undefined) => {
+    let fn = getExecFunction().name;
     let content = "";
     try {
         if (sync) {
             // 同步读取
-            var data = fs.readFileSync(filepath);
+            try {
+                if (readBinary) {
+                    let data = fs.readSync( );
+                    content = data;
+                } else {
+                    let data = fs.readFileSync(filepath, { encoding: encoding });
+                    content = data;
+                }
+                console.log("readFileContent:同步读取: " + content);
+                console.log(typeof content);
+            } catch (error) {
+                prompte(fn + ": " + error);
+                return undefined;
+            }
+        } else {
+            // 异步读取
+            if (callback == undefined) {
+                callback = (error, data) => {
+                    if (error) {
+                        console.log(error);//error输出的是错误对象信息
+                        console.log('%s: 读取文件失败', fn);
+                    } else {
+                        console.log(data);
+                        return data;
+                    }
+                }
+            }
             if (readBinary) {
                 content = data;
             } else {
-                content = data.toString();
+                let data = fs.readFile(filepath, { encoding: encoding }, callback);
+                content = data;
             }
-            console.log("readFileContent:同步读取: " + content);
-        } else {
-            // 异步读取
-            fs.readFile(filepath, function (err, data) {
-                if (err) {
-                    return console.error(err);
-                }
-                if (readBinary) {
-                    content = data;
-                } else {
-                    content = data.toString();
-                }
-                console.log("readFileContent:异步读取: " + content);
-            });
+            console.log("readFileContent:异步读取: " + content);
         }
     } catch (error) {
         console.log("readFileContent:" + error);
     }
     return content;
 }
+
+readFileContent("a", true, true)
 
 
 

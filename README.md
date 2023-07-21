@@ -317,11 +317,43 @@ TODO
 
 ### msystem
 
->Dep：
->
->- clipboardy
+- `export const getExecFunction = () => {`——获取当前运行的函数名称
+- `const defaultCallback = (err, data, funcname) => {`——默认回调函数 （**弃用**）
+- `const onSuccess = (fn) => {`——默认的用于Promise的函数 （**弃用**）
+- `const onFailed = (fn) => {`——默认的用于Promise的函数（**弃用**）
+- `export const print = (str, fg = 31, bg = 0, display = 1) => {`——简单的终端颜色
+- `export const prompt = (str, mode = 4) => {`——常用显示 
+  - `export const prompts = (str) => {`
+  - `export const prompte = (str) => {`
+  - `export const prompti = (str) => {`
+  - `export const promptw = (str) => {`
+  - `export const promptm = (str) => {`
 
-- TODO
+- `export const getFileSeparator = () => {`——获取文件分隔符
+- `export const isWindows = () => {`——是否是Windows系统
+- `export const setClipboard = (content, sync = true) => {`——clipboardy设置粘贴板
+- `export const getClipboard = (sync = true) => {`——clipboardy获取系统粘贴板信息
+- `export const prlst = (list, promptMode = 0) => {`——打印列表
+- `export const getPathSeparator = () => {`——返回环境变量分隔符
+- `export const getPath = () => {`——获取环境变量
+- `export const arrayRemoveDuplicates = (arr) => {`——去除重复数组元素
+- `export const fileType = (filepath, sync = true) => {`——判断文件类型 文件：1 文件夹：2 链接文件：3
+- `export const ls = (filepath, sync = true, showHidden = false, followLinks = true, absolutePath = true) => {`——ls
+- `export const la = (filepath, sync = true, followLinks = false, absolutePath = true) => {`—— 模拟la
+- `export const lsFileExtfilter = (filepath, ext) => {`——返回给定扩展名的文件
+- `export const fileLinkedto = (filepath) => {`——返回链接文件指向 [链接地址， 链接好坏]
+- `export const tree = (filepath, showHidden = false, followLinks = false) => {`——tree 返回目录下所有文件，包括空文件夹(包含当前文件夹) 仅有同步方法
+- `export const treeSync = (filepath, showHidden = false, followLinks = false) => {`——目前同上
+- `export const mkdir = (dir, sync = true, overwrite = false, recursive = false, mode = "0700") => {`——新建文件夹 注意Overwrite！会覆盖的！
+- `export const mkdirs = (path, sync = true, overwrite = false, mode = "0700") => {`——mkdir -p 注意Overwrite！会覆盖的！
+- `export const rm = async (filepath, sync = true, recursive = false) => {`——删除文件
+- `export const rmClearDirectory = async (dir, sync = true) => {`——清空目录
+- `export const rmFD = async (filepath, sync = true) => {`——删除文件或者文件夹
+- `export const cp = (src, dst, sync = true, recursive = false,  overwrite = true, errorOnExist = false,   dereference = false, eserveTimestamps = false,   filter = (src, dest) => {    return true;  })`——复制文件 如果recursive是false，除了src dst，其他Option选项无效
+- `export const cpFD = (src, dst, sync = true,   overwrite = true, errorOnExist = false,   dereference = false, preserveTimestamps = false,   filter = (s, d) => {      return true;   })`——复制文件、文件夹
+- `export const mv = (src, dst, sync = true) => {`——移动文件（重命名）
+- `export const mvCPRM = (src, dst,    overwrite = true, errorOnExist = false,    dereference = false, preserveTimestamps = false,    filter = (s, d) => {        return true;    })`——先复制再删除
+- ``——TODO
 
 ## Python
 
