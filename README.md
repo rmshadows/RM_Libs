@@ -328,7 +328,6 @@ TODO
   - `export const prompti = (str) => {`
   - `export const promptw = (str) => {`
   - `export const promptm = (str) => {`
-
 - `export const getFileSeparator = () => {`——获取文件分隔符
 - `export const isWindows = () => {`——是否是Windows系统
 - `export const setClipboard = (content, sync = true) => {`——clipboardy设置粘贴板
@@ -353,7 +352,8 @@ TODO
 - `export const cpFD = (src, dst, sync = true,   overwrite = true, errorOnExist = false,   dereference = false, preserveTimestamps = false,   filter = (s, d) => {      return true;   })`——复制文件、文件夹
 - `export const mv = (src, dst, sync = true) => {`——移动文件（重命名）
 - `export const mvCPRM = (src, dst,    overwrite = true, errorOnExist = false,    dereference = false, preserveTimestamps = false,    filter = (s, d) => {        return true;    })`——先复制再删除
-- ``——TODO
+- `export const readFileContent = (filepath, readFile = false, sync = true, fsopenflag = 'r',    encoding = 'utf-8', callback = undefined, fsopenmode = 0o666,    fsreadoffset = 0, fsreadbufflength = 0, fsreadlength = undefined, fsreadposition = null)`——读取文件
+- ``——写入文件
 
 ## Python
 
@@ -645,6 +645,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.7.22——0.1.8(Under Dev)
+  - Node模块写入文件
 - 2023.7.6——0.1.7(Under Dev)
   - 新增Node.js项目库
 - 2023.5.19——0.1.6

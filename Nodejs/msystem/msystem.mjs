@@ -1033,28 +1033,61 @@ export const mvCPRM = (src, dst,
 
 
 /**
- * 读取文件 TODO
+ * 读取文件内容
  * @param {*} filepath 文件路径
- * @param {*} readBinary 是否返回二进制内容（否则返回文本） 
- * @param {*} sync 是否同步
- * @returns 内容
+ * @param {*} readFile 使用ReadFile还是read 
+ * @param {*} sync 是否同步 
+ * @param {*} fsopenflag 默认'r'
+ * @param {*} encoding 编码默认'utf-8' 可设置为 null
+ * @param {*} callback 异步回调
+ * @param {*} fsopenmode 默认 0o666
+ * @param {*} fsreadoffset 缓冲区中的偏移量，指示从哪里开始写入。仅对read方法有效
+ * @param {*} fsreadbufflength 缓冲区长度，仅对read方法有效
+ * @param {*} fsreadlength 一个整数，指定要读取的字节数。，仅对read方法有效
+ * @param {*} fsreadposition null 一个整数，指定从文件中的何处开始读取。 如果位置为空，则从当前文件位置读取数据。 ，仅对read方法有效
+ * @returns 
  */
-export const readFileContent = (filepath, readBinary = false, sync = true, encoding = 'utf-8', callback = undefined) => {
+export const readFileContent = (filepath, readFile = false, sync = true, fsopenflag = 'r',
+    encoding = 'utf-8', callback = undefined, fsopenmode = 0o666,
+    fsreadoffset = 0, fsreadbufflength = 0, fsreadlength = undefined, fsreadposition = null) => {
+    if (fsreadbufflength == 0) {
+        // 文件大小即是缓冲大小
+        let fps = fs.statSync(filepath);
+        fsreadbufflength = fps.size;
+    }
+    let buf = new Buffer.alloc(fsreadbufflength);
+    if (fsreadlength == undefined) {
+        fsreadlength = buf.byteLength;
+    }
     let fn = getExecFunction().name;
     let content = "";
     try {
         if (sync) {
             // 同步读取
             try {
-                if (readBinary) {
-                    let data = fs.readSync( );
-                    content = data;
-                } else {
+                if (readFile) {
                     let data = fs.readFileSync(filepath, { encoding: encoding });
                     content = data;
+                } else {
+                    // 使用read
+                    /**
+fs.open()方法返回的文件描述符。
+buffer： 存储从文件中取出的数据。
+offset： 缓冲区中的偏移量，指示从哪里开始写入。
+length： 一个整数，指定要读取的字节数。
+位置： 一个整数，指定从文件中的何处开始读取。 如果位置为空，则从当前文件位置读取数据。 
+                     */
+                    let f = fs.openSync(filepath, fsopenflag, fsopenmode);
+                    let d = fs.readSync(f, buf, fsreadoffset, fsreadlength, fsreadposition);
+                    console.log(d + "  字节被读取");
+                    // 仅输出读取的字节
+                    if (d > 0) {
+                        content = buf.slice(0, d).toString()
+                        console.log(content);
+                    }
                 }
                 console.log("readFileContent:同步读取: " + content);
-                console.log(typeof content);
+                return content;
             } catch (error) {
                 prompte(fn + ": " + error);
                 return undefined;
@@ -1072,11 +1105,36 @@ export const readFileContent = (filepath, readBinary = false, sync = true, encod
                     }
                 }
             }
-            if (readBinary) {
-                content = data;
-            } else {
+            if (readFile) {
                 let data = fs.readFile(filepath, { encoding: encoding }, callback);
                 content = data;
+            } else {
+                fs.open(filepath, fsopenflag, fsopenmode, function (err, fd) {
+                    if (err) {
+                        return console.error(err);
+                    }
+                    fs.read(fd, buf, fsreadoffset, fsreadlength, fsreadposition,
+                        function (err, bytes) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            // 仅输出读取的字节
+                            if (bytes > 0) {
+                                content = buf.slice(0, bytes).toString();
+                                console.log(content);
+                            }
+                            console.log(bytes + " bytes read");
+
+                            // Close the opened file.
+                            fs.close(fd, function (err) {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                console.log("File closed successfully");
+                            });
+                            return content;
+                        });
+                });
             }
             console.log("readFileContent:异步读取: " + content);
         }
@@ -1086,7 +1144,8 @@ export const readFileContent = (filepath, readBinary = false, sync = true, encod
     return content;
 }
 
-readFileContent("a", true, true)
+
+
 
 
 
