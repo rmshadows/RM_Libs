@@ -11,8 +11,13 @@ import fse, { copy } from 'fs-extra';
 import child_process from 'child_process';
 import { time } from 'console';
 import { kill } from 'process';
+import n_readlines from 'n-readlines';
+import readline from 'readline';
 
-var fsPromise = fs.promises;
+
+const lineByLine = n_readlines;
+const fsPromise = fs.promises;
+
 
 /**
  * 模块内部函数
@@ -1035,10 +1040,10 @@ export const mvCPRM = (src, dst,
 /**
  * 读取文件内容
  * @param {*} filepath 文件路径
- * @param {*} readFile 使用ReadFile还是read 
- * @param {*} sync 是否同步 
+ * @param {*} readFile 使用ReadFile还是read   true
+ * @param {*} sync 是否同步  true
+ * @param {*} encoding 编码默认'utf-8' 可设置为 null buffer
  * @param {*} fsopenflag 默认'r'
- * @param {*} encoding 编码默认'utf-8' 可设置为 null
  * @param {*} callback 异步回调
  * @param {*} fsopenmode 默认 0o666
  * @param {*} fsreadoffset 缓冲区中的偏移量，指示从哪里开始写入。仅对read方法有效
@@ -1047,8 +1052,8 @@ export const mvCPRM = (src, dst,
  * @param {*} fsreadposition null 一个整数，指定从文件中的何处开始读取。 如果位置为空，则从当前文件位置读取数据。 ，仅对read方法有效
  * @returns 
  */
-export const readFileContent = (filepath, readFile = false, sync = true, fsopenflag = 'r',
-    encoding = 'utf-8', callback = undefined, fsopenmode = 0o666,
+export const readFileContent = (filepath, readFile = true, sync = true, encoding = 'utf-8',
+    fsopenflag = 'r', callback = undefined, fsopenmode = 0o666,
     fsreadoffset = 0, fsreadbufflength = 0, fsreadlength = undefined, fsreadposition = null) => {
     if (fsreadbufflength == 0) {
         // 文件大小即是缓冲大小
@@ -1145,7 +1150,221 @@ length： 一个整数，指定要读取的字节数。
 }
 
 
+/**
+ * 读取大文件 返回每行的数组
+ * npm install n-readlines
+ * @param {*} filepath 文件
+ * @param {*} splitor 每一行的分隔符， 也就是行再分隔
+ * @param {*} code_comment 代码注释标志
+ * @param {*} sync 是否同步
+ * @param {*} encoding 默认 utf-8
+ * @param {*} ignoreNull 忽略空行
+ * @returns 数组
+ */
+export const readFileNReadlines = (filepath, splitor = undefined, code_comment = undefined, sync = true, encoding = "utf-8", ignoreNull = true) => {
+    let fn = getExecFunction().name;
+    if (sync) {
+        try {
+            let readLines = L.empty();
+            const liner = new lineByLine(filepath);
+            let line;
+            let lineNumber = 0;
+            while (line = liner.next()) {
+                line = line.toString(encoding).replace("\r\n", "").replace("\r", "").replace("\n", "");
+                if (ignoreNull && line == "") {
+                    // promptw("发现空行! ");
+                    lineNumber++;
+                    continue;
+                }
+                // 如果定义了忽略的字符串
+                if (code_comment != undefined) {
+                    // 行里有注释符号
+                    if (line.indexOf(code_comment) != -1) {
+                        // 分隔，取前面
+                        let tsp = line.split(code_comment);
+                        // 取开头
+                        tsp = String(tsp[0]).replace(" ", "").replace("\t", "");
+                        // 去除空格和Tab后是空则为注释
+                        if (tsp === "") {
+                            // promptw("发现注释:  "+line);
+                            lineNumber++;
+                            continue;
+                        }
+                    }
+                }
+                // 如果定义了分隔符
+                if (splitor != undefined) {
+                    if (line.indexOf(splitor) == -1) {
+                        // 不包含就是[line内容]
+                        readLines = L.append([line], readLines);
+                    } else {
+                        readLines = L.append(line.split(splitor), readLines);
+                    }
+                } else {
+                    readLines = L.append(line, readLines);
+                }
+                // console.log('Line ' + lineNumber + ': ' + line);
+                lineNumber++;
+            }
+            // console.log('end of line reached');
+            return L.toArray(readLines);
+        } catch (error) {
+            console.log("%s: " + error, fn);
+            return undefined;
+        }
+    } else {
+        let readLines = L.empty();
+        let rl = readline.createInterface({
+            input: fs.createReadStream(filepath),
+            output: process.stdout,
+            terminal: false
+        });
+
+        rl.on('line', (line) => {
+            let pass = false;
+            line = line.toString(encoding);
+            promptm(line);
+            if (ignoreNull && line == "") {
+                // promptw("发现空行! ");
+                pass = true;
+            }
+            // 如果定义了忽略的字符串
+            if (code_comment != undefined) {
+                // 行里有注释符号
+                if (line.indexOf(code_comment) != -1) {
+                    // 分隔，取前面
+                    let tsp = line.split(code_comment);
+                    // 取开头
+                    tsp = String(tsp[0]).replace(" ", "").replace("\t", "");
+                    // 去除空格和Tab后是空则为注释
+                    if (tsp === "") {
+                        // promptw("发现注释:  " + line);
+                        pass = true;
+                    }
+                }
+            }
+            if (!pass) {
+                // 如果定义了分隔符
+                if (splitor != undefined) {
+                    if (line.indexOf(splitor) == -1) {
+                        // 不包含就是[line内容]
+                        readLines = L.append([line], readLines);
+                    } else {
+                        readLines = L.append(line.split(splitor), readLines);
+                    }
+                } else {
+                    readLines = L.append(line, readLines);
+                }
+            }
+        });
+
+        rl.on('close', function () {
+            // do something on finish here
+            return L.toArray(readLines);
+        });
+    }
+}
+
+/**
+ * 默认配置文件设置
+ * @param {*} filepath 
+ * @param {*} splitor 
+ * @param {*} code_comment 
+ */
+export const readConfFileSync = (filepath, splitor = "=", code_comment = "#") => {
+    return readFileNReadlines(filepath, splitor, code_comment);
+}
 
 
+/**
+ * 写入文件
+ * @param {string} filepath 
+ * @param {*} towrite 
+ * @param {*} sync 
+ * @param {*} encoding 
+ * @param {*} flag 
+ * @param {*} overwrite 
+ * @param {*} mode 
+ * @returns 
+ */
+export const writeFileContent = (filepath, towrite, sync = true, encoding = "utf-8", flag = "w", overwrite = true, mode = 0o666) => {
+    let fn = getExecFunction().name;
+    if (fs.existsSync(filepath) && !overwrite) {
+        prompte(fn + ": 文件存在 => " + filepath);
+        return undefined;
+    }
+    if (sync) {
+        try {
+            fs.writeFileSync(filepath, towrite, { encoding: encoding, flag: flag, mode: mode });
+        } catch (error) {
+            console.log("%s: " + error, fn);
+        }
+    } else {
+        fs.writeFile(filepath, towrite, { encoding: encoding, flag: flag, mode: mode }, err => {
+            if (err) {
+                console.error(err);
+                return undefined;
+            }
+            // file written successfully
+        });
+    }
+}
+
+/**
+ * 追加写入
+ * @param {*} filepath 
+ * @param {*} towrite 
+ * @param {*} sync 
+ * @param {*} encoding 
+ * @param {*} overwrite 
+ * @param {*} mode 
+ */
+export const writeFileInAppendMode = (filepath, towrite, sync = true, encoding = "utf-8", overwrite = true, mode = 0o666) => {
+    let flag = "a";
+    writeFileContent(filepath, towrite, sync, encoding, flag, overwrite, mode);
+}
+
+
+/**
+ * 逐行写入（仅异步）
+ * EOL 换行符默认windows的
+ * @param {*} filepath 
+ * @param {Array} linesToWrite  
+ * @param {*} flags 
+ * @param {*} encoding 
+ * @param {*} EOL 换行符默认windows的
+ * @param {*} overwrite 
+ * @returns 
+ */
+export const writeByLinesAsync = (filepath, linesToWrite, flags = "w", encoding = "utf-8", EOL = "\r\n", overwrite = true) => {
+    let fn = getExecFunction().name;
+    if (fs.existsSync(filepath) && !overwrite) {
+        prompte(fn + ": 文件存在 => " + filepath);
+        return undefined;
+    }
+    if (EOL == undefined) {
+        EOL = os.EOL;
+    }
+    // 创建一个可以写入的流，写入到文件 output.txt 中
+    let writerStream = fs.createWriteStream(filepath, { flags: flags, encoding: encoding });
+
+    linesToWrite.forEach(l => {
+        // 使用 utf8 编码写入数据
+        writerStream.write(l + EOL, encoding);
+    });
+
+    // 标记文件末尾
+    writerStream.end();
+
+    // 处理流事件 --> finish、error
+    writerStream.on('finish', function () {
+        console.log("写入完成。");
+        writerStream.close();
+    });
+
+    writerStream.on('error', function (err) {
+        console.log(err.stack);
+    });
+}
 
 

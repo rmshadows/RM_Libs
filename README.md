@@ -353,7 +353,11 @@ TODO
 - `export const mv = (src, dst, sync = true) => {`——移动文件（重命名）
 - `export const mvCPRM = (src, dst,    overwrite = true, errorOnExist = false,    dereference = false, preserveTimestamps = false,    filter = (s, d) => {        return true;    })`——先复制再删除
 - `export const readFileContent = (filepath, readFile = false, sync = true, fsopenflag = 'r',    encoding = 'utf-8', callback = undefined, fsopenmode = 0o666,    fsreadoffset = 0, fsreadbufflength = 0, fsreadlength = undefined, fsreadposition = null)`——读取文件
-- ``——写入文件
+- `export const readFileNReadlines = (filepath, splitor = undefined, code_comment = undefined, sync = true, encoding = "utf-8", ignoreNull = true) => {`——逐行读取文件
+- `export const readConfFileSync = (filepath, splitor = "=", code_comment = "#") => {`——默认配置文件设置
+- `export const writeFileContent = (filepath, towrite, sync = true, encoding = "utf-8", flag = "w", overwrite = true, mode = 0o666) => {`——写入文件
+- `export const writeFileInAppendMode = (filepath, towrite, sync = true, encoding = "utf-8", overwrite = true, mode = 0o666) => {`——追加写入
+- `export const writeByLinesAsync = (filepath, linesToWrite, flags = "w", encoding = "utf-8", EOL = "\r\n", overwrite = true) => {`——逐行写入（仅异步）
 
 ## Python
 
@@ -645,6 +649,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.7.23——0.1.9
+  - Node system模块新增读写功能
 - 2023.7.22——0.1.8(Under Dev)
   - Node模块写入文件
 - 2023.7.6——0.1.7(Under Dev)
