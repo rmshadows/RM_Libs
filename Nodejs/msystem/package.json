@@ -1,8 +1,8 @@
 {
-  "name": "system",
+  "name": "msystem",
   "version": "0.0.0",
   "description": "系统组件",
-  "main": "system.js",
+  "main": "index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
