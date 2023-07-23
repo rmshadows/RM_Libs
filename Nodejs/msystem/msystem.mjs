@@ -1,19 +1,17 @@
 /**
  * 系统操作模块，默认同步直接返回值，异步返回Promise
+ * EES6: https://es6.ruanyifeng.com/#README
  */
-"use strict";
 import clipboard from 'clipboardy';
-import fs, { read } from 'fs';
+import fs from 'fs';
 import * as L from 'list'
 import path from 'path';
 import chalk from 'chalk';
-import fse, { copy } from 'fs-extra';
+import fse from 'fs-extra';
 import child_process from 'child_process';
-import { time } from 'console';
-import { kill } from 'process';
 import n_readlines from 'n-readlines';
 import readline from 'readline';
-
+import {setTimeout} from 'node:timers/promises'; 
 
 const lineByLine = n_readlines;
 const fsPromise = fs.promises;
@@ -1368,3 +1366,21 @@ export const writeByLinesAsync = (filepath, linesToWrite, flags = "w", encoding 
 }
 
 
+/**
+ * 设置延时 
+ * 使用: await sleep(xxxx);
+ * import {setTimeout} from 'node:timers/promises'; 
+ * @param {*} msecond 毫秒
+ */
+export const sleep = async (msecond) => {
+    if (msecond % 1000 == 0) {
+        let sec = msecond / 1000;
+        for (let i = sec; i > 0; i--) {
+            promptm("还有 " + i + " 秒");
+            await setTimeout(1000);
+        }
+    } else {
+        await setTimeout(msecond);
+    }
+    promptm("Done.");
+}

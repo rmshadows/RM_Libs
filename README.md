@@ -304,9 +304,17 @@ public class test {
 
 ## Node.js
 
-TODO....
+引入：复制文件夹到项目中，`npm i`
 
-引入：`import 【脚本名称】`
+```
+// 按需引入
+import { prompts as green } from './msystem/msystem.mjs'
+green("终端绿色字体");
+
+// 整体引入
+import * as msystem from './msystem/msystem.mjs';
+msystem.prompte("终端红色字体");
+```
 
 - mqrcode——二维码生成与扫描
 - msystem——系统相关操作
@@ -358,6 +366,7 @@ TODO
 - `export const writeFileContent = (filepath, towrite, sync = true, encoding = "utf-8", flag = "w", overwrite = true, mode = 0o666) => {`——写入文件
 - `export const writeFileInAppendMode = (filepath, towrite, sync = true, encoding = "utf-8", overwrite = true, mode = 0o666) => {`——追加写入
 - `export const writeByLinesAsync = (filepath, linesToWrite, flags = "w", encoding = "utf-8", EOL = "\r\n", overwrite = true) => {`——逐行写入（仅异步）
+- `export const sleep = async (msecond) => {`——设置延时，使用:`await sleep(xxxx);`
 
 ## Python
 
