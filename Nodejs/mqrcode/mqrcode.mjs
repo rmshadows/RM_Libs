@@ -21,13 +21,14 @@ QRCode.toCanvas(canvas, 'sample text', function (error) {
 
  */
 import QRCode from 'qrcode'
-import QRCodeReader from 'qrcode-reader';
-import fs, { read } from 'fs';
-import Jimp from 'jimp';
-import { log } from 'console';
+import jsQR from "jsqr";
+import jpeg from 'jpeg-js';
+import { PNG as PNG } from "pngjs";
+import fs from 'fs';
 
-var reader = new QRCodeReader();
-
+// 依赖msystem
+// import * as ms from "../msystem/msystem.mjs";
+import path from 'path';
 
 // 二维码生成
 /**
@@ -53,7 +54,7 @@ const asyncGenerateQR = async (text, width, type) => {
  * @param {*} width 
  * @param {*} type 文件类型 svg png txt
  */
-export const createQRSync = (text, savepath, width = "500", type = "svg") => {
+export const createQRSync = (text, savepath, width = "500", type = "png") => {
   QRCode.toFile(savepath, text, { type: type, width: width });
 }
 
@@ -87,31 +88,139 @@ export const generateQRBase64Async = async (text, width = 500, type = "image/png
 // 二维码读取
 
 /**
- * 读取二维码
- * @param {*} filepath 
+ * 读取jpg图片转为Uint8Array
+ * To decode directly into a Uint8Array
+{
+  width: 1000,
+  height: 1000,
+  exifBuffer: Uint8Array(12347) [
+      0, 73, 73,  42, 0, 8, 0,   0, 0, 7, 0,  18,
+      1,  3,  0,   1, 0, 0, 0,   1, 0, 0, 0,  26,
+      1,  5,  0,   1, 0, 0, 0,  98, 0, 0, 0,  27,
+      1,  5,  0,   1, 0, 0, 0, 106, 0, 0, 0,  40,
+      1,  3,  0,   1, 0, 0, 0,   3, 0, 0, 0,  49,
+      1,  2,  0,  13, 0, 0, 0, 114, 0, 0, 0,  50,
+      1,  2,  0,  20, 0, 0, 0, 128, 0, 0, 0, 105,
+    135,  4,  0,   1, 0, 0, 0, 148, 0, 0, 0, 166,
+      0,  0,  0, 248,
+    ... 12247 more items
+  ],
+  data: Uint8Array(4000000) [
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255,
+    ... 3999900 more items
+  ]
+}
+ * @param {*} jpgFile 
+ * @returns 
  */
-export const readQRCodeFromFile = async (filepath) => {
-  let buffer = fs.readFileSync(filepath);
-  let r = "";
-  Jimp.read(buffer, function (err, image) {
-    if (err) {
-      console.error(err);
-      // TODO handle error
-    }
-    reader.callback = async function (err, value) {
-      if (err) {
-        console.error(err);
-        // TODO handle error
-      }
-      // console.log(value.result);
-      // console.log(value);
-      r = value.result;
-    };
-    reader.decode(image.bitmap);
-    console.log("Return: " + r);
-  });
+export const decodejpg2Uint8Array = (jpgFile) => {
+  /*
+    { width: 320,
+      height: 180,
+      data: { '0': 91, '1': 64, ... } } // typed array
+    */
+  try {
+    let jpegData = fs.readFileSync(jpgFile);
+    let rawImageData = jpeg.decode(jpegData, { useTArray: true }); // return as Uint8Array
+    // console.log(rawImageData);
+    return rawImageData;
+  } catch (error) {
+    console.log(error);
+  }
+  return undefined;
 }
 
-readQRCodeFromFile("1.png").then(x => console.log("aaa"), x => console.log("???"));
-// let a = readQRCodeFromFile("1.png")
-// console.log(a);
+
+/**
+ * 读取png图片转为Uint8Array
+ * @param {*} pngFile 
+{
+  width: 1000,
+  height: 1000,
+  depth: 8,
+  interlace: false,
+  palette: false,
+  color: true,
+  alpha: true,
+  bpp: 4,
+  colorType: 6,
+  data: <Buffer ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ... 3999950 more bytes>,
+  gamma: 0
+}
+ */
+export const decodepng2Uint8Array = (pngFile) => {
+  try {
+    let data = fs.readFileSync(pngFile);
+    // console.log(data);
+    let png = PNG.sync.read(data);
+    // console.log(png);
+    return png;
+  } catch (error) {
+    console.log(error);
+  }
+  return undefined;
+}
+
+
+/**
+ * 读取二维码 目前仅支持JPG和PNG
+ * @param {*} filepath 
+ * @param {*} width 二维码宽 默认不指定 undefined
+ * @param {*} height 二维码高 默认不指定 undefined
+{
+  binaryData: [ 49, 50, 51 ],
+  data: '123',
+  chunks: [ { type: 'numeric', text: '123' } ],
+  version: 1,
+  location: {
+    topRightCorner: { x: 862.25, y: 137.74999999999997 },
+    topLeftCorner: { x: 137.92861167852368, y: 137.92861167852368 },
+    bottomRightCorner: { x: 863.1457082303077, y: 863.1457082303077 },
+    bottomLeftCorner: { x: 137.74999999999997, y: 862.25 },
+    topRightFinderPattern: { x: 741.5, y: 258.5 },
+    topLeftFinderPattern: { x: 258.5, y: 258.5 },
+    bottomLeftFinderPattern: { x: 258.5, y: 741.5 },
+    bottomRightAlignmentPattern: { x: 638.2142857142858, y: 638.2142857142858 }
+  }
+}
+ */
+export const readQRCodeFromFileSync = async (filepath, width = undefined, height = undefined) => {
+  try {
+    let decode = undefined;
+    let ex = path.extname(filepath);
+    if (ex == ".png") {
+      decode = decodepng2Uint8Array(filepath);
+    }
+    else if (ex == ".jpg" || ex == ".jpeg") {
+      decode = decodejpg2Uint8Array(filepath);
+    }
+    else {
+      throw TypeError("readQRCodeFromFile: " + filepath + " 不是JPG或PNG");
+    }
+    let uint8Array = decode['data'];
+    if(width == undefined){
+      width = decode['width'];
+    }
+    if(height == undefined){
+      height = decode['height'];
+    }
+
+    let code = jsQR(uint8Array, width, height);
+
+    if (code) {
+      console.log("Found QR code", code);
+    }
+    return code;
+  } catch (error) {
+    console.log(error);
+  }
+  return undefined;
+}

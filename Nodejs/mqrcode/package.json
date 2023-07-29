@@ -1,7 +1,8 @@
 {
   "dependencies": {
-    "jimp": "^0.22.8",
-    "qrcode": "^1.5.3",
-    "qrcode-reader": "^1.0.4"
+    "jpeg-js": "^0.4.4",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "qrcode": "^1.5.3"
   }
 }

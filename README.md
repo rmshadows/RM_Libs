@@ -321,7 +321,15 @@ msystem.prompte("终端红色字体");
 
 ### mqrcode
 
-TODO
+>二维码模块
+
+- `const asyncGenerateQR = async (text, width, type) => {`——内部函数，生成二维码 With async/await
+- `export const createQRSync = (text, savepath, width = "500", type = "svg")`——生成二维码图像并保存
+- `export const generateQRBase64Promises = (text, width = 500, type = "image/png") => {`——With promises 返回Base64图片
+- `export const generateQRBase64Async = async (text, width = 500, type = "image/png") => {`—— With async/await 返回Base64图片
+- `export const decodejpg2Uint8Array = (jpgFile) => {`——读取jpg图片转为Uint8Array
+- `export const decodepng2Uint8Array = (pngFile) => {`——读取png图片转为Uint8Array
+- `export const readQRCodeFromFileSync = async (filepath, width = undefined, height = undefined) => {`——读取二维码 目前仅支持JPG和PNG
 
 ### msystem
 
@@ -658,6 +666,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.7.30——0.2.0
+  - Node qrcode二维码模块基本完成
 - 2023.7.23——0.1.9
   - Node system模块新增读写功能
 - 2023.7.22——0.1.8(Under Dev)
