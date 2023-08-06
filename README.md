@@ -375,6 +375,7 @@ msystem.prompte("终端红色字体");
 - `export const writeFileInAppendMode = (filepath, towrite, sync = true, encoding = "utf-8", overwrite = true, mode = 0o666) => {`——追加写入
 - `export const writeByLinesAsync = (filepath, linesToWrite, flags = "w", encoding = "utf-8", EOL = "\r\n", overwrite = true) => {`——逐行写入（仅异步）
 - `export const sleep = async (msecond) => {`——设置延时，使用:`await sleep(xxxx);`
+- `export const getIpAddr = (type=0) => {`——返回本机IP地址
 
 ## Python
 

@@ -11,7 +11,9 @@ import fse from 'fs-extra';
 import child_process from 'child_process';
 import n_readlines from 'n-readlines';
 import readline from 'readline';
-import {setTimeout} from 'node:timers/promises'; 
+import { setTimeout } from 'node:timers/promises';
+import os from 'os';
+import { log } from 'console';
 
 const lineByLine = n_readlines;
 const fsPromise = fs.promises;
@@ -1383,4 +1385,42 @@ export const sleep = async (msecond) => {
         await setTimeout(msecond);
     }
     promptm("Done.");
+}
+
+
+/**
+ * 返回本机IP地址
+ * @param {Number} type 0:全部 1:ipv4 2:ipv6
+ * @returns 
+ */
+export const getIpAddr = (type=0) => {
+    // 获取本机网络信息
+    let iaddr = L.empty();
+    const nfs = os.networkInterfaces();
+    // console.log(nfs);
+    // 查找 IPv4 地址
+    for (const networkname in nfs) {
+        // 网络名称
+        // console.log(networkname);
+        for (const v4v6 of nfs[networkname]) {
+            // 打印IPv4 IPv6网络信息
+            // console.log(v4v6);
+            if (type == 1){
+                if (v4v6.family === 'IPv4') {
+                    iaddr = L.append(v4v6.address, iaddr);
+                    break
+                }
+            }
+            else if (type == 2){
+                if (v4v6.family === 'IPv6') {
+                    iaddr = L.append(v4v6.address, iaddr);
+                    break
+                }
+            }else{
+                iaddr = L.append(v4v6.address, iaddr);
+            }
+        }
+    }
+    // prlst(L.toArray(iaddr));
+    return L.toArray(iaddr);
 }
