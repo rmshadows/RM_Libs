@@ -202,7 +202,7 @@ public class AES_CFB {
      */
     private static byte[] bytesDecrypt(byte[] content, byte[] bkey, byte[] iv) {
         try {
-            SecretKeySpec key = new SecretKeySpec(bkey, "AES");;
+            SecretKeySpec key = new SecretKeySpec(bkey, "AES");
             Cipher cipher = Cipher.getInstance(CipherMode);
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
 

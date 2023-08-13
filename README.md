@@ -316,8 +316,26 @@ import * as msystem from './msystem/msystem.mjs';
 msystem.prompte("终端红色字体");
 ```
 
+- maes——AES加密模块
 - mqrcode——二维码生成与扫描
 - msystem——系统相关操作
+
+### maes
+
+>AES加密模块
+
+- aes_tools.mjs——工具模块
+  - `export const bytes2hex=(bytes)=>{`——bytes[]=>hex
+  - `export const hex2bytes=(hex)=>{`——hex=>bytes[]
+  - `export const keyPadding = (stringKey, length) => {`——密钥长度补全
+  - `export const bytesToString = (arr) => {`——读取UTF8编码的字节，并专为Unicode的字符串
+  - `export const stringToBytes = (str, isGetBytes = true) => {`——将字符串格式化为UTF8编码的字节
+  - `export const bytesToString1 = (arr) => {`——Byte数组 (UTF-8) 转字符串
+  - `export const stringToBytes1 = (str) => {`——字符串转Byte数组 (UTF-8) 
+  - `CHARACTER`——"UTF-8"
+- aes_cfb.mjs——CFB模块
+- aes_cbc.mjs——CBC模块
+- maes.mjs——用于引用导出的模块
 
 ### mqrcode
 
