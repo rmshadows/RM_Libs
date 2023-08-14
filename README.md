@@ -334,8 +334,27 @@ msystem.prompte("终端红色字体");
   - `export const stringToBytes1 = (str) => {`——字符串转Byte数组 (UTF-8) 
   - `CHARACTER`——"UTF-8"
 - aes_cfb.mjs——CFB模块
+  - `export const cfbCipher = (SecuritykeyStr, initVectorStr, pwdLength = 32) => {`——返回加密器
+  - `export const cfbDecipher = (SecuritykeyStr, initVectorStr, pwdLength = 32) => {`——返回解密器
+  - `export const encrypt = (cipher, message) => {`——加密信息
+  - `export const decrypt = (decipher, hexmessage) => {`——解密的方法
+  - `export const tEncrypt = (message, key, iv, length = 32) => {`——临时加密的方法
+  - `export const tDecrypt = (hexmessage, key, iv, length = 32) => {`——临时解密的方法
 - aes_cbc.mjs——CBC模块
+  - `export const cbcCipher = (SecuritykeyStr, initVectorStr, pwdLength = 16) => {`——返回加密器
+  - `export const cbcDecipher = (SecuritykeyStr, initVectorStr, pwdLength = 16) => {`——返回解密器
+  - `export const encrypt = (cipher, message) => {`——加密信息
+  - `export const decrypt = (decipher, hexmessage) => {`—— 解密的方法
+  - `export const tEncrypt = (message, key, iv, length = 16) => {`——临时加密的方法
+  - `export const tDecrypt = (hexmessage, key, iv, length = 16) => {`——临时解密的方法
 - maes.mjs——用于引用导出的模块
+  - `export const createCFB = (key, iv, length = 32) => {`——返回一对CFB加密器，解密器
+  - `export const createCBC = (key, iv, length = 16) => {`——返回一堆CBC加密器、解密器
+  - `export const encryptCBC = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CBC加密 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
+  - `export const decryptCBC = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CBC解密 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
+  - `export const encryptCFB = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CFB加密 
+  - `export const decryptCFB = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CFB解密
+  - `function test() {`——测试的方法（和Python、Jave匹配）
 
 ### mqrcode
 
@@ -685,6 +704,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.8.15——0.2.1
+  - Node新增AES加密模块，支持CBC、CFB
 - 2023.7.30——0.2.0
   - Node qrcode二维码模块基本完成
 - 2023.7.23——0.1.9

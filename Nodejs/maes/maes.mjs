@@ -1,49 +1,139 @@
-var toCrypt = "妳好Hello@";
-var cbfpasswd = "123456"; // 0DF262FE3A6F56282D6E5B9B
-var cfbiv = ";";
-var cbcpasswd = "123456"; // 8494872F6E4EFC08FBD8E3EC57F04A17
-var cbciv = "4321";
-var cbcpwdsize = 32;
+import * as cfb from "./aes_cfb.mjs";
+import * as cbc from "./aes_cbc.mjs";
 
-let crypto;
-try {
-  crypto = await import('node:crypto');
-} catch (err) {
-  console.error('crypto support is disabled!');
-} 
-// import crypto from 'crypto';
+/**
+ * 返回一对CFB加密器，解密器
+ * @param {string} key 
+ * @param {string} iv 
+ * @param {number} length 
+ * @returns 
+ */
+export const createCFB = (key, iv, length = 32) => {
+  return [cfb.cfbCipher(key, iv, length), cfb.cfbDecipher(key, iv, length)]
+}
 
-// https://www.section.io/engineering-education/data-encryption-and-decryption-in-node-js-using-crypto/
-// https://medium.com/@abhishek.sinha132/aes-encryption-decryption-using-nodejs-3d3457c39bbf
-const algorithm = "aes-256-cbc"; 
+/**
+ * 返回一堆CBC加密器、解密器
+ * @param {string} key 密钥 
+ * @param {string} iv 偏移量
+ * @param {number} length 密钥填充长度
+ * @returns 
+ */
+export const createCBC = (key, iv, length = 16) => {
+  return [cbc.cbcCipher(key, iv, length), cbc.cbcDecipher(key, iv, length)]
+}
 
-// generate 16 bytes of random data
-const initVector = crypto.randomBytes(16);
+/**
+ * CBC加密 
+ * 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
+ * @param {Array} cipherPair  密钥对
+ * @param {string} msg 信息
+ * @param {string} key 
+ * @param {string} iv 
+ * @param {number} length 
+ * @returns 
+ */
+export const encryptCBC = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {
+  if (cipherPair == undefined || key != undefined) {
+    // 未定义，则认为是临时加密
+    return cbc.tEncrypt(msg, key, iv, length);
+  } else {
+    return cbc.encrypt(cipherPair[0], msg);
+  }
+}
 
-// protected data
-const message = "This is a secret message";
+/**
+ * CBC解密
+ * 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
+ * @param {Array} cipherPair  密钥对
+ * @param {string} msg 信息
+ * @param {string} key 
+ * @param {string} iv 
+ * @param {number} length 
+ * @returns 
+ */
+export const decryptCBC = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {
+  if (cipherPair == undefined || key != undefined) {
+    // 未定义，则认为是临时解密
+    return cbc.tDecrypt(msg, key, iv, length);
+  } else {
+    return cbc.decrypt(cipherPair[1], msg);
+  }
+}
 
-// secret key generate 32 bytes of random data
-const Securitykey = crypto.randomBytes(32);
 
-// the cipher function
-const cipher = crypto.createCipheriv(algorithm, Securitykey, initVector);
-// const cipher = crypto.createCipheriv("");
+/**
+ * CFB加密 
+ * 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
+ * @param {Array} cipherPair  密钥对
+ * @param {string} msg 信息
+ * @param {string} key 
+ * @param {string} iv 
+ * @param {number} length 
+ * @returns 
+ */
+export const encryptCFB = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {
+  if (cipherPair == undefined || key != undefined) {
+    // 未定义，则认为是临时加密
+    return cfb.tEncrypt(msg, key, iv, length);
+  } else {
+    return cfb.encrypt(cipherPair[0], msg);
+  }
+}
 
-// encrypt the message
-// input encoding
-// output encoding
-let encryptedData = cipher.update(message, "utf-8", "hex");
+/**
+ * CFB解密
+ * 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
+ * @param {Array} cipherPair  密钥对
+ * @param {string} msg 信息
+ * @param {string} key 
+ * @param {string} iv 
+ * @param {number} length 
+ * @returns 
+ */
+export const decryptCFB = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {
+  if (cipherPair == undefined || key != undefined) {
+    // 未定义，则认为是临时解密
+    return cfb.tDecrypt(msg, key, iv, length);
+  } else {
+    return cfb.decrypt(cipherPair[1], msg);
+  }
+}
 
-encryptedData += cipher.final("hex");
+/**
+ * 测试的方法（和Python、Jave匹配）
+ */
+function test() {
+  const msg = "妳好Hello@";
+  let cfbs = createCFB("123456", ";", 32);
+  let cbcs = createCBC("123456", "4321", 32);
+  console.log("CFB加密前：" + msg);
+  let xmsg = encryptCFB(cfbs, msg);
+  console.log("CFB加密：" + xmsg);
+  console.log("CFB解密：" + decryptCFB(cfbs, xmsg));
+  xmsg = encryptCFB(undefined, msg, "12345", "54321", 32);
+  console.log("CFB临时加密(PWD: 12345;IV:54321)：" + xmsg);
+  console.log("CFB临时解密(PWD: 12345;IV:54321)：" + decryptCFB(undefined, xmsg, "12345", "54321", 32));
 
-console.log("Encrypted message: " + encryptedData);
+  console.log("CBC加密前：" + msg);
+  xmsg = encryptCBC(cbcs, msg);
+  console.log("CBC加密：" + xmsg);
+  console.log("CBC解密：" + decryptCBC(cbcs, xmsg));
+  xmsg = encryptCBC(undefined, msg, "12345", "54321", 32);
+  console.log("CBC临时加密(PWD: 12345;IV:54321)：" + xmsg);
+  console.log("CBC临时解密(PWD: 12345;IV:54321)：" + decryptCBC(undefined, xmsg, "12345", "54321", 32));
+}
+test();
+/**
+CFB加密前：妳好Hello@
+CFB加密：0DF262FE3A6F56282D6E5B9B
+CFB解密：妳好Hello@
+CFB临时加密(PWD: 12345;IV:54321)：601F9AD97802812B0787CAC6
+CFB临时解密(PWD: 12345;IV:54321)：妳好Hello@
 
-// the decipher function
-const decipher = crypto.createDecipheriv(algorithm, Securitykey, initVector);
-
-let decryptedData = decipher.update(encryptedData, "hex", "utf-8");
-
-decryptedData += decipher.final("utf8");
-
-console.log("Decrypted message: " + decryptedData);
+CBC加密前：妳好Hello@
+CBC加密：8494872F6E4EFC08FBD8E3EC57F04A17
+CBC解密：妳好Hello@
+CBC临时加密(PWD: 12345, IV: 54321)：D0A99E4A590B06AE867B412094697E21
+CBC临时解密(PWD: 12345, IV: 54321)：妳好Hello@
+ */
