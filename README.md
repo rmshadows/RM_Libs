@@ -348,6 +348,8 @@ msystem.prompte("终端红色字体");
   - `export const tEncrypt = (message, key, iv, length = 16) => {`——临时加密的方法
   - `export const tDecrypt = (hexmessage, key, iv, length = 16) => {`——临时解密的方法
 - maes.mjs——用于引用导出的模块
+  - `export class cfbCipher {`——可以反复使用的CFB类
+  - `export class cbcCipher {`——可以反复使用的CBC类
   - `export const createCFB = (key, iv, length = 32) => {`——返回一对CFB加密器，解密器
   - `export const createCBC = (key, iv, length = 16) => {`——返回一堆CBC加密器、解密器
   - `export const encryptCBC = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CBC加密 如果cipherPair是undefined，则认为是临时加密，需要提供密钥向量等
@@ -704,6 +706,8 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2023.8.16——0.2.2
+  - 修复了Node  AES模块加密功能无法复用的问题
 - 2023.8.15——0.2.1
   - Node新增AES加密模块，支持CBC、CFB
 - 2023.7.30——0.2.0

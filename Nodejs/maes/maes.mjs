@@ -1,5 +1,42 @@
 import * as cfb from "./aes_cfb.mjs";
 import * as cbc from "./aes_cbc.mjs";
+import { log } from "node:console";
+
+export class cfbCipher {
+  constructor(key, iv, length=32){
+    this.key = key;
+    this.iv = iv;
+    this.length =length;
+  }
+
+  encrypt(msg){
+    let kp = createCFB(this.key, this.iv, this.length);
+    return encryptCFB(kp, msg);
+  }
+
+  decrypt(msg){
+    let kp = createCFB(this.key, this.iv, this.length);
+    return decryptCFB(kp, msg);
+  }
+}
+
+export class cbcCipher {
+  constructor(key, iv, length=32){
+    this.key = key;
+    this.iv = iv;
+    this.length =length;
+  }
+
+  encrypt(msg){
+    let kp = createCBC(this.key, this.iv, this.length);
+    return encryptCBC(kp, msg);
+  }
+
+  decrypt(msg){
+    let kp = createCBC(this.key, this.iv, this.length);
+    return decryptCBC(kp, msg);
+  }
+}
 
 /**
  * 返回一对CFB加密器，解密器
@@ -122,6 +159,18 @@ function test() {
   xmsg = encryptCBC(undefined, msg, "12345", "54321", 32);
   console.log("CBC临时加密(PWD: 12345;IV:54321)：" + xmsg);
   console.log("CBC临时解密(PWD: 12345;IV:54321)：" + decryptCBC(undefined, xmsg, "12345", "54321", 32));
+
+  console.log("\n\n多次加密测试:");
+  const cfb = new cfbCipher("12345", ";", 32);
+  xmsg = cfb.encrypt(msg);
+  console.log(xmsg);
+  console.log(cfb.decrypt(xmsg));
+  xmsg = cfb.encrypt(msg);
+  console.log(xmsg);
+  console.log(cfb.decrypt(xmsg));
+  xmsg = cfb.encrypt(msg);
+  console.log(xmsg);
+  console.log(cfb.decrypt(xmsg));
 }
 test();
 /**
