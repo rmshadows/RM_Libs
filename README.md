@@ -302,7 +302,7 @@ public class test {
   - `public static int[] javabytes2pythonbytes(byte[] jbytes)`——Javabyte数组转Pythonbyte数组
 - AdministratorChecker——辅助类
 
-## Node.js
+## Node.js——ESM
 
 引入：复制文件夹到项目中，`npm i`
 
