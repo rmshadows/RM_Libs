@@ -85,8 +85,13 @@ def image2pdf(directory, output_pdf_name, content:bool=True):
     for x in file_list:
         if "jpg" in x or 'jpeg' in x:
             pic_name.append(x)
-    # 排序
+    # 排序 https://www.likecs.com/show-307952382.html
     pic_name.sort()  # sorted
+    # 如果上面这一句无法满足，请取消注释下行(自行修改参数)
+    # e.g.: a1 a2: print(sorted(pic_name, key=lambda info: (info[0], int(info[1:]))))
+    # sort(key=lambda x: int(x[1]))
+    pic_name = sorted(pic_name, key=lambda info: int(info[:-4]))
+    # print(pic_name)
     new_pic = []
     n = 1
     for x in pic_name:
