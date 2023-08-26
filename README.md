@@ -317,6 +317,7 @@ msystem.prompte("终端红色字体");
 ```
 
 - maes——AES加密模块
+- mHashcode——对象数字Hashcode生成（不是Hex!）
 - mqrcode——二维码生成与扫描
 - msystem——系统相关操作
 
@@ -357,6 +358,17 @@ msystem.prompte("终端红色字体");
   - `export const encryptCFB = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CFB加密 
   - `export const decryptCFB = (cipherPair = undefined, msg = "", key = undefined, iv = undefined, length = undefined) => {`——CFB解密
   - `function test() {`——测试的方法（和Python、Jave匹配）
+
+### mHashcode
+
+>类似Java的Hashcode() 但是不是很可靠，可能会重复
+>
+>https://github.com/m3talstorm/hashcode/tree/master
+>
+>https://stackoverflow.com/questions/194846/is-there-hash-code-function-accepting-any-object-type
+
+- `const hashCodeObject = (value) => {`——Hashcode对象（可能重复！不像Java那样可靠）
+- `const hashCodeString = (string) => {`——返回字符串的Hashcode数字
 
 ### mqrcode
 
@@ -706,6 +718,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2023.8.26——0.2.3
+  - Node新增mHashcode模块
 
 - 2023.8.16——0.2.2
   - 修复了Node  AES模块加密功能无法复用的问题
