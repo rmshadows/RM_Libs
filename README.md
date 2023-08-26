@@ -415,6 +415,7 @@ msystem.prompte("终端红色字体");
 - `export const writeByLinesAsync = (filepath, linesToWrite, flags = "w", encoding = "utf-8", EOL = "\r\n", overwrite = true) => {`——逐行写入（仅异步）
 - `export const sleep = async (msecond) => {`——设置延时，使用:`await sleep(xxxx);`
 - `export const getIpAddr = (type=0) => {`——返回本机IP地址
+- `const randomNum = (minNum, maxNum) => {`——生成从minNum到maxNum的随机数
 
 ## Python
 

@@ -1393,7 +1393,7 @@ export const sleep = async (msecond) => {
  * @param {Number} type 0:全部 1:ipv4 2:ipv6
  * @returns 
  */
-export const getIpAddr = (type=0) => {
+export const getIpAddr = (type = 0) => {
     // 获取本机网络信息
     let iaddr = L.empty();
     const nfs = os.networkInterfaces();
@@ -1405,22 +1405,42 @@ export const getIpAddr = (type=0) => {
         for (const v4v6 of nfs[networkname]) {
             // 打印IPv4 IPv6网络信息
             // console.log(v4v6);
-            if (type == 1){
+            if (type == 1) {
                 if (v4v6.family === 'IPv4') {
                     iaddr = L.append(v4v6.address, iaddr);
                     break
                 }
             }
-            else if (type == 2){
+            else if (type == 2) {
                 if (v4v6.family === 'IPv6') {
                     iaddr = L.append(v4v6.address, iaddr);
                     break
                 }
-            }else{
+            } else {
                 iaddr = L.append(v4v6.address, iaddr);
             }
         }
     }
     // prlst(L.toArray(iaddr));
     return L.toArray(iaddr);
+}
+
+/**
+ * 生成从minNum到maxNum的随机数
+ * @param {*} minNum 
+ * @param {*} maxNum 
+ * @returns 
+ */
+const randomNum = (minNum, maxNum) => {
+    switch (arguments.length) {
+        case 1:
+            return parseInt(Math.random() * minNum + 1, 10);
+            break;
+        case 2:
+            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+            break;
+        default:
+            return 0;
+            break;
+    }
 }
