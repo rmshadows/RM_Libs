@@ -170,7 +170,7 @@ public class IO_Utils {
     public static byte[] readBytesUsingBufferedInputStream(File f){
         Path path = Paths.get(f.getAbsolutePath());
         try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(path.toFile()));
-             ByteArrayOutputStream baos = new ByteArrayOutputStream();){
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()){
             byte[] read = new byte[4];
             int r_len = -1;
             while ((r_len = bis.read(read)) != -1){
