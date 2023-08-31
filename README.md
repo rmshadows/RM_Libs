@@ -78,6 +78,7 @@ testPrintln
 - Code_Utils——编码
   - Base64Bytes——Base64和Bytes
   - BytesHexString——十六进制字符串和Bytes
+- Datetime_Utils——时间组件
 - IO_Utils——输入输出，文件读写
   - IO_Utils——文件读写
 - RSA_Utils——RSA组件
@@ -85,6 +86,11 @@ testPrintln
   - RSA_PKCS1_Utils——处理PKCS1的RSA组件
   - RSA_PKCS8_Utils——处理PKCS8的RSA组件
   - RSA_Tools——RSA公用函数
+- System_Utils——系统组件
+- Tools_Utils——工具模块里面的每个包都是独立的，不允许依赖其他包（相互独立）
+  - RandomNumber——随机数
+  - ScheduleTask——定时任务（可以用于代替`while(xx==true){Thread.sleep(1000)}`检测变量）
+
 
 ### AES_Utils
 
@@ -301,6 +307,30 @@ public class test {
   - `public static byte[] pythonbytes2javabytes(byte[] pybytes)`——Pythonbyte数组转Javabyte数组
   - `public static int[] javabytes2pythonbytes(byte[] jbytes)`——Javabyte数组转Pythonbyte数组
 - AdministratorChecker——辅助类
+
+### Tools_Utils
+
+>Tools项目中的工具包不准依赖其他项目，只能自己成一个文件，单文件, 可以是依赖，也可以是模板参考
+
+- RandomNumber
+  - RandomNumber——随机数
+    - `public static int randomInt(int min, int max) {`
+    - `public static int secureRandomInt(int min, int max) {`
+    - `public static int mathRandomInt(int min, int max) {`
+- ScheduleTask——用来代替While true检查元素变化的周期任务
+  - `public class ScheduleTask {`
+    - `public void setExecAsScheduleAtFixedRate(boolean execAsScheduleAtFixedRate) {`——设置模式是 scheduleAtFixedRate scheduleWithFixedDelay
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond, AtomicBoolean control) {`——条件超时
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond, AtomicBoolean control, TimeUnit timeUnit) {`——条件超时
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond, AtomicBoolean control, long checkIinitialDelayMicroSecond, long checkPeriodMicroSecond, TimeUnit timeUnit) {`——条件超时构造方法
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond) {`——会一直运行此任务，除非外部调用cancle方法
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond, TimeUnit timeUnit) {`——会一直运行此任务，除非外部调用cancle方法
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond, long taskTimeout) {`——运行超时
+    - `public ScheduleTask(Runnable task, long initialDelaySecond, long periodSecond, long taskTimeout, TimeUnit timeUnit) {`——超时后会自动退出
+    - `public void startTask() {`——开始任务
+    - `private void startWithControl(AtomicBoolean control) {`——检测控制元素来决定是否停止
+    - `private void startWithoutControl() {`——超时控制
+    - `public void cancelTask() {`——取消任务
 
 ## Node.js——ESM
 
@@ -718,6 +748,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2023.8.31——0.2.4
+  - Java新增Tools工具模块
 
 - 2023.8.26——0.2.3
   - Node新增mHashcode模块
