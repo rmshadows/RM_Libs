@@ -611,6 +611,7 @@ if __name__ == '__main__':
 - `def add_content(pdf_in_name:str,pdf_out_name:str,content_dict:dict)`——添加PDF注释（目录）
 - `def mergePdfs(directory, output_pdf_file)`——合并PDF（提供目录）
 - `def image2pdf(directory, output_pdf_name, content:bool=True):`——将所给文件夹的jpg图片转为PDF文档（提供目录）
+- `def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):`——拆分PDF到图片
 
 ### m_QR
 
@@ -748,6 +749,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2023.9.21——0.2.5
+  - Python PDF模块新增转图像功能
 
 - 2023.8.31——0.2.4
   - Java新增Tools工具模块

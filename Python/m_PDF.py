@@ -10,6 +10,8 @@ from PIL import Image
 from PyPDF2 import PdfFileMerger
 from PyPDF2 import PdfFileReader as pdf_reader, PdfFileWriter as pdf_writer
 
+from pdf2image import convert_from_path
+
 import sys
 
 import m_System
@@ -123,8 +125,36 @@ def image2pdf(directory, output_pdf_name, content:bool=True):
             print(e)
 
 
+def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):
+    """
+    拆分PDF到图片
+    Args:
+        pdfFile: PDF路径
+        dpi: 图像DPI
+        format: 图像格式
+        toDir: 会在PDF同路径下新建文件夹
+
+    Returns:
+
+    """
+    # 父目录绝对路径
+    pp = op.dirname(pdfFile)
+    image_path = op.join(pp, toDir)
+    # 没有就新建
+    if not op.exists(image_path):
+        os.mkdir(image_path)
+    pages = convert_from_path(pdfFile, dpi=dpi, fmt=format)
+    for i, page in enumerate(pages):
+        # page.save(f'page_{i + 1}.jpeg', format.upper())
+        # 文件名+页码
+        page.save(op.join(image_path, "{0}-{1}.{2}".format(pdfFile, i, format)))
+
+
 if __name__ == '__main__':
+    # 合并PDF
     image2pdf("images", "output.pdf")
+    # 拆分PDF
+    # pdf2images("1.pdf", 400, "jpg")
 
 
 
