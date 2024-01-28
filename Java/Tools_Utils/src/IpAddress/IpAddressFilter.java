@@ -14,6 +14,9 @@ public class IpAddressFilter {
         System.out.println("Is valid IPv6: " + getIpType(ipv6Address));
         System.out.println("Is valid IPv4 + Port: " + getIpType(ipAddressWithPort));
         System.out.println("Is valid IPv6 + Port: " + getIpType(ipv6AddressWithPort));
+
+        System.out.println("Is valid IPv4 + Port: " + splitIpAndPort(ipAddressWithPort));
+        System.out.println("Is valid IPv6 + Port: " + splitIpAndPort(ipv6AddressWithPort));
     }
 
     public static boolean isValidIPv4(String ipv4Address) {
@@ -36,18 +39,33 @@ public class IpAddressFilter {
         return ipWithPort.matches(ipWithPortPattern);
     }
 
-
-    public static String getIpType(String ip) {
+    // "IPv4":1/"IPv6":2/"IPv4 with Port":3/"IPv6 with Port":4/"Invalid IP":5
+    public static int getIpType(String ip) {
         if (isValidIPv4(ip)) {
-            return "IPv4";
+            return 1;
         } else if (isValidIPv6(ip)) {
-            return "IPv6";
+            return 2;
         } else if (isValidIPv4AddressWithPort(ip)) {
-            return "IPv4 with Port";
+            return 3;
         } else if (isValidIPv6AddressWithPort(ip)) {
-            return "IPv6 with Port";
+            return 4;
         } else {
-            return "Invalid IP";
+            return 5;
+        }
+    }
+
+    public static Pair<String, String> splitIpAndPort(String ipAddressWithPort) {
+        // 判断是 IPv4 还是 IPv6
+        if (getIpType(ipAddressWithPort) == 4) {
+            // IPv6 地址
+            String[] parts = ipAddressWithPort.split("]:");
+            return new Pair<>(parts[0].substring(1), parts[1]);
+        } else if (getIpType(ipAddressWithPort) ==3 ) {
+            // IPv4 地址
+            String[] parts = ipAddressWithPort.split(":");
+            return new Pair<>(parts[0], parts[1]);
+        } else {
+            return null;
         }
     }
 }
