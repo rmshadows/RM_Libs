@@ -88,8 +88,10 @@ testPrintln
   - RSA_Tools——RSA公用函数
 - System_Utils——系统组件
 - Tools_Utils——工具模块里面的每个包都是独立的，不允许依赖其他包（相互独立）
+  - IpAddress——IP
   - RandomNumber——随机数
   - ScheduleTask——定时任务（可以用于代替`while(xx==true){Thread.sleep(1000)}`检测变量）
+  
 
 
 ### AES_Utils
@@ -311,6 +313,17 @@ public class test {
 ### Tools_Utils
 
 >Tools项目中的工具包不准依赖其他项目，只能自己成一个文件，单文件, 可以是依赖，也可以是模板参考
+
+- IpAddress——IP识别
+  - `IpAddressFilter.java`——IP识别
+    - `public static boolean isValidIPv4(String ipv4Address) {`——是否是ipv4
+    - `public static boolean isValidIPv6(String ipv6Address) {`——是否是ipv6
+    - `public static boolean isValidIPv4AddressWithPort(String ipWithPort) {`——是否是ipv4+port
+    - `public static boolean isValidIPv6AddressWithPort(String ipWithPort) {`——是否是ipv6+port
+    - `public static int getIpType(String ip) {`——检测ip是哪一类（注意：ipv6需要中括号！）：`"IPv4":1/"IPv6":2/"IPv4 with Port":3/"IPv6 with Port":4/"Invalid IP":5`
+    - `public static Pair<String, String> splitIpAndPort(String ipAddressWithPort) {`——返回ip和端口
+
+  - `Pair`——模拟Kotlin pair
 
 - RandomNumber
   - RandomNumber——随机数
@@ -749,6 +762,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.1.28——0.2.6
+  - Java Tool_Utils新增IP相关
 
 - 2023.9.21——0.2.5
   - Python PDF模块新增转图像功能
