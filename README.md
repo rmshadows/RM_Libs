@@ -721,6 +721,7 @@ if __name__ == '__main__':
 - `pythonbytes2javabytes(pythonbytes)`——Python byte数组转Java byte数组
 - `pythonbyte2javabyte(pythonbyte)`——Python byte转Java byte
 - `inputTimeout(str_msg, int_timeout_second)`——输入超时模块
+- `def remove_newlines(text):`——去换行
 
 例:
 

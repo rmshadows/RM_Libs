@@ -455,6 +455,24 @@ def inputTimeout(str_msg, int_timeout_second):
         c = None
     finally:
         return c
+        
+
+def remove_newlines(text):
+    """
+    去换行符
+    Args:
+        text:
+
+    Returns:
+
+    """
+    # 替换Unix和Linux系统的换行符
+    text = text.replace('\n', ' ')
+    # 替换Windows系统的换行符
+    text = text.replace('\r\n', ' ')
+    # 替换旧版Mac系统的换行符
+    text = text.replace('\r', ' ')
+    return text
 
 
 if __name__ == '__main__':
