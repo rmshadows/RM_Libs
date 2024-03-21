@@ -625,6 +625,7 @@ if __name__ == '__main__':
 - `def mergePdfs(directory, output_pdf_file)`——合并PDF（提供目录）
 - `def image2pdf(directory, output_pdf_name, content:bool=True):`——将所给文件夹的jpg图片转为PDF文档（提供目录）
 - `def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):`——拆分PDF到图片
+- `def jpg_to_individual_pdf(directory):`——将指定文件夹中的每张 JPG 图片转换为单独的 PDF 文件
 
 ### m_QR
 
@@ -763,6 +764,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.3.21——0.2.7
+  - Python PDF模块新增jpg转pdf
 
 - 2024.1.28——0.2.6
   - Java Tool_Utils新增IP相关

@@ -150,11 +150,33 @@ def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):
         page.save(op.join(image_path, "{0}-{1}.{2}".format(pdfFile, i, format)))
 
 
+def jpg_to_individual_pdf(directory):
+    """
+    将指定文件夹中的每张 JPG 图片转换为单独的 PDF 文件
+    Args:
+        directory: 图片文件夹路径
+    """
+    # 获取文件夹中的所有 JPG 图片文件
+    jpg_files = [file for file in os.listdir(directory) if file.lower().endswith('.jpg')]
+    # 对文件名进行排序
+    jpg_files.sort()
+    # 逐个处理每张 JPG 图片
+    for jpg_file in jpg_files:
+        # 打开 JPG 图片
+        with Image.open(os.path.join(directory, jpg_file)) as img:
+            # 创建一个新的 PDF 文档
+            output_pdf_name = os.path.splitext(jpg_file)[0] + '.pdf'
+            # 将 JPG 图片保存为 PDF 文件
+            img.save(output_pdf_name, 'PDF')
+
+
 if __name__ == '__main__':
     # 合并PDF
     image2pdf("images", "output.pdf")
     # 拆分PDF
     # pdf2images("1.pdf", 400, "jpg")
+    # 将指定文件夹中的每张 JPG 图片转换为单独的 PDF 文件
+    # jpg_to_individual_pdf("images")
 
 
 
