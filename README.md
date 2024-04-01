@@ -480,7 +480,8 @@ msystem.prompte("终端红色字体");
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ConfigFiles——配置文件相关操作
 - m_Datetime——时间模块
-- m_Excel——Excel相关处理
+- m_ExcelOpenpyxl——Excel相关处理(Openpyxl)（读写）
+- m_ExcelXlsxWriter——Excel相关处理(XlsxWriter)（只写）
 - m_Image——图像处理相关
 - m_PDF——PDF文件处理
 - m_ProgressBar.py——终端进度条(Linux Only)
@@ -606,7 +607,11 @@ if __name__ == '__main__':
 
 - `def log(data, debugMode=True, note="", abfilepath=False)`——记录日志
 
-### m_Excel
+### m_ExcelOpenpyxl
+
+- 
+
+### m_ExcelXlsxWriter
 
 - `def permutation(lst, len)`——对给定的列表进行排列组合
 - `def excelIndex2cell(row, col)`——将索引转化为字符串定位，如（0，0）==> ‘A1’
@@ -764,6 +769,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.4.1——0.2.8
+  - TODO：Python `m_ExcelXlsxWriter`分离出，需要一个可以读取Excel的
 
 - 2024.3.21——0.2.7
   - Python PDF模块新增jpg转pdf

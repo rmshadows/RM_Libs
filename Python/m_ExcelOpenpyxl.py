@@ -93,7 +93,7 @@ def lines_writer(worksheet_ob, content_in_lines:list, start_row):
         worksheet_ob: worksheet对象
         content_in_lines: Excel表格的每一行 [[A1, B1, C1],[A2, B2, C2]]
         start_row: 起始行
-
+        要求安装 XlsxWriter
     Returns:
         返回下次的起始行
     """
