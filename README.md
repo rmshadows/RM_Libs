@@ -609,7 +609,21 @@ if __name__ == '__main__':
 
 ### m_ExcelOpenpyxl
 
-- 
+- `def createNewWorkbook(firstSheetName=None):`——新建workbook但不是新建一个实际的文件
+- `def createSheet(wb, sheetName, position=None):`——新增表格
+- `def getSheetNames(wb):`——返回Sheets名字
+- `def getSheetByIndex(wb, index):`——返回Sheet
+- `def copyWorksheet(wb, ws):`——复制工作表
+- `def readRows(ws, min_row, max_row, min_col, max_col, valueOnly=True):`——读行
+- `def readColumns(ws, min_col, max_col, min_row, max_row, valueOnly=True):`——读列
+- `def getCellRange(ws, cell1, cell2):`—— 返回一个范围内的单元格
+- `def getRowOrColumns(ws, name):`——返回行或者列
+- `def isnumeric(value):`—— 检查给定参数类型
+- `def justReadOneRow(ws, row, deep=60, valueOnly=True):`——读1行,50列
+- `def excel_column_to_number(column_name):`——列名转换为对应的列索引
+- `def justReadOneColumn(ws, col, deep=50, valueOnly=True):`——读列
+- `def loadExcel(filename):`——加载现有的Excel表格
+- `def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):`——替换单元格值
 
 ### m_ExcelXlsxWriter
 
@@ -769,6 +783,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.4.2——0.2.9
+  - Python更新了Excel读取
 
 - 2024.4.1——0.2.8
   - TODO：Python `m_ExcelXlsxWriter`分离出，需要一个可以读取Excel的
