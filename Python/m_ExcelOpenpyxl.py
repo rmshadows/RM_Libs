@@ -65,9 +65,21 @@ def getSheetNames(wb):
         wb:workbook
 
     Returns:
-
+        str
     """
     return wb.sheetnames
+
+
+def getSheetByIndex(wb, index):
+    """
+    返回Sheet
+    Args:
+        wb:workbook
+        index:索引
+    Returns:
+        str
+    """
+    return wb[getSheetNames(wb)[index]]
 
 
 def copyWorksheet(wb, ws):
@@ -164,6 +176,22 @@ def getRowOrColumns(ws, name):
     """
     return ws[name]
 
+
+def isnumeric(value):
+    """
+    检查给定参数类型
+    Args:
+        value:
+
+    Returns:
+
+    """
+    if isinstance(value, int) or isinstance(value, float):
+        return True
+    else:
+        return False
+
+
 def justReadOneRow(ws, row, deep=60, valueOnly=True):
     """
     读1行,50列
@@ -183,6 +211,21 @@ def justReadOneRow(ws, row, deep=60, valueOnly=True):
     return cs
 
 
+def excel_column_to_number(column_name):
+    """
+    列名转换为对应的列索引
+    Args:
+        column_name:
+
+    Returns:
+
+    """
+    result = 0
+    for char in column_name:
+        result = result * 26 + ord(char) - ord('A') + 1
+    return result
+
+
 def justReadOneColumn(ws, col, deep=50, valueOnly=True):
     """
         读列
@@ -198,18 +241,12 @@ def justReadOneColumn(ws, col, deep=50, valueOnly=True):
             <Cell Sheet1.A2>
         """
     cs = []
-    if col.isnumeric():
-        for col in ws.iter_cols(min_row=0, max_row=deep, min_col=col, max_col=col, values_only=valueOnly):
-            for cell in col:
-                print(cell)
-                cs.append(cell)
-    else:
-        cols = ws[col]
-        print(cols)
-        for col in cols:
-            for cell in col:
-                print(cell)
-                cs.append(cell)
+    if not isnumeric(col):
+        col = excel_column_to_number(col)
+    for col in ws.iter_cols(min_row=0, max_row=deep, min_col=col, max_col=col, values_only=valueOnly):
+        for cell in col:
+            print(cell)
+            cs.append(cell)
     return cs
 
 
@@ -225,8 +262,32 @@ def loadExcel(filename):
     return load_workbook(filename=filename)
 
 
+def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):
+    """
+    替换单元格值
+    Args:
+        wb: workbook
+        ws: 工作表名字（字符串）或者索引（数字）
+        cell: 单元格名称
+        checkValue: 检查的值
+        replacement: 替换值
+        whenEqual: 什么时候替换，True表示是某个值的时候替换
+
+    Returns:
+        None
+    """
+    if isnumeric(ws):
+        wss = getSheetByIndex(wb, ws)
+    else:
+        wss = wb[ws]
+    if whenEqual:
+        if str(wss[cell].value) == str(checkValue):
+            wss[cell] = replacement
+    else:
+        if str(wss[cell].value) != str(checkValue):
+            wss[cell] = replacement
+    return wb
+
+
 if __name__ == '__main__':
-    wb = loadExcel("1.xlsx")
-    ws = wb[getSheetNames(wb)[0]]
-    justReadOneColumn(ws, "B")
     print("Hello World")
