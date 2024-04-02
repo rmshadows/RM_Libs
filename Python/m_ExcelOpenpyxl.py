@@ -12,67 +12,9 @@ from openpyxl import load_workbook
 >>> col_range = ws['C:D']
 >>> row10 = ws[10]
 >>> row_range = ws[5:10]
-或者：
-for row in ws.iter_rows(min_row=1, max_col=3, max_row=2):
-...    for cell in row:
-...        print(cell)
-和
->>> for col in ws.iter_cols(min_row=1, max_col=3, max_row=2):
-...     for cell in col:
-...         print(cell)
-注意：For performance reasons the Worksheet.iter_cols() method is not available in read-only mode.
 
-Because of this feature, scrolling through cells instead of accessing them directly will create them all in memory, even if you don’t assign them a value.
-Something like
->>> for x in range(1,101):
-...        for y in range(1,101):
-...            ws.cell(row=x, column=y)
-will create 100x100 cells in memory, for nothing.
----
-For performance reasons the Worksheet.columns property is not available in read-only mode.
-If you need to iterate through all the rows or columns of a file, you can instead use the Worksheet.rows property:
->>> ws = wb.active
->>> ws['C9'] = 'hello world'
->>> tuple(ws.rows)
-((<Cell Sheet.A1>, <Cell Sheet.B1>, <Cell Sheet.C1>),
-(<Cell Sheet.A2>, <Cell Sheet.B2>, <Cell Sheet.C2>),
-(<Cell Sheet.A3>, <Cell Sheet.B3>, <Cell Sheet.C3>),
-(<Cell Sheet.A4>, <Cell Sheet.B4>, <Cell Sheet.C4>),
-(<Cell Sheet.A5>, <Cell Sheet.B5>, <Cell Sheet.C5>),
-(<Cell Sheet.A6>, <Cell Sheet.B6>, <Cell Sheet.C6>),
-(<Cell Sheet.A7>, <Cell Sheet.B7>, <Cell Sheet.C7>),
-(<Cell Sheet.A8>, <Cell Sheet.B8>, <Cell Sheet.C8>),
-(<Cell Sheet.A9>, <Cell Sheet.B9>, <Cell Sheet.C9>))
-
-or the Worksheet.columns property:
-
->>> tuple(ws.columns)
-((<Cell Sheet.A1>,
-<Cell Sheet.A2>,
-<Cell Sheet.A3>,
-<Cell Sheet.A4>,
-<Cell Sheet.A5>,
-<Cell Sheet.A6>,
-...
-<Cell Sheet.B7>,
-<Cell Sheet.B8>,
-<Cell Sheet.B9>),
-(<Cell Sheet.C1>,
-<Cell Sheet.C2>,
-<Cell Sheet.C3>,
-<Cell Sheet.C4>,
-<Cell Sheet.C5>,
-<Cell Sheet.C6>,
-<Cell Sheet.C7>,
-<Cell Sheet.C8>,
-<Cell Sheet.C9>))
-
-If you just want the values from a worksheet you can use the Worksheet.values property. This iterates over all the rows in a worksheet but returns just the cell values:
-
-for row in ws.values:
-   for value in row:
-     print(value)
-
+### 所有行
+Worksheet.rows
 
 """
 
@@ -222,7 +164,7 @@ def getRowOrColumns(ws, name):
     """
     return ws[name]
 
-def justReadOneRow(ws, row, valueOnly=True):
+def justReadOneRow(ws, row, deep=60, valueOnly=True):
     """
     读1行,50列
     Args:
@@ -234,14 +176,14 @@ def justReadOneRow(ws, row, valueOnly=True):
         <Cell Sheet1.A2>
     """
     cs = []
-    for row in ws.iter_rows(min_row=row, max_row=row, min_col=0, max_col=50, values_only=valueOnly):
+    for row in ws.iter_rows(min_row=row, max_row=row, min_col=0, max_col=deep, values_only=valueOnly):
         for cell in row:
             print(cell)
             cs.append(cell)
     return cs
 
 
-def justReadOneColumn(ws, min_col, max_col, min_row, max_row, valueOnly=True):
+def justReadOneColumn(ws, col, deep=50, valueOnly=True):
     """
         读列
         Args:
@@ -256,10 +198,18 @@ def justReadOneColumn(ws, min_col, max_col, min_row, max_row, valueOnly=True):
             <Cell Sheet1.A2>
         """
     cs = []
-    for col in ws.iter_cols(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col, values_only=valueOnly):
-        for cell in col:
-            print(cell)
-            cs.append(cell)
+    if col.isnumeric():
+        for col in ws.iter_cols(min_row=0, max_row=deep, min_col=col, max_col=col, values_only=valueOnly):
+            for cell in col:
+                print(cell)
+                cs.append(cell)
+    else:
+        cols = ws[col]
+        print(cols)
+        for col in cols:
+            for cell in col:
+                print(cell)
+                cs.append(cell)
     return cs
 
 
@@ -278,5 +228,5 @@ def loadExcel(filename):
 if __name__ == '__main__':
     wb = loadExcel("1.xlsx")
     ws = wb[getSheetNames(wb)[0]]
-    readColumns(ws, 2, 4, 3, 5, False)
+    justReadOneColumn(ws, "B")
     print("Hello World")
