@@ -274,8 +274,9 @@ def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):
         whenEqual: 什么时候替换，True表示是某个值的时候替换
 
     Returns:
-        None
+        修改 返回 wb ，没有返回None
     """
+    modify = False
     if isnumeric(ws):
         wss = getSheetByIndex(wb, ws)
     else:
@@ -283,10 +284,15 @@ def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):
     if whenEqual:
         if str(wss[cell].value) == str(checkValue):
             wss[cell] = replacement
+            modify = True
     else:
         if str(wss[cell].value) != str(checkValue):
             wss[cell] = replacement
-    return wb
+            modify = True
+    if modify:
+        return wb
+    else:
+        return None
 
 
 if __name__ == '__main__':
