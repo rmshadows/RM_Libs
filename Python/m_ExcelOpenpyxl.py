@@ -281,12 +281,15 @@ def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):
         wss = getSheetByIndex(wb, ws)
     else:
         wss = wb[ws]
+    ck = str(wss[cell].value)
+    if wss[cell].value is None:
+        ck = ""
     if whenEqual:
-        if str(wss[cell].value) == str(checkValue):
+        if ck == str(checkValue):
             wss[cell] = replacement
             modify = True
     else:
-        if str(wss[cell].value) != str(checkValue):
+        if ck != str(checkValue):
             wss[cell] = replacement
             modify = True
     if modify:
