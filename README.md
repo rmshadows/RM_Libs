@@ -624,6 +624,9 @@ if __name__ == '__main__':
 - `def justReadOneColumn(ws, col, deep=50, valueOnly=True):`——读列
 - `def loadExcel(filename):`——加载现有的Excel表格
 - `def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):`——替换单元格值
+- `def merge_xlsx_files(src_folder, output_file):`——简单的创建一个新的工作簿作为合并后的文件(仅合并到一张worksheet！)
+- `def delete_worksheets_except_index(input_file, index_to_keep, saveAs=None):`——删除除了指定索引的worksheet以外的其他表格
+- `def worksheetSplitInto(inputFile, outputDir=None, prefix=None):`——将一个Excel中的多个worksheet拆成单个文件
 
 ### m_ExcelXlsxWriter
 
@@ -742,6 +745,8 @@ if __name__ == '__main__':
 - `pythonbyte2javabyte(pythonbyte)`——Python byte转Java byte
 - `inputTimeout(str_msg, int_timeout_second)`——输入超时模块
 - `def remove_newlines(text):`——去换行
+- `def splitFilePath(file_path):`——给定路径分离出文件夹、文件名、扩展名,如果是文件夹返回None
+- `def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, dstWithExt=False, ext=None):`——重命名文件（可复制）
 
 例:
 
@@ -783,6 +788,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.4.9——0.3.0
+  - Python更新了Excel表格拆分功能
 
 - 2024.4.2——0.2.9
   - Python更新了Excel读取
