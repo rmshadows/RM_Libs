@@ -539,12 +539,27 @@ def remove_newlines(text):
 
     """
     # 替换Unix和Linux系统的换行符
-    text = text.replace('\n', ' ')
+    text = text.replace('\n', '')
     # 替换Windows系统的换行符
-    text = text.replace('\r\n', ' ')
+    text = text.replace('\r\n', '')
     # 替换旧版Mac系统的换行符
-    text = text.replace('\r', ' ')
+    text = text.replace('\r', '')
     return text
+
+
+def trim_spaces(string):
+    """
+    使用 strip() 方法去除字符串前后的空格
+    Args:
+        string:
+
+    Returns:
+
+    """
+    trimmed_string = string.strip()
+    # 将中间的空格保留
+    result = ' '.join(trimmed_string.split())
+    return result
 
 
 if __name__ == '__main__':

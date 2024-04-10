@@ -745,6 +745,7 @@ if __name__ == '__main__':
 - `pythonbyte2javabyte(pythonbyte)`——Python byte转Java byte
 - `inputTimeout(str_msg, int_timeout_second)`——输入超时模块
 - `def remove_newlines(text):`——去换行
+- `def trim_spaces(string):`——使用 strip() 方法去除字符串前后的空格
 - `def splitFilePath(file_path):`——给定路径分离出文件夹、文件名、扩展名,如果是文件夹返回None
 - `def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, dstWithExt=False, ext=None):`——重命名文件（可复制）
 
