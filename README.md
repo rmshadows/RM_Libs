@@ -748,6 +748,9 @@ if __name__ == '__main__':
 - `def trim_spaces(string):`——使用 strip() 方法去除字符串前后的空格
 - `def splitFilePath(file_path):`——给定路径分离出文件夹、文件名、扩展名,如果是文件夹返回None
 - `def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, dstWithExt=False, ext=None):`——重命名文件（可复制）
+- `def editFilename(src, dst, prefix=None, suffix=None, dstWithExt=False, ext=None):`——编辑文件名
+- `def check_prefix_suffix(string, prefix=None, suffix=None):`——检查字符串是否以特定前缀或后缀开头或结尾。
+- `def readFileAsList(filepath, separator="\t", comment="#", ignoreNone=True, encoding="UTF-8"):`——读取文件到列表
 
 例:
 
@@ -789,6 +792,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.4.13——0.3.1
+  - Python更新了`m_System`
 
 - 2024.4.9——0.3.0
   - Python更新了Excel表格拆分功能
