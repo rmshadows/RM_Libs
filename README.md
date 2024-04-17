@@ -545,6 +545,9 @@ if __name__ == '__main__':
 - `sortListBy(list, byIndex = 0, reverse = False)`——列表排序
 - `sortDictByValue(dict, reverse = False)`——按值排序字典
 - `sortDictByKey(dict, reverse = False)`——按key排序字典
+- `def hasDuplicates(lst):`——判断给定列表中是否有重复元素
+- `def find_duplicate_indexes(lst, verbose=False):`——返回重复元素+索引
+- `def modify_string_if_duplicate(string, lst):`——检查是否在给定列表中，并返回字符串，python判断给定新字符串是否包含在原列表中，如果有就加上后缀(1)，比如给定x，原来列表中有x，就返回x(1)，如果原列表中有x(1)，就返回x(2)
 
 ### m_ColorStdout
 
@@ -609,6 +612,8 @@ if __name__ == '__main__':
 
 ### m_ExcelOpenpyxl
 
+>依赖m_System和m_Arrays
+
 - `def createNewWorkbook(firstSheetName=None):`——新建workbook但不是新建一个实际的文件
 - `def createSheet(wb, sheetName, position=None):`——新增表格
 - `def getSheetNames(wb):`——返回Sheets名字
@@ -626,7 +631,16 @@ if __name__ == '__main__':
 - `def replaceOneCellValue(wb, ws, cell, checkValue, replacement, whenEqual=True):`——替换单元格值
 - `def merge_xlsx_files(src_folder, output_file):`——简单的创建一个新的工作簿作为合并后的文件(仅合并到一张worksheet！)
 - `def delete_worksheets_except_index(input_file, index_to_keep, saveAs=None):`——删除除了指定索引的worksheet以外的其他表格
+- `def appendData(ws, list):`——添加一行数据
 - `def worksheetSplitInto(inputFile, outputDir=None, prefix=None):`——将一个Excel中的多个worksheet拆成单个文件
+- `def cellBold(ws, cellID):`——字体加粗
+- `def barChart(title="标题", x="X轴", y="Y轴", type="col"):`——返回柱状图（空的）
+- `def reference(worksheet=None, range_string=None, min_col=None,min_row=None,max_col=None,max_row=None):`——返回引用区间
+- `def barChartAppendData(chart, data, categories):`——为柱状统计图添加数据
+- `def deleteWorksheet(wb, worksheetNameOrIndex):`——删除指定的worksheet
+- `def is_openpyxl_workbook(obj):`——判断是不是workbook对象
+- `def copyWorksheetIntoBase(wbSrcf, wsSrc, wbDstf, savePath="", copyTitle=None):`——复制某Excel建议用另一个
+- `def copyWorksheetInto(wbSrcf, wsSrc, wbDstf, savePath="", copyTitle=None):`——复制某Excel到另一个Excel，如果savePath是None，返回wb
 
 ### m_ExcelXlsxWriter
 
@@ -792,6 +806,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.4.17——0.3.2
+  - Python更新了Excel、System、Array模块
 
 - 2024.4.13——0.3.1
   - Python更新了`m_System`

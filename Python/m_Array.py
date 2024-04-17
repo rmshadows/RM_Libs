@@ -144,6 +144,68 @@ def sortDictByKey(dict, reverse = False):
     return result_dict
 
 
+def hasDuplicates(lst):
+    """
+    判断给定列表中是否有重复元素
+    Args:
+        lst:
+
+    Returns:
+
+    """
+    return len(lst) != len(set(lst))
+
+
+def find_duplicate_indexes(lst, verbose=False):
+    """
+    返回重复元素+索引
+    {5: [4, 5], 6: [6, 7], 8: [9, 10]}
+    Args:
+        lst:
+
+    Returns:
+
+    """
+    duplicates = {}
+    for i, item in enumerate(lst):
+        if item in duplicates:
+            duplicates[item].append(i)
+        else:
+            duplicates[item] = [i]
+    duplicate_indexes = {item: indexes for item, indexes in duplicates.items() if len(indexes) > 1}
+    if verbose:
+        if duplicate_indexes:
+            print("列表中的重复元素及其索引:")
+            for item, indexes in duplicate_indexes.items():
+                print(f"元素 {item} 在索引 {indexes} 重复")
+        else:
+            print("列表中没有重复元素")
+    return duplicate_indexes
+
+
+def modify_string_if_duplicate(string, lst):
+    """
+    检查是否在给定列表中，并返回字符串
+    python判断给定新字符串是否包含在原列表中，如果有就加上后缀(1)，比如给定x，原来列表中有x，就返回x(1)，如果原列表中有x(1)，就返回x(2)
+    不变返回None
+    Args:
+        string:
+        lst:
+
+    Returns:
+
+    """
+    count = 1
+    modified_string = string
+    while modified_string in lst:
+        modified_string = f"{string}({count})"
+        count += 1
+    if modified_string == string:
+        return None
+    else:
+        return modified_string
+
+
 if __name__ == '__main__':
     l1 = [1,4,2,3,5,9,1]
     l2 = [3,3,2,4,5,5,2]
