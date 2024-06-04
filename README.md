@@ -488,7 +488,9 @@ msystem.prompte("终端红色字体");
 - m_QR——二维码生成、识别
 - m_RSA——RSA模块
 - m_System——系统信息相关
+- m_VCF3——通讯录VCF3.0文件读取
 - m_Web——网络相关
+- m_Winreg——Windows注册表相关
 
 ### m_AES
 
@@ -779,6 +781,21 @@ if __name__ == '__main__':
         print(f)
 ```
 
+### m_VCF3
+
+- `def getFieldnames(vcards):`——获取字段名称
+- `def getFieldnamesAndParams(vcards):`——获取字段名+属性名称
+- `def readVCF(vcf_file, validate=False, ignoreUnreadable=False, verbose=False):`——读取 VCF 文件并收集所有唯一的字段名
+- `def process_address(adr):`——内部函数
+- `def process_name(n):`——内部函数
+- `def process_list(lst):`——内部函数
+- `def process_bytes(data):`——内部函数
+- `def vcards_to_csv(vcards, csv_file):`——将 VCF 转换为 CSV 文件
+- `def csv_to_vcards(csv_file, delimiter=','):`——从 CSV 文件读取数据并转换为 vCard 对象列表。
+- `def vcards_to_vcf(vcards, vcf_file, Escaping=False):`——将 vCard 对象列表导出为 VCF 文件。
+- `def quoted_printable_to_utf8(quoted_printable_string):`——将 QUOTED-PRINTABLE 编码的字符串转换为 UTF-8 编码的字符串
+- `def decode_vcard_lines(vcard_lines):`——将 vCard 文件中的 QUOTED-PRINTABLE 编码的行转换为 UTF-8
+
 ### m_Web
 
 - `def getWebservertime(host)`——返回网络日期、时间['2022-06-23', '03:53:01']
@@ -806,6 +823,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.6.4——0.3.3
+  - Python新增VCF3.0通讯录读取模块
 
 - 2024.4.17——0.3.2
   - Python更新了Excel、System、Array模块
