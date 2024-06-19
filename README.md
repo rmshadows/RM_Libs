@@ -664,6 +664,11 @@ if __name__ == '__main__':
 - `def image2pdf(directory, output_pdf_name, content:bool=True):`——将所给文件夹的jpg图片转为PDF文档（提供目录）
 - `def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):`——拆分PDF到图片
 - `def jpg_to_individual_pdf(directory):`——将指定文件夹中的每张 JPG 图片转换为单独的 PDF 文件
+- `def split_pdf(input_pdf_path, output_dir, export_menu=False):`——将PDF拆分成单页的PDF文件
+- `def get_bookmarks(pdf_path, outlines=None, parent_name=""):`——获取PDF书签
+- `def export_bookmarks(input_pdf_path, output_txt_path, delimiter="\t", ignoreTheSame=False):`——导出PDF目录与页码的关系
+- `def rotate_pdf_pages(directory, rotation_angle):`——将指定文件夹中的所有PDF文件按照指定角度顺时针旋转
+- `def get_pdf_page_sizes(pdf_file):`——获取 PDF 文件中每一页的大小（宽度和高度）。
 
 ### m_QR
 
@@ -823,6 +828,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.6.19——0.3.4
+  - Python PDF模块优化、新增功能、修复
 
 - 2024.6.4——0.3.3
   - Python新增VCF3.0通讯录读取模块

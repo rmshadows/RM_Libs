@@ -7,7 +7,7 @@ import os.path as op
 import random
 
 from PIL import Image
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfFileMerger, PdfFileReader, PdfFileWriter
 from PyPDF2 import PdfFileReader as pdf_reader, PdfFileWriter as pdf_writer
 
 from pdf2image import convert_from_path
@@ -48,7 +48,7 @@ def mergePdfs(directory, output_pdf_file):
     # 为了避免RecursionError: maximum recursion depth exceeded while calling a Python object > 1000
     sys.setrecursionlimit(1200)
     merger = PdfFileMerger()
-    pdf_files = m_System.getFile(directory, "pdf")
+    pdf_files = m_System.getSuffixFile("pdf", directory, False)
     pdf_files.sort()
     for pdf in pdf_files:
         merger.append(pdf)
@@ -170,20 +170,138 @@ def jpg_to_individual_pdf(directory):
             img.save(output_pdf_name, 'PDF')
 
 
+def split_pdf(input_pdf_path, output_dir, export_menu=False):
+    """
+    将PDF拆分成单页的PDF文件
+    Args:
+        input_pdf_path: 输入PDF文件路径
+        output_dir: 输出目录路径
+        export_menu: 是否导出目录
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    input_pdf = PdfFileReader(open(input_pdf_path, "rb"))
+    total_pages = input_pdf.getNumPages()
+    for page_number in range(total_pages):
+        pdf_writer = PdfFileWriter()
+        pdf_writer.addPage(input_pdf.getPage(page_number))
+        output_pdf_path = os.path.join(output_dir, f"page_{page_number + 1}.pdf")
+        with open(output_pdf_path, "wb") as output_pdf_file:
+            pdf_writer.write(output_pdf_file)
+        print(f"Saved: {output_pdf_path}")
+    if export_menu:
+        export_bookmarks(input_pdf_path, os.path.join(output_dir, "menu.txt"))
+
+
+def get_bookmarks(pdf_path, outlines=None, parent_name=""):
+    """
+    获取PDF书签
+    Args:
+        pdf_path: 输入PDF文件路径
+        outlines: 当前的书签列表
+        parent_name: 父书签名称
+
+    Returns:
+        bookmarks: 包含页码和标题的书签列表
+    """
+    pdf_reader = PdfFileReader(open(pdf_path, "rb"))
+
+    if outlines is None:
+        outlines = pdf_reader.getOutlines()
+
+    bookmarks = []
+
+    for outline in outlines:
+        if isinstance(outline, list):
+            # 递归处理子书签
+            bookmarks += get_bookmarks(pdf_path, outline, parent_name)
+        else:
+            title = outline.title if not parent_name else f"{parent_name} - {outline.title}"
+            bookmarks.append((pdf_reader.getDestinationPageNumber(outline) + 1, title))
+
+    return bookmarks
+
+
+def export_bookmarks(input_pdf_path, output_txt_path, delimiter="\t", ignoreTheSame=False):
+    """
+    导出PDF目录与页码的关系
+    Args:
+        input_pdf_path: 输入PDF文件路径
+        output_txt_path: 输出文本文件路径
+        delimiter: 分隔符
+        ignoreTheSame: true则页面序号不会有重复
+    """
+    bookmarks = get_bookmarks(input_pdf_path)
+    with open(output_txt_path, "w", encoding="utf-8") as f:
+        for page_number in range(1, PdfFileReader(open(input_pdf_path, "rb")).getNumPages() + 1):
+            found = False
+            for bookmark_page, title in bookmarks:
+                if ignoreTheSame:
+                    if bookmark_page == page_number:
+                        f.write(f"{page_number}{delimiter}{title}\n")
+                        found = True
+                        break
+                else:
+                    f.write(f"{page_number}{delimiter}{title}\n")
+                    found = True
+            if not found:
+                f.write(f"{page_number}{delimiter}None\n")
+
+
+def rotate_pdf_pages(directory, rotation_angle):
+    """
+    将指定文件夹中的所有PDF文件按照指定角度顺时针旋转
+    Args:
+        directory: 包含PDF文件的文件夹路径
+        rotation_angle: 旋转角度，可以是90、180、270等
+
+    Returns:
+        None
+    """
+    # 获取文件夹中所有PDF文件
+    pdf_files = [f for f in os.listdir(directory) if f.endswith('.pdf')]
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(directory, pdf_file)
+        output_path = os.path.join(directory, f"rotated_{pdf_file}")  # 新文件名加前缀
+        # 打开PDF文件
+        with open(pdf_path, 'rb') as file:
+            pdf_reader = PdfFileReader(file)
+            pdf_writer = PdfFileWriter()
+            # 遍历PDF的每一页
+            for page_num in range(pdf_reader.numPages):
+                page = pdf_reader.getPage(page_num)
+                page.rotateClockwise(rotation_angle)
+                pdf_writer.addPage(page)
+            # 保存修改后的PDF文件到新文件
+            with open(output_path, 'wb') as output_file:
+                pdf_writer.write(output_file)
+
+
+def get_pdf_page_sizes(pdf_file):
+    """
+    获取 PDF 文件中每一页的大小（宽度和高度）。
+
+    Args:
+    - pdf_file: PDF 文件路径。
+
+    Returns:
+    - page_sizes: 包含每一页大小的列表，每个元素是一个元组 (width, height)。
+    """
+    page_sizes = []
+    with open(pdf_file, 'rb') as f:
+        pdf_reader = PdfFileReader(f)
+        num_pages = pdf_reader.getNumPages()
+        for page_num in range(num_pages):
+            page = pdf_reader.getPage(page_num)
+            width = page.mediaBox.getUpperRight_x() - page.mediaBox.getLowerLeft_x()
+            height = page.mediaBox.getUpperRight_y() - page.mediaBox.getLowerLeft_y()
+            page_sizes.append((width, height))
+    return page_sizes
+
+
 if __name__ == '__main__':
     # 合并PDF
-    image2pdf("images", "output.pdf")
-    # 拆分PDF
-    # pdf2images("1.pdf", 400, "jpg")
-    # 将指定文件夹中的每张 JPG 图片转换为单独的 PDF 文件
-    # jpg_to_individual_pdf("images")
-
-
-
-
-
-
-
-
-
+    # image2pdf("images", "output.pdf")
+    for i in get_pdf_page_sizes("1.pdf"):
+        print(i)
 
