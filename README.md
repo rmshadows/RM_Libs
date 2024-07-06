@@ -653,7 +653,10 @@ if __name__ == '__main__':
 
 ### m_Image
 
+>依赖m_System
+
 - `def draw_English_text(image, x, y, string, font_size=20, color=(0, 0, 0), word_css="en.ttf", direction=None)`——添加英文文字（字体限制英文, 可自行修改中文字体）
+- `def draw_text(image, x, y, string, font_size=20, color=(0, 0, 0), word_css="zh.ttf", direction=None):`——添加文字，座标负数则从反方向开始计算
 
 ### m_PDF
 
@@ -767,11 +770,13 @@ if __name__ == '__main__':
 - `inputTimeout(str_msg, int_timeout_second)`——输入超时模块
 - `def remove_newlines(text):`——去换行
 - `def trim_spaces(string):`——使用 strip() 方法去除字符串前后的空格
-- `def splitFilePath(file_path):`——给定路径分离出文件夹、文件名、扩展名,如果是文件夹返回None
+- `def splitFilePath(file_path):`——给定路径分离出文件夹、文件名、扩展名；如果是文件夹，返回上级文件夹的绝对路径、上级文件夹名称和当前文件夹名称
+- `def splitFileNameAndExt(file_path):`——给定路径分离出文件夹、文件名、扩展名,如果是文件夹返回None
 - `def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, dstWithExt=False, ext=None):`——重命名文件（可复制）
 - `def editFilename(src, dst, prefix=None, suffix=None, dstWithExt=False, ext=None):`——编辑文件名
 - `def check_prefix_suffix(string, prefix=None, suffix=None):`——检查字符串是否以特定前缀或后缀开头或结尾。
 - `def readFileAsList(filepath, separator="\t", comment="#", ignoreNone=True, encoding="UTF-8"):`——读取文件到列表
+- `def get_relative_path(path1, path2="."):`——给定两个路径，返回前者相对于后者的相对路径
 
 例:
 
@@ -828,6 +833,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.7.6——0.3.5
+  - Python优化了Image模块
 
 - 2024.6.19——0.3.4
   - Python PDF模块优化、新增功能、修复

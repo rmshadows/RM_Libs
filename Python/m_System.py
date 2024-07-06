@@ -314,7 +314,7 @@ def editFilename(src, dst, prefix=None, suffix=None, dstWithExt=False, ext=None)
     return os.path.join(dst_dir, "{}{}".format(dst_name, dst_ext))
 
 
-def splitFilePath(file_path):
+def splitFileNameAndExt(file_path):
     """
     给定路径分离出文件夹、文件名、扩展名
     Args:
@@ -333,6 +333,34 @@ def splitFilePath(file_path):
         return folder_path, file_name, file_ext
     else:
         return None
+
+
+def splitFilePath(file_path):
+    """
+    给定路径分离出文件夹、文件名、扩展名
+    如果是文件夹，返回上级文件夹的绝对路径、上级文件夹名称和当前文件夹名称
+    Args:
+        file_path: 绝对路径
+
+    Returns:
+        tuple: (folder_path, file_name, file_ext) 如果是文件
+        tuple: (parent_folder_path, parent_folder_name, current_folder_name) 如果是文件夹
+    """
+    file_path = os.path.abspath(file_path)
+    if not os.path.isdir(file_path):
+        # 获取所在文件夹路径、文件名和扩展名
+        folder_path, file_name_ext = os.path.split(file_path)
+        # 分离文件名和扩展名
+        file_name, file_ext = os.path.splitext(file_name_ext)
+        return folder_path, file_name, file_ext
+    else:
+        # 获取当前文件夹的名称
+        current_folder_name = os.path.basename(file_path)
+        # 获取上级文件夹路径
+        parent_folder_path = os.path.dirname(file_path)
+        # 获取上级文件夹的名称
+        parent_folder_name = os.path.basename(parent_folder_path)
+        return parent_folder_path, parent_folder_name, current_folder_name
 
 
 def displaySystemInfo():
@@ -633,6 +661,33 @@ def readFileAsList(filepath, separator="\t", comment="#", ignoreNone=True, encod
                 continue
             lst.append(line.split(separator))
     return lst
+
+
+def get_relative_path(path1, path2="."):
+    """
+    给定两个路径，返回前者相对于后者的相对路径
+    Args:
+        path1: 第一个路径（目标路径）
+        path2: 第二个路径（基准路径）
+
+    Returns:
+        前者相对于后者的相对路径
+    """
+    # 将路径转换为标准化的绝对路径
+    abs_path1 = os.path.abspath(path1)
+    abs_path2 = os.path.abspath(path2)
+    # 分割路径为列表
+    path1_list = os.path.normpath(abs_path1).split(os.sep)
+    path2_list = os.path.normpath(abs_path2).split(os.sep)
+    # 找到第一个不同的目录索引
+    index = 0
+    for dir1, dir2 in zip(path1_list, path2_list):
+        if dir1 != dir2:
+            break
+        index += 1
+    # 构造相对路径
+    relative_path = os.sep.join(['..' for _ in range(len(path2_list) - index)] + path1_list[index:])
+    return relative_path
 
 
 if __name__ == '__main__':
