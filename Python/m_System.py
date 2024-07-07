@@ -690,6 +690,18 @@ def get_relative_path(path1, path2="."):
     return relative_path
 
 
+def sortByNatsorted(list2sort):
+    """
+    返回自然排序的列表
+    Args:
+        list2sort:
+
+    Returns:
+
+    """
+    return natsorted(list2sort)
+
+
 if __name__ == '__main__':
     print("是否是管理员：{}".format(checkAdministrator()))
     # execCommand("ls", 0, True)

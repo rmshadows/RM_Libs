@@ -11,6 +11,7 @@ from PyPDF2 import PdfFileMerger, PdfFileReader, PdfFileWriter
 from PyPDF2 import PdfFileReader as pdf_reader, PdfFileWriter as pdf_writer
 
 from pdf2image import convert_from_path
+from natsort import natsorted
 
 import sys
 
@@ -49,7 +50,8 @@ def mergePdfs(directory, output_pdf_file):
     sys.setrecursionlimit(1200)
     merger = PdfFileMerger()
     pdf_files = m_System.getSuffixFile("pdf", directory, False)
-    pdf_files.sort()
+    # pdf_files.sort()
+    pdf_files = natsorted(pdf_files)
     for pdf in pdf_files:
         merger.append(pdf)
     merger.write(output_pdf_file)
@@ -193,7 +195,6 @@ def image2pdf(directory, output_pdf_name, content: bool = True):
             os.remove(temp_pdf)
         except Exception as e:
             print(e)
-
 
 
 def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):
