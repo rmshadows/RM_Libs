@@ -56,7 +56,7 @@ def mergePdfs(directory, output_pdf_file):
     merger.close()
 
 
-def image2pdf(directory, output_pdf_name, content:bool=True):
+def image2pdf_old(directory, output_pdf_name, content:bool=True):
     """
     将所给文件夹的jpg图片转为PDF文档（提供目录）
     Args:
@@ -93,7 +93,7 @@ def image2pdf(directory, output_pdf_name, content:bool=True):
     # e.g.: a1 a2: print(sorted(pic_name, key=lambda info: (info[0], int(info[1:]))))
     # sort(key=lambda x: int(x[1]))
     pic_name = sorted(pic_name, key=lambda info: int(info[:-4]))
-    # print(pic_name)
+    print(pic_name)
     new_pic = []
     n = 1
     for x in pic_name:
@@ -123,6 +123,74 @@ def image2pdf(directory, output_pdf_name, content:bool=True):
             os.remove(r)
         except Exception as e:
             print(e)
+
+
+def image2pdf(directory, output_pdf_name, content: bool = True):
+    """
+    将所给文件夹的jpg图片转为PDF文档（提供目录）
+    Args:
+        directory: 文件夹路径
+        output_pdf_name: 导出PDF名称
+        content: 是否需要注释
+    """
+    # change all png into jpg & delete the .png files
+    names = os.listdir(directory)
+    content_dict = {}
+    for name in names:
+        img = Image.open(op.join(directory, name))
+        name_parts = name.split(".")
+        if name_parts[-1] == "png":
+            name_parts[-1] = "jpg"
+            name_jpg = ".".join(name_parts)
+            r, g, b, a = img.split()
+            img = Image.merge("RGB", (r, g, b))
+            to_save_path = op.join(directory, name_jpg)
+            img.save(to_save_path)
+            os.remove(op.join(directory, name))
+        else:
+            continue
+
+    # Collect jpg and jpeg files
+    file_list = os.listdir(directory)
+    pic_name = [x for x in file_list if x.lower().endswith(('jpg', 'jpeg'))]
+
+    # Sort filenames by numeric value if possible
+    pic_name.sort(key=lambda x: int(''.join(filter(str.isdigit, x)) or 0))
+    # print(pic_name)
+
+    new_pic = []
+    n = 1
+    for x in pic_name:
+        if "jpg" in x or "jpeg" in x:
+            new_pic.append(x)
+            content_dict[x] = n
+            n += 1
+
+    im1 = Image.open(op.join(directory, new_pic[0]))
+    new_pic.pop(0)
+    im_list = []
+    for i in new_pic:
+        img = Image.open(op.join(directory, i))
+        if img.mode == "RGBA":
+            r, g, b, a = img.split()
+            img = Image.merge("RGB", (r, g, b))
+            img = img.convert('RGB')
+            im_list.append(img)
+        else:
+            im_list.append(img)
+
+    im1.save(output_pdf_name, "PDF", resolution=100.0, save_all=True, append_images=im_list)
+
+    if content:
+        # Generate intermediate file to prevent accidents
+        temp_pdf = "{}.pdf".format(random.randint(9999, 999999))
+        os.rename(output_pdf_name, temp_pdf)
+        try:
+            add_content(temp_pdf, output_pdf_name, content_dict)
+            os.remove(temp_pdf)
+        except Exception as e:
+            print(e)
+
 
 
 def pdf2images(pdfFile, dpi=200, format='png', toDir="2images"):
