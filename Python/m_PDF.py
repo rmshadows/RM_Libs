@@ -142,9 +142,12 @@ def image2pdf(directory, output_pdf_name, content: bool = True):
         if name_parts[-1] == "png":
             name_parts[-1] = "jpg"
             name_jpg = ".".join(name_parts)
-            r, g, b, a = img.split()
-            img = Image.merge("RGB", (r, g, b))
+            # r, g, b, a = img.split()
+            # img = Image.merge("RGB", (r, g, b))
+            if img.mode == "RGBA":
+                img = img.convert("RGB")
             to_save_path = op.join(directory, name_jpg)
+
             img.save(to_save_path)
             os.remove(op.join(directory, name))
         else:
