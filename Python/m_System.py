@@ -104,7 +104,7 @@ def getSuffixFile(suffix, directory=".", case_sensitive=True):
                  for root, dirs, files in os.walk(directory) \
                  for filespath in files \
                  if (not case_sensitive and str(filespath).lower().endswith(suffix)) or \
-                    (case_sensitive and str(filespath).endswith(suffix))  # 判断是否大小写敏感
+                 (case_sensitive and str(filespath).endswith(suffix))  # 判断是否大小写敏感
                  ]
     if file_list:
         sorted_files = natsorted(file_list)
@@ -363,6 +363,17 @@ def splitFilePath(file_path):
         return parent_folder_path, parent_folder_name, current_folder_name
 
 
+def getFileNameOrDirectoryName(abPath):
+    """
+    获取文件名或者文件夹名称
+    Returns:
+    """
+    if fileOrDirectory(abPath) == 1:
+        return splitFilePath(abPath)[-2]
+    else:
+        return splitFilePath(abPath)[-1]
+
+
 def displaySystemInfo():
     """
     打印系统信息
@@ -582,7 +593,7 @@ def inputTimeout(str_msg, int_timeout_second):
         c = None
     finally:
         return c
-        
+
 
 def remove_newlines(text):
     """
@@ -702,11 +713,236 @@ def sortByNatsorted(list2sort):
     return natsorted(list2sort)
 
 
+def ls(path='.', show_hidden=False):
+    """
+    List directory contents.
+    Parameters:
+    path (str): Directory path to list. Default is current directory.
+    show_hidden (bool): Whether to show hidden files. Default is False.
+    """
+    try:
+        # List directory contents
+        items = os.listdir(path)
+
+        # Filter out hidden files if show_hidden is False
+        if not show_hidden:
+            items = [item for item in items if not item.startswith('.')]
+        abItems = []
+        for i in items:
+            abItems.append(os.path.abspath(i))
+        # Sort and print items
+        abItems = sortByNatsorted(abItems)
+        for item in items:
+            print(item)
+        return abItems
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+
+def tree(directory='.', show_hidden=False):
+    """
+    Recursively get a directory tree with absolute paths.
+
+    Parameters:
+    directory (str): Directory path to list. Default is current directory.
+    show_hidden (bool): Whether to show hidden files. Default is False.
+
+    Returns:
+    list: A list of tuples representing the directory tree,
+          where each tuple contains the depth and absolute path.
+          (0, '/home/jessie/Project/Github/rm_scripts/Office/RenameDirectory/1.txt')
+    """
+
+    def _tree(directory, level, show_hidden):
+        result = []
+        try:
+            items = os.listdir(directory)
+            # Filter out hidden files if show_hidden is False
+            if not show_hidden:
+                items = [item for item in items if not item.startswith('.')]
+            # Sort items
+            items = sortByNatsorted(items)
+            # Iterate over items
+            for item in items:
+                item_path = os.path.join(directory, item)
+                result.append((level, os.path.abspath(item_path)))
+
+                # Recur if item is a directory
+                if os.path.isdir(item_path):
+                    result.extend(_tree(item_path, level + 1, show_hidden))
+        except Exception as e:
+            result.append((level, f"Error: {e}"))
+        return result
+
+    return _tree(directory, 0, show_hidden)
+
+
+def getTreeAbPath(treeResult):
+    """
+    返回tree的文件路径
+    Args:
+        treeResult:
+    Returns:
+
+    """
+    # (0, '/home/jessie/Project/Github/rm_scripts/Office/RenameDirectory/1.txt')
+    abs = []
+    for i in treeResult:
+        abs.append(i[1])
+    return abs
+
+
+def filter_file_items(items, exclusion, mode=0, item_type=0, relp=".", withFileExt=False,  verbose=False):
+    """
+    从列表中剔除指定的项目。
+
+    参数:
+    items (list of str): 文件或目录路径的列表。
+    exclusion (str): 要剔除的项目（字符串）。
+    mode (int): 匹配模式，可以是 'exact'（0完全匹配）或 'partial'（1部分匹配）。默认是 'exact'0。
+    item_type (int): 项目类型，可以是 'all'（所有0）、'file'（文件1）或 'directory'（目录2）。默认是 'all'0。
+    withFileext: 如果是文件，是否带扩展名匹配
+
+    返回:
+    list: 剔除指定项目后的列表。
+    """
+
+    filtered_items = []
+    for item in items:
+        # 获取相对路径
+        item_relp = get_relative_path(item, relp)
+
+        # 完全匹配模式
+        if mode == 0:
+            # 仅针对文件过滤
+            if item_type == 1:
+                # 不是文件直接添加
+                if fileOrDirectory(item) != 1:
+                    filtered_items.append(item)
+                    continue
+                # 是文件的判断
+                fparts = split_path_into_parts(item_relp)
+                if not withFileExt:
+                    # 最后一项改为文件名
+                    fparts[-1] = splitFilePath(fparts[-1])[1]
+                for p in fparts:
+                    # 匹配上了
+                    if p == exclusion:
+                        if verbose:
+                            print("排除 {} ".format(item))
+                        break
+                else:
+                    # 没匹配上就添加
+                    filtered_items.append(item)
+            elif item_type == 2:
+                if fileOrDirectory(item) != 2:
+                    filtered_items.append(item)
+                    continue
+                for p in split_path_into_parts(item_relp):
+                    # 匹配上了
+                    if p == exclusion:
+                        if verbose:
+                            print("排除 {} ".format(item))
+                        break
+                else:
+                    # 没匹配上就添加
+                    filtered_items.append(item)
+            else:
+                fparts = split_path_into_parts(item_relp)
+                # 文件的要获取文件名
+                if fileOrDirectory(item) == 1:
+                    if not withFileExt:
+                        # 最后一项改为文件名
+                        fparts[-1] = splitFilePath(fparts[-1])[1]
+                for p in fparts:
+                    # 匹配上了
+                    if p == exclusion:
+                        if verbose:
+                            print("排除 {} ".format(item))
+                        break
+                else:
+                    # 没匹配上就添加
+                    filtered_items.append(item)
+        else:
+            # 非精准排除的
+            if item_type == 1:
+                # 不是文件直接添加
+                if fileOrDirectory(item) != 1:
+                    filtered_items.append(item)
+                    continue
+                # 是文件的判断
+                fparts = split_path_into_parts(item_relp)
+                if not withFileExt:
+                    # 最后一项改为文件名
+                    fparts[-1] = splitFilePath(fparts[-1])[1]
+                for p in fparts:
+                    # 匹配上了
+                    if exclusion in p:
+                        if verbose:
+                            print("排除 {} ".format(item))
+                        break
+                else:
+                    # 没匹配上就添加
+                    filtered_items.append(item)
+            elif item_type == 2:
+                if fileOrDirectory(item) != 2:
+                    filtered_items.append(item)
+                    continue
+                for p in split_path_into_parts(item_relp):
+                    # 匹配上了
+                    if exclusion in p:
+                        if verbose:
+                            print("排除 {} ".format(item))
+                        break
+                else:
+                    # 没匹配上就添加
+                    filtered_items.append(item)
+            else:
+                fparts = split_path_into_parts(item_relp)
+                # 文件的要获取文件名
+                if fileOrDirectory(item) == 1:
+                    if not withFileExt:
+                        # 最后一项改为文件名
+                        fparts[-1] = splitFilePath(fparts[-1])[1]
+                for p in fparts:
+                    # 匹配上了
+                    if exclusion in p:
+                        if verbose:
+                            print("排除 {} ".format(item))
+                        break
+                else:
+                    # 没匹配上就添加
+                    filtered_items.append(item)
+    return filtered_items
+
+
+def split_path_into_parts(path):
+    """
+    将路径拆分为其组成部分。
+    参数:
+    path (str): 文件或目录路径。
+    返回:
+    list: 路径的各部分。
+    """
+    parts = []
+    while True:
+        head, tail = os.path.split(path)
+        if head == path:  # 根目录
+            parts.insert(0, head)
+            break
+        elif tail == path:  # 当前目录
+            parts.insert(0, tail)
+            break
+        else:
+            path = head
+            parts.insert(0, tail)
+    return parts
+
+
 if __name__ == '__main__':
     print("是否是管理员：{}".format(checkAdministrator()))
     # execCommand("ls", 0, True)
     print("CPU核心数: {}".format(cpu_count()))
-    # print("gitignore文件是否有UTF-8 BOM: {}".format(isBomExist("gitignore")))
-    # 列出py文件
-    # for f in getSuffixFile("py"):
-    #     print(f)
+    fs = getTreeAbPath(tree("."))
+
