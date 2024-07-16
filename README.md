@@ -662,7 +662,7 @@ if __name__ == '__main__':
 
 ### m_PDF
 
->依赖m_System
+>依赖m_System、m_Arrays
 
 - `def add_content(pdf_in_name:str,pdf_out_name:str,content_dict:dict)`——添加PDF注释（目录）
 - `def mergePdfs(directory, output_pdf_file)`——合并PDF（提供目录）
@@ -674,6 +674,8 @@ if __name__ == '__main__':
 - `def export_bookmarks(input_pdf_path, output_txt_path, delimiter="\t", ignoreTheSame=False):`——导出PDF目录与页码的关系
 - `def rotate_pdf_pages(directory, rotation_angle):`——将指定文件夹中的所有PDF文件按照指定角度顺时针旋转
 - `def get_pdf_page_sizes(pdf_file):`——获取 PDF 文件中每一页的大小（宽度和高度）。
+- `def extract_pages_to_pdf(input_pdf_path, output_pdf_path, page_numbers_str):`——从PDF文件中提取指定页码并保存为新的PDF文件
+- `def extract_pages_to_jpg(input_pdf_path, output_dir, page_numbers_str, dpi=300):`——从PDF文件中提取指定页码并保存为JPG图片
 
 ### m_QR
 
@@ -782,6 +784,16 @@ if __name__ == '__main__':
 - `def check_prefix_suffix(string, prefix=None, suffix=None):`——检查字符串是否以特定前缀或后缀开头或结尾。
 - `def readFileAsList(filepath, separator="\t", comment="#", ignoreNone=True, encoding="UTF-8"):`——读取文件到列表
 - `def get_relative_path(path1, path2="."):`——给定两个路径，返回前者相对于后者的相对路径
+- `def sortByNatsorted(list2sort):`——返回自然排序的列表
+- `def ls(path='.', show_hidden=False):`——List directory contents.
+- `def tree(directory='.', show_hidden=False):`——Recursively get a directory tree with absolute paths.
+- `def getTreeAbPath(treeResult):`——返回tree的文件路径
+- `def filter_file_items(items, exclusion, mode=0, item_type=0, relp=".", withFileExt=False,  verbose=False):`——从列表中剔除指定的项目
+- `def filter_filename_and_directoryname(file_list, exclude, ext=True):`——过滤文件名、文件夹列表，精确到扩展名
+- `def filter_filename_and_directoryname_contains_string(file_list, exclude_string):`——按字符过滤文件名、文件夹列表
+- `def isInExcludeList(fp, excludeList, mode=0):`——返回是否在排除列表(文件名)
+- `def split_path_into_parts(path):`——将路径拆分为其组成部分。
+- `def mkdir(path, ignoreExisted=True, replace=False):`——新建文件夹
 
 例:
 
@@ -838,6 +850,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.7.16——0.3.6
+  - Python优化了PDF相关代码
 
 - 2024.7.6——0.3.5
   - Python优化了Image模块
