@@ -220,6 +220,30 @@ def modify_string_if_duplicate(string, lst):
         return modified_string
 
 
+def remove_duplicates(input_list, preserve_order=True):
+    """
+    去除重复元素
+    Remove duplicate elements from a list and return a new list.
+
+    Parameters:
+    input_list (list): The list from which duplicates need to be removed.
+    preserve_order (bool): Whether to preserve the original order of elements. Default is True.
+
+    Returns:
+    list: A new list with duplicates removed.
+    """
+    if preserve_order:
+        seen = set()
+        new_list = []
+        for item in input_list:
+            if item not in seen:
+                new_list.append(item)
+                seen.add(item)
+        return new_list
+    else:
+        return list(set(input_list))
+
+
 if __name__ == '__main__':
     l1 = [1,4,2,3,5,9,1]
     l2 = [3,3,2,4,5,5,2]

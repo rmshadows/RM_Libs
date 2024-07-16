@@ -245,23 +245,22 @@ def moveFD(src, dst):
     return True
 
 
-def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, dstWithExt=False, ext=None):
+def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, ext=None):
     """
     重命名文件（可复制）
     Args:
         src:源文件
-        dst:目标名称（可以不带扩展名，如果带扩展名请修改dstWithExt）
+        dst:目标名称（不要带扩展名）
         copyFile:是否复制文件，默认否
         prefix:前缀
         suffix:后缀
-        dstWithExt:目标名称是否带有扩展名，默认没有
         ext:指定扩展名
 
     Returns:
         返回结果
     """
     # 组合新文件名
-    new_file_name = editFilename(src, dst, prefix, suffix, dstWithExt, ext)
+    new_file_name = editFilename(src, dst, prefix, suffix, ext)
     if copyFile:
         return copyFD(src, new_file_name)
     else:
@@ -342,7 +341,7 @@ def splitFileNameAndExt(file_path):
 
 def splitFilePath(file_path, fileOrDirectory=0):
     """
-    给定路径分离出文件夹、文件名、扩展名
+    给定路径分离出文件夹、文件名、扩展名(带.)
     注意：必须是存在的文件夹
     如果是文件夹，返回上级文件夹的绝对路径、上级文件夹名称和当前文件夹名称
     Args:
@@ -1031,6 +1030,28 @@ def split_path_into_parts(path):
             path = head
             parts.insert(0, tail)
     return parts
+
+
+def mkdir(path, ignoreExisted=True, replace=False):
+    """
+    新建文件夹
+    Args:
+        path: 路径
+        ignoreExisted: 忽略存在
+        replace: 替换（会删除）
+
+    Returns:
+
+    """
+    if os.path.exists(path):
+        if replace:
+            rmFD(path)
+            os.mkdir(path)
+        else:
+            if not ignoreExisted:
+                os.mkdir(path)
+    else:
+        os.mkdir(path)
 
 
 if __name__ == '__main__':

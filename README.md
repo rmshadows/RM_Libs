@@ -545,11 +545,13 @@ if __name__ == '__main__':
 - `splitListInto(list2split:list, n:int)`——将列表强制分为n个
 - `permutation(lst, len)`——对给定的列表进行排列组合
 - `sortListBy(list, byIndex = 0, reverse = False)`——列表排序
+- `def sortByNatsorted(list):`——自然排序功能
 - `sortDictByValue(dict, reverse = False)`——按值排序字典
 - `sortDictByKey(dict, reverse = False)`——按key排序字典
 - `def hasDuplicates(lst):`——判断给定列表中是否有重复元素
 - `def find_duplicate_indexes(lst, verbose=False):`——返回重复元素+索引
 - `def modify_string_if_duplicate(string, lst):`——检查是否在给定列表中，并返回字符串，python判断给定新字符串是否包含在原列表中，如果有就加上后缀(1)，比如给定x，原来列表中有x，就返回x(1)，如果原列表中有x(1)，就返回x(2)
+- `def remove_duplicates(input_list, preserve_order=True):`——去除重复元素
 
 ### m_ColorStdout
 
@@ -761,7 +763,7 @@ if __name__ == '__main__':
 - `rmFD(file_or_dir, expect=0)`——删除文件
 - `copyFD(src, dst)`——复制文件或者文件夹
 - `moveFD(src, dst)`——移动文件或者文件夹
-- `getSuffixFile(suffix, directory=".")`——返回文件夹下的带后缀的文件
+- `def getSuffixFile(suffix, directory=".", case_sensitive=True):`——返回文件夹下的带后缀的文件
 - `displaySystemInfo()`——打印系统信息，仅Windows和Linux
 - `javabyte2pythonbyte(javabyte)`——Python byte转Java byte
 - `javabytes2pythonbytes(javabytes)`——Java byte数组转PythonByte数组
@@ -772,8 +774,11 @@ if __name__ == '__main__':
 - `def trim_spaces(string):`——使用 strip() 方法去除字符串前后的空格
 - `def splitFilePath(file_path):`——给定路径分离出文件夹、文件名、扩展名；如果是文件夹，返回上级文件夹的绝对路径、上级文件夹名称和当前文件夹名称
 - `def splitFileNameAndExt(file_path):`——给定路径分离出文件夹、文件名、扩展名,如果是文件夹返回None
-- `def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, dstWithExt=False, ext=None):`——重命名文件（可复制）
-- `def editFilename(src, dst, prefix=None, suffix=None, dstWithExt=False, ext=None):`——编辑文件名
+- `def renameFile(src, dst, copyFile=False, prefix=None, suffix=None, ext=None):`——重命名文件（可复制）
+- `def editFilename(src, dst, prefix=None, suffix=None, ext=None):`——编辑文件名
+- `def splitFileNameAndExt(file_path):`——给定路径分离出文件夹、文件名、扩展名，如果是文件夹返回None
+- `def getFileNameOrDirectoryName(abPath):`——获取文件名或者文件夹名称
+- `def splitFilePath(file_path, fileOrDirectory=0):`——给定路径分离出文件夹、文件名、扩展名(带.)。注意：必须是存在的文件夹。如果是文件夹，返回上级文件夹的绝对路径、上级文件夹名称和当前文件夹名称
 - `def check_prefix_suffix(string, prefix=None, suffix=None):`——检查字符串是否以特定前缀或后缀开头或结尾。
 - `def readFileAsList(filepath, separator="\t", comment="#", ignoreNone=True, encoding="UTF-8"):`——读取文件到列表
 - `def get_relative_path(path1, path2="."):`——给定两个路径，返回前者相对于后者的相对路径
