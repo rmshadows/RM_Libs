@@ -645,6 +645,11 @@ if __name__ == '__main__':
 - `def is_openpyxl_workbook(obj):`——判断是不是workbook对象
 - `def copyWorksheetIntoBase(wbSrcf, wsSrc, wbDstf, savePath="", copyTitle=None):`——复制某Excel建议用另一个
 - `def copyWorksheetInto(wbSrcf, wsSrc, wbDstf, savePath="", copyTitle=None):`——复制某Excel到另一个Excel，如果savePath是None，返回wb
+- `def copy_cell_format(source_cell, target_cell):`—— 复制源单元格的格式到目标单元格
+- `def merge_excel_with_format_and_merged_cells(src_folder, output_file, sheet_name, cell_range):`——合并指定文件夹中的Excel文件的某个工作表中的某个范围的数据和格式（包括合并单元格）。
+- `def insert_header_from_excel(target_file_or_wb, header_file, header_range, target_sheets=None, savePath=None):`——从header_file中读取指定区域的表头，并插入到目标Excel文件的所有工作表或指定工作表的顶部。表头内容和格式会被保留，并在目标文件原有内容之前插入。
+- `def remove_blank_rows_or_columns(wb, sheet_name, mode='row'):`——从指定的工作表中移除空白行或空白列。
+- `def remove_blank_cells(wb, sheet_name, cell_range, mode='row'):`——移除指定单元格范围内的空白单元格，按行或列模式处理。
 
 ### m_ExcelXlsxWriter
 
@@ -850,6 +855,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2024.9.23——0.3.7
+  - Python Excel新增了一些功能
 
 - 2024.7.16——0.3.6
   - Python优化了PDF相关代码
