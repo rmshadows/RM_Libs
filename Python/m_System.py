@@ -1054,6 +1054,48 @@ def mkdir(path, ignoreExisted=True, replace=False):
         os.mkdir(path)
 
 
+def write_to_file(file_path, data, mode='w', encoding='utf-8'):
+    """
+    将数据写入文件，支持文本和二进制数据。untest
+
+    :param file_path: 文件路径
+    :param data: 要写入的数据，可以是字符串、字节、或列表（每一项代表一行）
+    :param mode: 写入模式，文本文件使用 'w' 或 'a'，二进制文件使用 'wb' 或 'ab'
+    :param encoding: 文件编码，仅适用于文本模式，默认 'utf-8'
+    """
+    if 'b' in mode:  # 二进制模式
+        with open(file_path, mode) as file:
+            if isinstance(data, list):
+                for item in data:
+                    file.write(item)
+            else:
+                file.write(data)
+    else:  # 文本模式
+        with open(file_path, mode, encoding=encoding) as file:
+            if isinstance(data, list):
+                for line in data:
+                    file.write(f"{line}\n")
+            else:
+                file.write(data)
+
+
+def read_from_file(file_path, mode='r', encoding='utf-8'):
+    """
+    从文件读取数据，支持文本和二进制数据。untest
+
+    :param file_path: 文件路径
+    :param mode: 读取模式，文本文件使用 'r'，二进制文件使用 'rb'
+    :param encoding: 文件编码，仅适用于文本模式，默认 'utf-8'
+    :return: 返回文件内容，文本模式返回字符串，二进制模式返回字节
+    """
+    if 'b' in mode:  # 二进制模式
+        with open(file_path, mode) as file:
+            return file.read()
+    else:  # 文本模式
+        with open(file_path, mode, encoding=encoding) as file:
+            return file.read()
+
+
 if __name__ == '__main__':
     print("是否是管理员：{}".format(checkAdministrator()))
     # execCommand("ls", 0, True)
