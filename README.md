@@ -665,6 +665,17 @@ if __name__ == '__main__':
 - `def draw_English_text(image, x, y, string, font_size=20, color=(0, 0, 0), word_css="en.ttf", direction=None)`——添加英文文字（字体限制英文, 可自行修改中文字体）
 - `def draw_text(image, x, y, string, font_size=20, color=(0, 0, 0), word_css="zh.ttf", direction=None):`——添加文字，座标负数则从反方向开始计算
 
+### m_Log.py
+
+> 轻量日志模块（控制台 + 可选文件日志）
+
+- `def init_logger(enable_file: bool = True, log_path: Optional[str] = "logs") -> logging.Logger:`——初始化日志系统（建议在脚本开始处调用一次）。
+- `def _logger() -> logging.Logger:`——获取本模块 logger。如果用户没有显式调用 init_logger，则这里会自动初始化一个默认 logger（写到 logs/）。
+- `def info(msg: str) -> None:`——"""记录 INFO 级别日志（正常流程信息，如开始/完成）。
+- `def warning(msg: str) -> None:`——"""记录 WARNING 级别日志（可继续运行，但可能存在问题的情况）。
+- `def error(msg: str) -> None:`——"""记录 ERROR 级别日志（错误信息文本，不包含堆栈）。
+- `def exception(msg: str) -> None:`——记录异常日志（ERROR + traceback）。必须在 except 块中调用，才能自动把堆栈写入日志文件。
+
 ### m_PDF
 
 >依赖m_System、m_Arrays
@@ -856,6 +867,11 @@ if __name__ == '__main__':
 
 ## 更新日志
 
+- 2026.1.11——0.3.8
+  - 新增Log模块
+
+  - 优化PDF模块
+  
 - 2024.9.23——0.3.7
   - Python Excel新增了一些功能
 
