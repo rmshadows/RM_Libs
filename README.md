@@ -75,6 +75,7 @@ testPrintln
   - AES_CBC——CBC模式
   - AES_CFB——CFB模式
   - AES_Tools——AES组件共用的函数（十六进制字符串转Byte数组、Byte数组转十六进制字符串）
+  - **AES V2**（与 Node/Python **三端一致**）：仅 **CBC、32 字节密钥 + KDF（PBKDF2）**；`AES_ToolsV2`、`AES_V2`。接口：String（hex）`encryptCBC`/`decryptCBC`、二进制 `encryptCBC(byte[],...)`/`decryptCBC(byte[],...)`。测试见 `testV2.java`。兼容（零填充、16/24 位）用 v1。规范见 `AES_V2_SPEC.md`
 - Code_Utils——编码
   - Base64Bytes——Base64和Bytes
   - BytesHexString——十六进制字符串和Bytes
@@ -359,7 +360,7 @@ import * as msystem from './msystem/msystem.mjs';
 msystem.prompte("终端红色字体");
 ```
 
-- maes——AES加密模块
+- maes——AES加密模块（另有 **aes_v2.mjs**：V2 与 Java/Python **三端一致**，CBC 32 字节 + KDF；String 接口 `encryptCBC`/`decryptCBC`、二进制 `encryptCBCBytes`/`decryptCBCBytes`。兼容用 v1。见 `AES_V2_SPEC.md`）
 - mHashcode——对象数字Hashcode生成（不是Hex!）
 - mqrcode——二维码生成与扫描
 - msystem——系统相关操作
@@ -476,7 +477,7 @@ msystem.prompte("终端红色字体");
 
 引入：`import 【脚本名称】`
 
-- m_AES——AES模块
+- m_AES——AES模块（另有 **m_AES_v2.py**：V2 与 Java/Node **三端一致**，CBC 32 字节 + KDF；String `encrypt_cbc`/`decrypt_cbc`、二进制 `encrypt_cbc_bytes`/`decrypt_cbc_bytes`。兼容用 v1。见 `AES_V2_SPEC.md`）
 - m_ColorStdout——终端彩色字体输出(Windows(受限) & Linux)
 - m_ConfigFiles——配置文件相关操作
 - m_Datetime——时间模块
@@ -866,6 +867,9 @@ if __name__ == '__main__':
 - `hideSoftware(name, is64Bit=True, accurate=True, hide=True)`—— 是否隐藏软件卸载入口 to hide a software from regedit,  添加`Dword SystemComponent 1` 
 
 ## 更新日志
+
+- 2026.2.7——0.3.9
+  - 新增 **AES V2**：Java、Python、Node **三端一致**；仅 CBC，**32 字节密钥 + KDF（PBKDF2）**；提供 String（hex）与 byte[]/Buffer 二进制两类接口；兼容（零填充等）留给 v1；规范见 `AES_V2_SPEC.md`
 
 - 2026.1.11——0.3.8
   - 新增Log模块
